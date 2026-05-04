@@ -1,26 +1,27 @@
-# Minton Landing Page (MVP) 🏸
+# Minton Landing Page (MVP)
 
-Selamat datang di repository proyek akhir MBKM untuk **Minton**! Aplikasi pemesanan lapangan badminton yang dibuat dengan tujuan untuk mempermudah pemain mencari dan menyewa lapangan, mencari teman main (mabar), dan juga bergabung dengan komunitas.
+Repository ini berisi kode sumber untuk proyek akhir MBKM tim kami, yaitu purwarupa aplikasi **Minton**. Aplikasi ini dirancang untuk membantu pengguna menyewa lapangan badminton, mencari teman mabar, dan menemukan komunitas badminton.
 
-## 🚀 Live Demo
-Aplikasi ini dapat diakses langsung secara online (Live Demo) pada tautan berikut:
-**[Lihat Live Demo Minton](https://kelvinsatriahendra.github.io/minton-mvp/)**
+## Link Akses
+Aplikasi Minton yang sudah di-deploy dapat diakses pada tautan berikut:
+[https://kelvinsatriahendra.github.io/minton-mvp/](https://kelvinsatriahendra.github.io/minton-mvp/)
 
-## 🛠️ Teknologi yang Digunakan
-- **Frontend:** HTML5, Vanilla CSS, Vanilla JavaScript.
-- **Backend / Database:** [Supabase](https://supabase.com/) (menggunakan Vanilla JS Client API) untuk mengelola data otentikasi.
-- **Desain UI/UX:** Figma.
+## Teknologi
+Proyek ini dibangun menggunakan teknologi berikut:
+* **Frontend**: HTML5, CSS, dan JavaScript (Vanilla)
+* **Backend/Database**: Supabase
+* **UI/UX Design**: Figma
 
-## 📁 Struktur Direktori
-- `/frontend/`: Berisi semua file utama antarmuka pengguna (HTML, CSS, JS, dan Asset gambar HD).
-- `/backend/`: Berisi file `auth.js` yang mengatur integrasi API ke Supabase dan file `database_schema.sql` sebagai rancangan tabel database.
-- `/index.html`: File *root redirect* agar link GitHub Pages langsung otomatis mengarah ke folder frontend.
+## Struktur Folder
+* `frontend/` - Berisi file antarmuka web (HTML, CSS, JS) beserta seluruh aset gambar.
+* `backend/` - Berisi file koneksi ke database Supabase (`auth.js`) dan file skema database (`database_schema.sql`).
+* `index.html` - File root yang berfungsi mengarahkan user otomatis ke folder frontend saat diakses via GitHub Pages.
 
-## ✨ Fitur Utama
-1. **Otentikasi Akun**: Pengguna dapat mendaftar (Sign Up) dan masuk (Login) dengan data yang terhubung ke Supabase.
-2. **Sewa Lapangan**: UI/UX katalog lapangan dengan jadwal interaktif.
-3. **Mabar & Komunitas**: UI/UX halaman *partnering* untuk bermain badminton bersama.
-4. **Desain Modern**: Tampilan responsif yang dioptimalkan dengan aset visual resolusi tinggi (HD) dan animasi.
+## Daftar Fitur
+1. Register dan Login akun (data tersimpan di Supabase)
+2. Halaman sewa lapangan dan cek jadwal ketersediaan
+3. Halaman komunitas dan fitur pencarian teman main
+4. Layout antarmuka responsif
 
 ---
-*Proyek ini diselesaikan sebagai bagian dari pemenuhan tugas akhir MBKM.*
+Tugas Akhir MBKM - Kelompok 48 (Web Dev UI/UX)

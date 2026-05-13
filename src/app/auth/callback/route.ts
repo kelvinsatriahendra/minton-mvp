@@ -18,10 +18,26 @@ export async function GET(request: Request) {
     
     if (!error && data.user) {
       const cookieStore = await cookies();
+      const user = data.user;
+      const userName = user.user_metadata.full_name || user.email?.split('@')[0] || 'Jagoan';
       
-      // Set cookies exactly like our login action
+      // 1. Sync to public.users table (Task 2 Requirement Integration)
+      await supabase.from('users').upsert({
+        email: user.email,
+        nama_lengkap: userName,
+        whatsapp: '0000000000', // Placeholder
+        password: 'oauth-user' // Mark as OAuth user
+      }, { onConflict: 'email' });
+
+      // 2. Set cookies (Middleware & UI requirements)
+      cookieStore.set('session', 'supabase-session-token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 60 * 24 * 7,
+        path: '/',
+      });
       cookieStore.set('isLoggedIn', 'true', { path: '/' });
-      cookieStore.set('userName', data.user.user_metadata.full_name || data.user.email?.split('@')[0] || 'Jagoan', { path: '/' });
+      cookieStore.set('userName', userName, { path: '/' });
       
       return NextResponse.redirect(`${origin}${next}`);
     }

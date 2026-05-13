@@ -22,12 +22,17 @@ export async function GET(request: Request) {
       const userName = user.user_metadata.full_name || user.email?.split('@')[0] || 'Jagoan';
       
       // 1. Sync to public.users table (Task 2 Requirement Integration)
-      await supabase.from('users').upsert({
+      const { error: dbError } = await supabase.from('users').upsert({
         email: user.email,
         nama_lengkap: userName,
-        whatsapp: '0000000000', // Placeholder
-        password: 'oauth-user' // Mark as OAuth user
+        whatsapp: `google-${user.id.substring(0, 8)}`, // Unique placeholder to avoid constraint error
+        password: 'oauth-user' 
       }, { onConflict: 'email' });
+
+      if (dbError) {
+        console.error('Database Sync Error:', dbError);
+        // Tetap lanjut agar user bisa login walau sync gagal sementara
+      }
 
       // 2. Set cookies (Middleware & UI requirements)
       cookieStore.set('session', 'supabase-session-token', {

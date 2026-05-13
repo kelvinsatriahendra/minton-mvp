@@ -36,8 +36,8 @@ export default function SignUpPage() {
     const formData = new FormData(event.currentTarget);
     const result = await signUpAction(null, formData);
 
-    if (result?.error) {
-      setError(result.error);
+    if (result?.message) {
+      setError(result.message);
       setLoading(false);
     } else {
       setShowSuccess(true);

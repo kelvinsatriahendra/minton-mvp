@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minton - Dashboard Pemain</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="kemitraan/dashboard.css">
+
+    <style>
+        /* Page-specific overrides or additions */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .dashboard-body {
+            flex: 1;
+            padding: 20px 36px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 20px;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            transition: 0.3s;
+        }
+
+        .activity-item:hover {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .activity-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .activity-info h5 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .activity-info p {
+            font-size: 12px;
+            color: var(--text-gray);
+        }
+
+        .match-status {
+            margin-left: auto;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .reward-banner {
+            background: linear-gradient(135deg, #1d1d1d 0%, #111 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .reward-info h2 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .reward-info p {
+            color: var(--text-gray);
+            font-size: 14px;
+        }
+
+        .points-badge {
+            background: var(--primary-lime);
+            color: #000;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 18px;
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="logo-section">
+            <a href="index.html"><img src="asset/logo.png" alt="Minton Logo"></a>
+        </div>
+        <nav class="nav-menu">
+            <a href="dashboard_pemain.html" class="nav-item active"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="booking_saya.html" class="nav-item"><i class="fa-solid fa-calendar-days"></i> Booking Saya</a>
+            <a href="dashboard_mabar.html" class="nav-item"><i class="fa-solid fa-users"></i> Main Bareng</a>
+            <a href="turnamen.html" class="nav-item"><i class="fa-solid fa-trophy"></i> Turnamen</a>
+            <div class="nav-divider"></div>
+            <a href="profil.html" class="nav-item"><i class="fa-solid fa-user"></i> Profil</a>
+            <a href="minton_pay.html" class="nav-item"><i class="fa-solid fa-wallet"></i> Minton Pay</a>
+            <a href="#" class="nav-item logout" onclick="simulateLogout()"><i class="fa-solid fa-right-from-bracket"></i> Keluar</a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="#" class="user-profile gold-member-card" style="padding: 10px; border-radius: 12px;">
+                <div class="avatar" style="background: #1a1608; color: #fcf6ba;">BS</div>
+                <div>
+                    <p class="user-name" style="color: #1a1608;">Bagas Saputra</p>
+                    <p class="user-role" style="color: rgba(0,0,0,0.6); font-weight: 600;">Member Gold</p>
+                </div>
+            </a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="page-header">
+            <h1>Dashboard Bagas</h1>
+            <div class="header-actions">
+                <button class="btn-secondary-dash"><i class="fa-solid fa-bell"></i></button>
+                <button class="btn-primary-dash" onclick="window.location.href='sewa lapangan/sewa_lapangan.html'"><i class="fa-solid fa-plus"></i> Cari Lapangan</button>
+            </div>
+        </header>
+
+        <div class="dashboard-body">
+            <!-- Reward Banner -->
+            <div class="reward-banner">
+                <div class="reward-info">
+                    <h2>Kumpulkan <span style="color: var(--primary-lime);">Minton Points.</span></h2>
+                    <p>Main lebih sering, kumpulkan poin, dan dapatkan potongan harga sewa lapangan!</p>
+                </div>
+                <div class="points-badge">
+                    2,450 pts
+                </div>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-shuttlecock"></i></div>
+                    <div class="stat-info"><h4>Main Bareng</h4><p>24 Sesi</p></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                    <div class="stat-info"><h4>Booking</h4><p>12 Kali</p></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-medal"></i></div>
+                    <div class="stat-info"><h4>Win Rate</h4><p>68%</p></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-ranking-star"></i></div>
+                    <div class="stat-info"><h4>Level</h4><p>Semi-Pro</p></div>
+                </div>
+            </div>
+
+            <div class="main-grid">
+                <!-- Upcoming Matches -->
+                <div class="content-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <span class="content-card-title" style="margin:0;">Jadwal Terdekat</span>
+                        <a href="booking_saya.html" style="color: var(--primary-lime); font-size: 13px; text-decoration: none;">Lihat Semua</a>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <img src="asset/surabaya-badminton.png" alt="Venue" style="width: 44px; height: 44px; border-radius: 10px; object-fit: cover;">
+                        <div class="activity-info">
+                            <h5>Main Bareng: GOR Sudirman</h5>
+                            <p>Besok, 19:00 - 21:00 • Lapangan 3</p>
+                        </div>
+                        <div class="match-status" style="color: var(--primary-lime);">Terkonfirmasi</div>
+                    </div>
+
+                    <div class="activity-item">
+                        <img src="asset/kalam-kudus.png" alt="Venue" style="width: 44px; height: 44px; border-radius: 10px; object-fit: cover;">
+                        <div class="activity-info">
+                            <h5>Sewa Lapangan: Kalam Kudus</h5>
+                            <p>Sabtu, 10 Mei • 08:00 - 10:00</p>
+                        </div>
+                        <div class="match-status" style="color: #ffc107;">Menunggu Bayar</div>
+                    </div>
+
+                    <div class="activity-item">
+                        <img src="asset/supersmash-badminton-hall.png" alt="Venue" style="width: 44px; height: 44px; border-radius: 10px; object-fit: cover;">
+                        <div class="activity-info">
+                            <h5>Main Bareng: Surabaya Hall</h5>
+                            <p>Minggu, 11 Mei • 16:00 - 18:00</p>
+                        </div>
+                        <div class="match-status" style="color: var(--primary-lime);">Terkonfirmasi</div>
+                    </div>
+                </div>
+
+                <!-- Leaderboard / Friends -->
+                <div class="content-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <span class="content-card-title" style="margin:0;">Teman Aktif</span>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:16px;">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <div class="avatar" style="width:32px; height:32px; font-size:11px;">AW</div>
+                            <div style="flex:1;">
+                                <p style="font-size:13px; font-weight:600;">Andi Wijaya</p>
+                                <p style="font-size:11px; color:var(--text-gray);">Online</p>
+                            </div>
+                            <div style="width:8px; height:8px; background:#4caf50; border-radius:50%;"></div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <div class="avatar" style="width:32px; height:32px; font-size:11px; background:#555;">BP</div>
+                            <div style="flex:1;">
+                                <p style="font-size:13px; font-weight:600;">Budi Pratama</p>
+                                <p style="font-size:11px; color:var(--text-gray);">Offline</p>
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <div class="avatar" style="width:32px; height:32px; font-size:11px;">CP</div>
+                            <div style="flex:1;">
+                                <p style="font-size:13px; font-weight:600;">Citra Putri</p>
+                                <p style="font-size:11px; color:var(--text-gray);">Online</p>
+                            </div>
+                            <div style="width:8px; height:8px; background:#4caf50; border-radius:50%;"></div>
+                        </div>
+                    </div>
+                    <button class="btn-secondary-dash" style="width: 100%; margin-top: 24px; padding: 8px;">Cari Teman Baru</button>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="content-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <span class="content-card-title" style="margin:0;">Aktivitas Terakhir</span>
+                </div>
+                <table class="dash-table">
+                    <thead>
+                        <tr>
+                            <th>Kegiatan</th>
+                            <th>Tanggal</th>
+                            <th>Lokasi</th>
+                            <th>Status</th>
+                            <th>Poin</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Sewa Lapangan</td>
+                            <td>05 Mei 2024</td>
+                            <td>GOR Sudirman</td>
+                            <td><span class="badge badge-open">Selesai</span></td>
+                            <td style="color: var(--primary-lime);">+50 pts</td>
+                        </tr>
+                        <tr>
+                            <td>Main Bareng</td>
+                            <td>03 Mei 2024</td>
+                            <td>Kalam Kudus</td>
+                            <td><span class="badge badge-open">Selesai</span></td>
+                            <td style="color: var(--primary-lime);">+30 pts</td>
+                        </tr>
+                        <tr>
+                            <td>Sewa Lapangan</td>
+                            <td>01 Mei 2024</td>
+                            <td>Surabaya Hall</td>
+                            <td><span class="badge badge-closed">Dibatalkan</span></td>
+                            <td>0 pts</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>

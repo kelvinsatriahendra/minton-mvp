@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minton - Dashboard Mitra</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="dashboard.css">
+
+    <style>
+        /* Page-specific styles */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .schedule-grid-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 280px;
+            gap: 20px;
+        }
+
+        table.court-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 4px;
+        }
+
+        .court-table th {
+            color: var(--text-gray);
+            font-size: 12px;
+            font-weight: 500;
+            padding: 10px 8px;
+            text-align: center;
+            letter-spacing: 0.3px;
+        }
+
+        .court-table td {
+            height: 38px;
+            min-width: 58px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            text-align: center;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .cell-time {
+            color: var(--text-gray);
+            background: none !important;
+            min-width: 80px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 400;
+            cursor: default;
+        }
+
+        .cell-empty {
+            background-color: var(--grid-empty);
+        }
+
+        .cell-empty:hover {
+            outline: 1px solid var(--primary-lime);
+        }
+
+        .cell-booked {
+            background-color: var(--primary-lime);
+            color: #000;
+            box-shadow: 0 0 8px rgba(189, 209, 36, 0.25);
+        }
+
+        .cell-closed {
+            background-color: #1a1a1a;
+            color: #444;
+        }
+
+        .dashboard-body {
+            flex: 1;
+            padding: 20px 36px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .calendar-controls {
+            display: flex;
+            gap: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="logo-section">
+            <a href="../index.html"><img src="../asset/logo.png" alt="Minton Logo"></a>
+        </div>
+        <nav class="nav-menu">
+            <a href="mitra.html" class="nav-item active"><i class="fa-solid fa-calendar-check"></i> Booking</a>
+            <a href="jadwal.html" class="nav-item"><i class="fa-solid fa-clock"></i> Schedule</a>
+            <a href="layanan.html" class="nav-item"><i class="fa-solid fa-box-archive"></i> Service</a>
+            <a href="survei.html" class="nav-item"><i class="fa-solid fa-file-lines"></i> Survey</a>
+            <div class="nav-divider"></div>
+            <a href="member.html" class="nav-item"><i class="fa-solid fa-users"></i> Members</a>
+            <a href="pengaturan.html" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
+            <a href="login_mitra.html" class="nav-item logout"><i class="fa-solid fa-right-from-bracket"></i> Keluar</a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="#" class="user-profile">
+                <div class="avatar">GS</div>
+                <div>
+                    <p class="user-name">GOR Sudirman</p>
+                    <p class="user-role">Pengelola</p>
+                </div>
+            </a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="page-header">
+            <h1>Dashboard Mitra</h1>
+            <div class="header-actions">
+                <button class="btn-secondary-dash"><i class="fa-solid fa-magnifying-glass"></i> Cari</button>
+                <button class="btn-primary-dash"><i class="fa-solid fa-plus"></i> Booking Baru</button>
+            </div>
+        </header>
+
+        <div class="dashboard-body">
+            <!-- Stats Row -->
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-money-bill-trend-up"></i></div>
+                    <div class="stat-info"><h4>Pendapatan Hari Ini</h4><p>Rp 1.250.000</p></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-ticket"></i></div>
+                    <div class="stat-info"><h4>Booking Aktif</h4><p>12 Jadwal</p></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-door-open"></i></div>
+                    <div class="stat-info"><h4>Slot Tersedia</h4><p>8 Sesi</p></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-star"></i></div>
+                    <div class="stat-info"><h4>Rating GOR</h4><p>4.8 / 5.0</p></div>
+                </div>
+            </div>
+
+            <!-- Schedule + Side Panel -->
+            <div class="schedule-grid-wrapper" style="flex: 1; min-height: 0;">
+                <div class="content-card" style="margin-bottom: 0; display: flex; flex-direction: column; overflow: hidden; padding: 20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <span class="content-card-title" style="margin:0;">Jadwal Lapangan Minggu Ini</span>
+                        <div class="calendar-controls">
+                            <button class="btn-secondary-dash" style="padding:4px 10px;"><i class="fa-solid fa-chevron-left"></i></button>
+                            <button class="btn-secondary-dash" style="padding:4px 12px; font-size:12px;">Minggu Ini</button>
+                            <button class="btn-secondary-dash" style="padding:4px 10px;"><i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                    <div style="overflow-y: auto; flex: 1;">
+                        <table class="court-table">
+                            <thead>
+                                <tr>
+                                    <th class="cell-time" style="text-align:left; color:#555;">Waktu</th>
+                                    <th>Sen</th><th>Sel</th><th>Rab</th><th>Kam</th><th>Jum</th><th>Sab</th><th>Min</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="cell-time">08:00</td>
+                                    <td class="cell-closed"></td><td class="cell-closed"></td><td class="cell-closed"></td><td class="cell-closed"></td><td class="cell-closed"></td><td class="cell-closed"></td><td class="cell-closed"></td>
+                                </tr>
+                                <tr>
+                                    <td class="cell-time">09:00</td>
+                                    <td class="cell-empty"></td><td class="cell-empty"></td><td class="cell-empty"></td><td class="cell-empty"></td><td class="cell-empty"></td><td class="cell-empty"></td><td class="cell-empty"></td>
+                                </tr>
+                                <tr>
+                                    <td class="cell-time">10:00</td>
+                                    <td class="cell-empty"></td><td class="cell-booked">1B</td><td class="cell-booked">1B</td><td class="cell-booked">1B</td><td class="cell-booked">1B</td><td class="cell-booked">1B</td><td class="cell-empty"></td>
+                                </tr>
+                                <tr>
+                                    <td class="cell-time">11:00</td>
+                                    <td class="cell-empty"></td><td class="cell-booked">1B</td><td class="cell-booked">1B</td><td class="cell-booked">1B</td><td class="cell-booked">1B</td><td class="cell-booked">1B</td><td class="cell-empty"></td>
+                                </tr>
+                                <tr>
+                                    <td class="cell-time">12:00</td>
+                                    <td class="cell-empty"></td><td class="cell-empty"></td><td class="cell-empty"></td><td class="cell-empty"></td><td class="cell-empty"></td><td class="cell-empty"></td><td class="cell-empty"></td>
+                                </tr>
+                                <tr>
+                                    <td class="cell-time">13:00</td>
+                                    <td class="cell-empty"></td><td class="cell-empty"></td><td class="cell-empty"></td><td class="cell-empty"></td><td class="cell-booked">2B</td><td class="cell-empty"></td><td class="cell-empty"></td>
+                                </tr>
+                                <tr>
+                                    <td class="cell-time">14:00</td>
+                                    <td class="cell-empty"></td><td class="cell-booked">2B</td><td class="cell-booked">1B</td><td class="cell-booked">3B</td><td class="cell-booked">2B</td><td class="cell-booked">1B</td><td class="cell-empty"></td>
+                                </tr>
+                                <tr>
+                                    <td class="cell-time">15:00</td>
+                                    <td class="cell-empty"></td><td class="cell-empty"></td><td class="cell-empty"></td><td class="cell-empty"></td><td class="cell-empty"></td><td class="cell-empty"></td><td class="cell-empty"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Side Panel -->
+                <div class="side-panel">
+                    <div class="content-card" style="margin-bottom:0; padding: 20px;">
+                        <p class="content-card-title" style="margin-bottom: 15px;">Notifikasi Terbaru</p>
+                        <div style="display:flex; flex-direction:column; gap:12px;">
+                            <div style="display:flex; gap:12px; align-items:flex-start;">
+                                <div class="stat-icon" style="width:36px; height:36px; font-size:14px; flex-shrink:0;"><i class="fa-solid fa-bell"></i></div>
+                                <div><p style="font-size:13px; margin-bottom:3px;">Booking baru dari Andi W.</p><p style="font-size:11px; color:#666;">10 menit lalu</p></div>
+                            </div>
+                            <div style="display:flex; gap:12px; align-items:flex-start;">
+                                <div class="stat-icon" style="width:36px; height:36px; font-size:14px; flex-shrink:0;"><i class="fa-solid fa-star"></i></div>
+                                <div><p style="font-size:13px; margin-bottom:3px;">Ulasan baru: ★★★★★</p><p style="font-size:11px; color:#666;">1 jam lalu</p></div>
+                            </div>
+                            <div style="display:flex; gap:12px; align-items:flex-start;">
+                                <div class="stat-icon" style="width:36px; height:36px; font-size:14px; flex-shrink:0;"><i class="fa-solid fa-circle-check"></i></div>
+                                <div><p style="font-size:13px; margin-bottom:3px;">Pembayaran terverifikasi</p><p style="font-size:11px; color:#666;">3 jam lalu</p></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

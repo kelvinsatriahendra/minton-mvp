@@ -1,147 +1,176 @@
+
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export default function Navbar() {
+  const [isScrolled, setIsScrolled] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState('');
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
-    // Check login status from cookies
-    const getCookie = (name: string) => {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop()?.split(';').shift();
-      return null;
-    };
-
-    const loggedIn = getCookie('isLoggedIn') === 'true';
-    const name = getCookie('userName');
-
-    if (loggedIn && name) {
-      setIsLoggedIn(true);
-      setUserName(decodeURIComponent(name));
-    }
-
+    // Handle scroll for transparent navbar
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
-
     window.addEventListener('scroll', handleScroll);
+
+    // Check login status from cookies
+    const cookies = document.cookie.split(';');
+    const loggedInCookie = cookies.find(c => c.trim().startsWith('isLoggedIn='));
+    const nameCookie = cookies.find(c => c.trim().startsWith('userName='));
+    
+    if (loggedInCookie && loggedInCookie.split('=')[1] === 'true') {
+      setIsLoggedIn(true);
+      if (nameCookie) {
+        setUserName(decodeURIComponent(nameCookie.split('=')[1]));
+      }
+    }
+
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleLogout = () => {
-    // Clear cookies
-    document.cookie = "session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    document.cookie = "isLoggedIn=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    document.cookie = "userName=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    window.location.href = '/';
-  };
-
   return (
-    <header className={`navbar ${isScrolled ? 'scrolled' : 'navbar-transparent'}`}>
-      <div className="container nav-wrapper">
-        <div className="logo">
-          <Link href="/"><img src="/asset/logo.png" alt="logo" /></Link>
+    <>
+      <style dangerouslySetInnerHTML={{__html: `
+        .navbar {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          padding: 26px 0;
+          z-index: 1000;
+          transition: all 0.4s ease;
+        }
+        .navbar.scrolled {
+          background-color: rgba(10, 10, 10, 0.95);
+          backdrop-filter: blur(10px);
+          padding: 16px 0;
+          border-bottom: 1px solid #222;
+        }
+        .nav-wrapper {
+          width: 90%;
+          max-width: 1600px;
+          margin: auto;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .logo img {
+          height: 28px;
+          display: block;
+        }
+        nav {
+          display: flex;
+          gap: 40px;
+        }
+        nav a {
+          color: #ffffff;
+          text-decoration: none;
+          font-size: 15px;
+          font-weight: 500;
+          position: relative;
+          transition: color 0.25s;
+        }
+        nav a::after {
+          content: '';
+          position: absolute;
+          left: 0; bottom: -4px;
+          width: 0; height: 2px;
+          background: #bdd124;
+          border-radius: 2px;
+          transition: width 0.3s ease;
+        }
+        nav a:hover { color: #bdd124; }
+        nav a:hover::after { width: 100%; }
+        
+        .nav-btn {
+          display: flex;
+          gap: 12px;
+          align-items: center;
+        }
+        .btn-primary {
+          background-color: #bdd124;
+          color: #000;
+          padding: 10px 24px;
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: 600;
+          border: none;
+          cursor: pointer;
+          transition: all 0.3s;
+        }
+        .btn-outline {
+          background: transparent;
+          color: #fff;
+          padding: 10px 24px;
+          border-radius: 8px;
+          font-size: 14px;
+          font-weight: 500;
+          border: 1px solid #333;
+          cursor: pointer;
+          transition: all 0.3s;
+        }
+        .btn-outline:hover {
+          background: #bdd124 !important;
+          border-color: #bdd124 !important;
+          color: #000 !important;
+        }
+        .user-profile {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          color: #fff;
+          font-weight: 500;
+          font-size: 14px;
+          cursor: pointer;
+        }
+        .user-avatar {
+          width: 32px;
+          height: 32px;
+          background: #bdd124;
+          color: #000;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+        }
+        @media (max-width: 768px) {
+          nav { display: none; }
+        }
+      `}} />
+      <header className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
+        <div className="nav-wrapper">
+          <div className="logo">
+            <Link href="/"><img src="/asset/logo.png" alt="logo" /></Link>
+          </div>
+
+          <nav id="nav-menu">
+            <Link href="/sewa-lapangan" style={pathname.includes('sewa-lapangan') ? {color: '#bdd124'} : {}}>Sewa Lapangan</Link>
+            <Link href="/main-bareng" style={pathname.includes('main-bareng') ? {color: '#bdd124'} : {}}>Main Bareng</Link>
+            <Link href="/kemitraan" style={pathname.includes('kemitraan') ? {color: '#bdd124'} : {}}>Kemitraan</Link>
+            <Link href="/komunitas" style={pathname.includes('komunitas') ? {color: '#bdd124'} : {}}>Komunitas</Link>
+          </nav>
+
+          <div className="nav-btn">
+            {isLoggedIn ? (
+              <Link href="/dashboard" className="user-profile">
+                <span>{userName}</span>
+                <div className="user-avatar">{userName.charAt(0).toUpperCase()}</div>
+              </Link>
+            ) : (
+              <>
+                <Link href="/sign-up"><button className="btn-outline">Sign-Up</button></Link>
+                <Link href="/login"><button className="btn-primary">Login</button></Link>
+              </>
+            )}
+          </div>
         </div>
-
-        <div className="hamburger" id="hamburger" onClick={() => {
-            document.getElementById('nav-menu')?.classList.toggle('active');
-            document.getElementById('nav-btn')?.classList.toggle('active');
-        }}>
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-
-        <nav id="nav-menu">
-          <Link href="/sewa-lapangan">Sewa Lapangan</Link>
-          <Link href="/main-bareng">Main Bareng</Link>
-          <Link href="/kemitraan">Kemitraan</Link>
-          <Link href="/komunitas">Komunitas</Link>
-        </nav>
-
-        <div className="nav-btn" id="nav-btn">
-          {isLoggedIn ? (
-            <div className="profile-menu" style={{ position: 'relative' }}>
-              <button 
-                className="profile-btn-ui" 
-                onClick={() => setShowDropdown(!showDropdown)}
-                style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '10px', 
-                  background: 'transparent', 
-                  border: 'none', 
-                  color: 'white', 
-                  cursor: 'pointer' 
-                }}
-              >
-                <div className="profile-avatar" style={{ 
-                  width: '32px', 
-                  height: '32px', 
-                  background: '#bdd124', 
-                  borderRadius: '50%', 
-                  color: 'black', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  fontWeight: 'bold' 
-                }}>
-                  {userName.charAt(0).toUpperCase()}
-                </div>
-                <p className="profile-name" style={{ margin: 0, fontWeight: 500 }}>{userName}</p>
-                <i className={`fa-solid fa-chevron-down`} style={{ fontSize: '10px' }}></i>
-              </button>
-
-              {showDropdown && (
-                <div className="profile-dropdown" style={{ 
-                  position: 'absolute', 
-                  top: '100%', 
-                  right: 0, 
-                  background: '#1D1D1D', 
-                  border: '1px solid #333', 
-                  borderRadius: '8px', 
-                  padding: '10px 0', 
-                  width: '180px', 
-                  marginTop: '10px',
-                  zIndex: 100
-                }}>
-                  <Link href="/dashboard" className="dropdown-item" style={{ display: 'block', padding: '8px 20px', color: 'white', textDecoration: 'none' }}>
-                    <i className="fa-solid fa-gauge" style={{ marginRight: '10px' }}></i> Dashboard
-                  </Link>
-                  <div style={{ height: '1px', background: '#333', margin: '5px 0' }}></div>
-                  <button 
-                    onClick={handleLogout} 
-                    className="dropdown-item" 
-                    style={{ 
-                      display: 'block', 
-                      width: '100%', 
-                      textAlign: 'left', 
-                      padding: '8px 20px', 
-                      color: '#ff4d4d', 
-                      background: 'transparent', 
-                      border: 'none', 
-                      cursor: 'pointer' 
-                    }}
-                  >
-                    <i className="fa-solid fa-right-from-bracket" style={{ marginRight: '10px' }}></i> Logout
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <>
-              <button className="btn-outline" onClick={() => { window.location.href = "/sign-up"; }}>Sign-Up</button>
-              <button className="btn-primary" onClick={() => { window.location.href = "/login"; }}>Login</button>
-            </>
-          )}
-        </div>
-      </div>
-    </header>
+      </header>
+    </>
   );
 }

@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status Booking</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            color: white;
+        }
+
+        
+        .status-container {
+            display: flex;
+            gap: 48px;
+            padding: 60px 0 160px;
+            width: 90%;
+            max-width: 1600px;
+            margin: auto;
+        }
+
+        .left {
+            flex: 2;
+        }
+
+        .right {
+            flex: 1;
+        }
+
+        
+        .btn-back {
+            padding: 12px 28px;
+            border: 1px solid #ffffff;
+            border-radius: 12px;
+            background: none;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 56px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-back:hover {
+            background: #bdd124;
+            border-color: #bdd124;
+            color: black;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            font-size: 16px;
+            color: #aaa;
+            margin-bottom: 48px;
+        }
+
+        
+        .success-header {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .success-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            border: 4px solid #bdd124;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #bdd124;
+            font-size: 36px;
+            box-shadow: 0 0 30px rgba(189, 209, 36, 0.4);
+            animation: successPulse 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .success-icon i {
+            opacity: 0;
+            transform: scale(0);
+            animation: checkmarkGrow 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.3s forwards;
+        }
+
+        @keyframes successPulse {
+            0% {
+                transform: scale(0.5);
+                box-shadow: 0 0 0 rgba(189, 209, 36, 0);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 0 50px rgba(189, 209, 36, 0.8);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 30px rgba(189, 209, 36, 0.4);
+                opacity: 1;
+            }
+        }
+
+        @keyframes checkmarkGrow {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+
+            70% {
+                transform: scale(1.3);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .success-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: white;
+        }
+
+        .success-id {
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        
+        .ticket {
+            display: flex;
+            background: #171717;
+            border-radius: 12px;
+            margin-bottom: 32px;
+            border: 1px solid #2a2a2a;
+            position: relative;
+        }
+
+        .ticket-left {
+            flex: 1.2;
+            padding: 40px 32px;
+            text-align: left;
+            border-right: 2px dashed #333;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        .ticket-right {
+            flex: 1;
+            padding: 40px 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+            position: relative;
+        }
+
+        
+        .ticket-left::after,
+        .ticket-right::before {
+            content: "";
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: #0f0f0f;
+            border-radius: 50%;
+        }
+
+        .ticket-left::after {
+            right: -16px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-left: 1px solid #2a2a2a;
+        }
+
+        .ticket-right::before {
+            left: -16px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-right: 1px solid #2a2a2a;
+        }
+
+        .ticket-label {
+            font-size: 13px;
+            color: #aaa;
+            margin-bottom: 8px;
+        }
+
+        .ticket-val {
+            font-size: 24px;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .ticket-badge {
+            background: #2a2a2a;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #ccc;
+            border: 1px solid #444;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        
+        .btn-group {
+            display: flex;
+            gap: 16px;
+        }
+
+        .btn-cancel {
+            flex: 1;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid #ff4d4d;
+            background: none;
+            color: #ff4d4d;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            text-align: center;
+        }
+
+        .btn-cancel:hover {
+            background: #ff4d4d;
+            color: white;
+        }
+
+        .btn-contact {
+            flex: 1;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid #ffffff;
+            background: none;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            text-align: center;
+        }
+
+        .btn-contact:hover {
+            background: #bdd124;
+            border-color: #bdd124;
+            color: black;
+            box-shadow: 0 0 20px rgba(189, 209, 36, 0.4);
+            transform: translateY(-2px);
+        }
+
+        
+        .summary-box {
+            background: #1c1c1c;
+            border-radius: 12px;
+            border: 1px solid #333;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid #333;
+            font-size: 14px;
+        }
+
+        .summary-row span:first-child {
+            color: #ccc;
+        }
+
+        .summary-row span:last-child {
+            color: #fff;
+        }
+
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px 24px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .summary-total span:first-child {
+            color: #fff;
+        }
+
+        .summary-total span:last-child {
+            color: #fff;
+        }
+
+        .terms {
+            font-size: 12px;
+            color: #888;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+
+<body>
+
+    
+    <header class="navbar">
+        <div class="container nav-wrapper">
+            <div class="logo">
+                <a href="../index.html"><img src="../asset/logo.png" alt="logo"></a>
+            </div>
+            <nav>
+                <a href="sewa_lapangan.html">Sewa Lapangan</a>
+                <a href="../main bareng/main_bareng.html">Main Bareng</a>
+                <a href="../kemitraan/kemitraan.html">Kemitraan</a>
+                <a href="../komunitas/komunitas.html">Komunitas</a>
+            </nav>
+            <div class="nav-btn">
+                <button class="btn-outline" onclick="window.location.href='../buat akun/sign-up.html'">Sign-Up</button>
+                <button class="btn-primary" onclick="window.location.href='../buat akun/login.html'">Login</button>
+            </div>
+        </div>
+    </header>
+
+    
+    <div class="container" style="padding-top: 60px;">
+        <a href="../index.html" class="btn-back">← Kembali ke Beranda</a>
+    </div>
+    <div class="status-container" style="padding-top: 0;">
+
+        
+        <div class="left">
+            
+            <div class="success-header">
+                <div class="success-icon"><i class="fa-solid fa-check"></i></div>
+                <div>
+                    <h1 class="success-title">Pemesanan Lapangan Berhasil!</h1>
+                    <div class="success-id">ID #MKM882026</div>
+                </div>
+            </div>
+
+            
+            <div class="ticket">
+                <div class="ticket-left">
+                    <div style="margin-bottom: 32px;">
+                        <div class="ticket-label">Venue Lapangan</div>
+                        <div class="ticket-val" style="font-size: 20px; margin-bottom: 4px;">Kalam Kudus Sport Center
+                        </div>
+                        <div style="font-size: 13px; color: #aaa;"><i class="fa-solid fa-location-dot"
+                                style="color: #bdd124; margin-right: 6px;"></i> Jl. Basuki Rahmat, Kerten, Surakarta
+                        </div>
+                    </div>
+                    <div>
+                        <div class="ticket-label">Tanggal Sewa</div>
+                        <div class="ticket-val" style="color: #ffffff;">06 Maret 2026</div>
+                    </div>
+                </div>
+                <div class="ticket-right">
+                    <div>
+                        <div class="ticket-label">Waktu</div>
+                        <div class="ticket-val">19:00 - 21:00 <span class="ticket-badge"><i
+                                    class="fa-regular fa-hourglass-half"></i> 2 Jam</span></div>
+                    </div>
+                    <div>
+                        <div class="ticket-label">Court ID</div>
+                        <div class="ticket-val">Badminton Blue Court 1</div>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="btn-group">
+                <button class="btn-cancel">Batalkan Booking</button>
+                <button class="btn-contact">Hubungi Pengelola</button>
+            </div>
+        </div>
+
+        
+        <div class="right">
+            <div class="summary-box">
+                <div class="summary-row">
+                    <span>Biaya Sewa</span>
+                    <span>Rp500.000</span>
+                </div>
+                <div class="summary-row">
+                    <span>Biaya Produk Tambahan</span>
+                    <span>Rp0</span>
+                </div>
+                <div class="summary-row">
+                    <span>Total Biaya Lainnya</span>
+                    <span>Rp0</span>
+                </div>
+                <div class="summary-row">
+                    <span>Convenience Fee</span>
+                    <span>Rp0</span>
+                </div>
+                <div class="summary-row">
+                    <span>Biaya Transaksi</span>
+                    <span>Rp0</span>
+                </div>
+                <div class="summary-total">
+                    <span>Total Biaya</span>
+                    <span>Rp500.000</span>
+                </div>
+            </div>
+
+            <div class="terms">
+                Pembatalan booking lapangan harus mengikuti ketentuan dari pengelola lapangan.
+            </div>
+        </div>
+
+    </div>
+
+    
+    <footer class="footer">
+        <div class="container footer-grid">
+            <div>
+                <div class="logo-footer">
+                    <img src="../asset/logo.png" alt="logo-footer">
+                </div>
+            </div>
+            <div>
+                <h4>Perusahaan</h4>
+                <a href="#">Tentang Kami</a>
+                <a href="#">Kebijakan Privasi</a>
+                <a href="#">Syarat & Ketentuan</a>
+                <br>
+                <br>
+            </div>
+            <div>
+                <h4>Ekosistem</h4>
+                <a href="#">Direktori Lapangan</a>
+            </div>
+            <div>
+                <h4>Hubungi Kami</h4>
+                <a href="#">Kontak</a>
+            </div>
+            <div class="social-media">
+                <img src="../asset/facebook.png" alt="facebook">
+                <img src="../asset/instagram.png" alt="instagram">
+                <img src="../asset/linkedin.png" alt="linkedin">
+                <img src="../asset/youtube.png" alt="youtube">
+            </div>
+        </div>
+    </footer>
+
+    <script src="../script.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minton - Pengaturan GOR</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="logo-section">
+            <a href="../index.html"><img src="../asset/logo.png" alt="Minton Logo"></a>
+        </div>
+        <nav class="nav-menu">
+            <a href="mitra.html" class="nav-item"><i class="fa-solid fa-calendar-check"></i> Booking</a>
+            <a href="jadwal.html" class="nav-item"><i class="fa-solid fa-clock"></i> Schedule</a>
+            <a href="layanan.html" class="nav-item"><i class="fa-solid fa-box-archive"></i> Service</a>
+            <a href="survei.html" class="nav-item"><i class="fa-solid fa-file-lines"></i> Survey</a>
+            <div class="nav-divider"></div>
+            <a href="member.html" class="nav-item"><i class="fa-solid fa-users"></i> Members</a>
+            <a href="pengaturan.html" class="nav-item active"><i class="fa-solid fa-gear"></i> Settings</a>
+            <a href="login_mitra.html" class="nav-item logout"><i class="fa-solid fa-right-from-bracket"></i> Keluar</a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="#" class="user-profile">
+                <div class="avatar">GS</div>
+                <div>
+                    <p class="user-name">GOR Sudirman</p>
+                    <p class="user-role">Pengelola</p>
+                </div>
+            </a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="page-header">
+            <h1>Pengaturan GOR</h1>
+            <div class="header-actions">
+                <button class="btn-secondary-dash">Batalkan</button>
+                <button class="btn-primary-dash"><i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan</button>
+            </div>
+        </header>
+
+        <div class="dashboard-body">
+            <!-- Informasi Dasar -->
+            <div class="content-card">
+                <p class="content-card-title">Informasi Dasar GOR</p>
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Nama GOR</label>
+                        <input class="form-input" type="text" value="GOR Sudirman Jaya">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nomor WhatsApp Bisnis</label>
+                        <input class="form-input" type="tel" value="081234567890">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email Bisnis</label>
+                        <input class="form-input" type="email" value="gor.sudirman@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Kota / Kabupaten</label>
+                        <input class="form-input" type="text" value="Surabaya">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Alamat Lengkap</label>
+                    <textarea class="form-textarea" rows="3">Jl. Raya Sudirman No. 123, Surabaya, Jawa Timur</textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Link Google Maps (Opsional)</label>
+                    <input class="form-input" type="url" placeholder="https://maps.google.com/...">
+                </div>
+            </div>
+
+            <!-- Jam Operasional -->
+            <div class="content-card">
+                <p class="content-card-title">Jam Operasional</p>
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Jam Buka</label>
+                        <input class="form-input" type="time" value="08:00">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Jam Tutup</label>
+                        <input class="form-input" type="time" value="23:00">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Harga -->
+            <div class="content-card">
+                <p class="content-card-title">Pengaturan Harga</p>
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Harga / Jam (Pagi & Sore)</label>
+                        <input class="form-input" type="number" value="35000">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Harga / Jam (Malam / Lampu Menyala)</label>
+                        <input class="form-input" type="number" value="50000">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Metode Pembayaran yang Diterima</label>
+                    <select class="form-select">
+                        <option>Semua Metode (Transfer, E-Wallet, Tunai)</option>
+                        <option>Transfer Bank & E-Wallet</option>
+                        <option>Tunai Saja</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Hapus Akun -->
+            <div class="content-card" style="border-color: rgba(244, 67, 54, 0.3);">
+                <p class="content-card-title" style="color: #f44336;">Zona Berbahaya</p>
+                <p style="font-size: 14px; color: var(--text-gray); margin-bottom: 16px;">Menghapus akun mitra akan menghapus semua data GOR Anda secara permanen dan tidak dapat dikembalikan.</p>
+                <button style="background: none; border: 1px solid #f44336; color: #f44336; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 14px; font-weight: 600;">Hapus Akun Mitra</button>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minton - Profil Saya</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="kemitraan/dashboard.css">
+
+    <style>
+        .dashboard-body {
+            flex: 1;
+            padding: 28px 36px;
+            overflow-y: auto;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            margin-bottom: 40px;
+            padding: 32px;
+            background: linear-gradient(135deg, #1d1d1d 0%, #111 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+        }
+
+        .profile-avatar-large {
+            width: 120px;
+            height: 120px;
+            background: var(--primary-lime);
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: 800;
+            color: #000;
+            position: relative;
+        }
+
+        .edit-avatar {
+            position: absolute;
+            bottom: -8px;
+            right: -8px;
+            width: 36px;
+            height: 36px;
+            background: #252525;
+            border: 2px solid var(--primary-lime);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-lime);
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .profile-meta h2 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .profile-meta p {
+            color: var(--text-gray);
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .profile-meta .badge {
+            margin-top: 12px;
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 32px;
+        }
+
+        .settings-tabs {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 12px 4px;
+            color: var(--text-gray);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .tab-btn.active {
+            color: var(--primary-lime);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary-lime);
+        }
+
+        .form-section {
+            margin-bottom: 32px;
+        }
+
+        .form-section h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: var(--primary-lime);
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="logo-section">
+            <a href="index.html"><img src="asset/logo.png" alt="Minton Logo"></a>
+        </div>
+        <nav class="nav-menu">
+            <a href="dashboard_pemain.html" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="booking_saya.html" class="nav-item"><i class="fa-solid fa-calendar-days"></i> Booking Saya</a>
+            <a href="dashboard_mabar.html" class="nav-item"><i class="fa-solid fa-users"></i> Main Bareng</a>
+            <a href="turnamen.html" class="nav-item"><i class="fa-solid fa-trophy"></i> Turnamen</a>
+            <div class="nav-divider"></div>
+            <a href="profil.html" class="nav-item active"><i class="fa-solid fa-user"></i> Profil</a>
+            <a href="minton_pay.html" class="nav-item"><i class="fa-solid fa-wallet"></i> Minton Pay</a>
+            <a href="index.html" class="nav-item logout"><i class="fa-solid fa-right-from-bracket"></i> Keluar</a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="#" class="user-profile gold-member-card" style="padding: 10px; border-radius: 12px;">
+                <div class="avatar" style="background: #1a1608; color: #fcf6ba;">BS</div>
+                <div>
+                    <p class="user-name" style="color: #1a1608;">Bagas Saputra</p>
+                    <p class="user-role" style="color: rgba(0,0,0,0.6); font-weight: 600;">Member Gold</p>
+                </div>
+            </a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="page-header">
+            <h1>Profil Saya</h1>
+            <div class="header-actions">
+                <button class="btn-primary-dash">Simpan Perubahan</button>
+            </div>
+        </header>
+
+        <div class="dashboard-body">
+            <div class="profile-header">
+                <div class="profile-avatar-large">
+                    BS
+                    <div class="edit-avatar"><i class="fa-solid fa-camera"></i></div>
+                </div>
+                <div class="profile-meta">
+                    <h2>Bagas Saputra</h2>
+                    <p>
+                        <span><i class="fa-solid fa-envelope"></i> bagas.saputra@email.com</span>
+                        <span><i class="fa-solid fa-phone"></i> +62 812 3456 7890</span>
+                    </p>
+                    <div style="display:flex; gap:10px;">
+                        <span class="badge badge-gold">Member Gold</span>
+                        <span class="badge badge-pro">Semi-Pro</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-grid">
+                <div class="main-settings">
+                    <div class="settings-tabs">
+                        <button class="tab-btn active">Informasi Pribadi</button>
+                        <button class="tab-btn">Keamanan</button>
+                        <button class="tab-btn">Notifikasi</button>
+                    </div>
+
+                    <div class="content-card">
+                        <div class="form-section">
+                            <h3>Biodata</h3>
+                            <div class="form-grid-2">
+                                <div class="form-group">
+                                    <label class="form-label">Nama Depan</label>
+                                    <input type="text" class="form-input" value="Bagas">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Nama Belakang</label>
+                                    <input type="text" class="form-input" value="Saputra">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Alamat Email</label>
+                                <input type="email" class="form-input" value="bagas.saputra@email.com">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Nomor Telepon</label>
+                                <input type="tel" class="form-input" value="081234567890">
+                            </div>
+                        </div>
+
+                        <div class="form-section" style="margin-bottom: 0;">
+                            <h3>Domisili</h3>
+                            <div class="form-group">
+                                <label class="form-label">Kota</label>
+                                <select class="form-select">
+                                    <option>Surabaya</option>
+                                    <option>Sidoarjo</option>
+                                    <option>Gresik</option>
+                                    <option>Lainnya</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="side-panel">
+                    <div class="content-card">
+                        <span class="content-card-title">Statistik Pemain</span>
+                        <div style="display:flex; flex-direction:column; gap:16px; margin-top:20px;">
+                            <div style="display:flex; justify-content:space-between;">
+                                <span style="color:var(--text-gray); font-size:14px;">Win Rate</span>
+                                <span style="font-weight:700;">68%</span>
+                            </div>
+                            <div style="width:100%; height:6px; background:#252525; border-radius:3px; overflow:hidden;">
+                                <div style="width:68%; height:100%; background:var(--primary-lime);"></div>
+                            </div>
+                            
+                            <div style="display:flex; justify-content:space-between; margin-top:8px;">
+                                <span style="color:var(--text-gray); font-size:14px;">Stamina</span>
+                                <span style="font-weight:700;">85%</span>
+                            </div>
+                            <div style="width:100%; height:6px; background:#252525; border-radius:3px; overflow:hidden;">
+                                <div style="width:85%; height:100%; background:var(--primary-lime);"></div>
+                            </div>
+
+                            <div style="display:flex; justify-content:space-between; margin-top:8px;">
+                                <span style="color:var(--text-gray); font-size:14px;">Power</span>
+                                <span style="font-weight:700;">74%</span>
+                            </div>
+                            <div style="width:100%; height:6px; background:#252525; border-radius:3px; overflow:hidden;">
+                                <div style="width:74%; height:100%; background:var(--primary-lime);"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-card gold-member-card">
+                        <h4 class="gold-text" style="margin-bottom:12px; font-size:15px;">Minton Gold Member</h4>
+                        <p style="font-size:13px; line-height:1.6;">Berlaku hingga 12 Des 2024. Nikmati akses prioritas booking lapangan!</p>
+                        <button class="btn-secondary-dash btn-gold" style="width:100%; margin-top:16px; font-size:12px;">Kelola Langganan</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minton - Turnamen</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="kemitraan/dashboard.css">
+
+    <style>
+        .dashboard-body {
+            flex: 1;
+            padding: 28px 36px;
+            overflow-y: auto;
+        }
+
+        .tournament-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .tournament-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: 0.3s;
+        }
+
+        .tournament-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--primary-lime);
+        }
+
+        .tournament-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+        }
+
+        .tournament-content {
+            padding: 20px;
+        }
+
+        .tournament-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            background: rgba(189, 209, 36, 0.1);
+            color: var(--primary-lime);
+        }
+
+        .tournament-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .tournament-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-gray);
+        }
+
+        .info-item i {
+            width: 16px;
+            color: var(--primary-lime);
+        }
+
+        .tournament-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .price-tag {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="logo-section">
+            <a href="index.html"><img src="asset/logo.png" alt="Minton Logo"></a>
+        </div>
+        <nav class="nav-menu">
+            <a href="dashboard_pemain.html" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="booking_saya.html" class="nav-item"><i class="fa-solid fa-calendar-days"></i> Booking Saya</a>
+            <a href="dashboard_mabar.html" class="nav-item"><i class="fa-solid fa-users"></i> Main Bareng</a>
+            <a href="turnamen.html" class="nav-item active"><i class="fa-solid fa-trophy"></i> Turnamen</a>
+            <div class="nav-divider"></div>
+            <a href="profil.html" class="nav-item"><i class="fa-solid fa-user"></i> Profil</a>
+            <a href="minton_pay.html" class="nav-item"><i class="fa-solid fa-wallet"></i> Minton Pay</a>
+            <a href="index.html" class="nav-item logout"><i class="fa-solid fa-right-from-bracket"></i> Keluar</a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="#" class="user-profile gold-member-card" style="padding: 10px; border-radius: 12px;">
+                <div class="avatar" style="background: #1a1608; color: #fcf6ba;">BS</div>
+                <div>
+                    <p class="user-name" style="color: #1a1608;">Bagas Saputra</p>
+                    <p class="user-role" style="color: rgba(0,0,0,0.6); font-weight: 600;">Member Gold</p>
+                </div>
+            </a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="page-header">
+            <h1>Turnamen</h1>
+            <div class="header-actions">
+                <button class="btn-secondary-dash"><i class="fa-solid fa-filter"></i> Filter</button>
+            </div>
+        </header>
+
+        <div class="dashboard-body">
+            <div style="margin-bottom: 32px;">
+                <h2 style="font-size: 24px; margin-bottom: 8px;">Turnamen <span style="color: var(--primary-lime);">Mendatang</span></h2>
+                <p style="color: var(--text-gray);">Daftarkan tim Anda dan menangkan hadiah jutaan rupiah!</p>
+            </div>
+
+            <div class="tournament-grid">
+                <!-- Tournament 1 -->
+                <div class="tournament-card">
+                    <img src="https://images.unsplash.com/photo-1599586120429-48281b6f0ece?auto=format&fit=crop&q=80&w=800" alt="Tournament" class="tournament-img">
+                    <div class="tournament-content">
+                        <span class="tournament-badge">Regional Surabaya</span>
+                        <h3 class="tournament-title">Minton Championship 2024</h3>
+                        <div class="tournament-info">
+                            <div class="info-item"><i class="fa-solid fa-calendar"></i> 20 - 22 Mei 2024</div>
+                            <div class="info-item"><i class="fa-solid fa-location-dot"></i> GOR Sudirman, Surabaya</div>
+                            <div class="info-item"><i class="fa-solid fa-users"></i> Ganda Putra (Open)</div>
+                        </div>
+                        <div class="tournament-footer">
+                            <div class="price-tag">Rp 200.000 / Tim</div>
+                            <button class="btn-primary-dash" style="padding: 8px 16px;">Daftar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tournament 2 -->
+                <div class="tournament-card">
+                    <img src="asset/piala-walikota-solo.png" alt="Piala Walikota Solo" class="tournament-img">
+                    <div class="tournament-content">
+                        <span class="tournament-badge">Amateur Series</span>
+                        <h3 class="tournament-title">Piala Walikota Solo</h3>
+                        <div class="tournament-info">
+                            <div class="info-item"><i class="fa-solid fa-calendar"></i> 05 - 07 Juni 2024</div>
+                            <div class="info-item"><i class="fa-solid fa-location-dot"></i> Kalam Kudus, Surakarta</div>
+                            <div class="info-item"><i class="fa-solid fa-users"></i> Tunggal Putra (U-21)</div>
+                        </div>
+                        <div class="tournament-footer">
+                            <div class="price-tag">Rp 150.000 / Org</div>
+                            <button class="btn-primary-dash" style="padding: 8px 16px;">Daftar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tournament 3 -->
+                <div class="tournament-card">
+                    <img src="https://images.unsplash.com/photo-1521537634581-0dced2fee2ef?auto=format&fit=crop&q=80&w=800" alt="Tournament" class="tournament-img">
+                    <div class="tournament-content">
+                        <span class="tournament-badge">Corporate League</span>
+                        <h3 class="tournament-title">BUMN Badminton Cup</h3>
+                        <div class="tournament-info">
+                            <div class="info-item"><i class="fa-solid fa-calendar"></i> 12 - 15 Juni 2024</div>
+                            <div class="info-item"><i class="fa-solid fa-location-dot"></i> Jakarta Badminton Hall</div>
+                            <div class="info-item"><i class="fa-solid fa-users"></i> Beregu Campuran</div>
+                        </div>
+                        <div class="tournament-footer">
+                            <div class="price-tag">Rp 1.500.000 / Tim</div>
+                            <button class="btn-secondary-dash" style="padding: 8px 16px; color: #aaa; border-color: #444; cursor: not-allowed;">Penuh</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

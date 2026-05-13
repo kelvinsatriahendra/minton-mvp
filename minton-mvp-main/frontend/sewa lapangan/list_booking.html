@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minton - Sewa Lapangan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../style.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            color: white;
+        }
+
+        
+        .sewa-container {
+            display: flex;
+            gap: 48px;
+            padding: 60px 0;
+            width: 90%;
+            max-width: 1600px;
+            margin: auto;
+        }
+
+        
+        .left {
+            flex: 2;
+        }
+
+        .btn-tambah {
+            padding: 12px 28px;
+            border: 1px solid #ffffff;
+            border-radius: 15px;
+            background: none;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 32px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-tambah:hover {
+            background: #bdd124;
+            border-color: #bdd124;
+            color: black;
+        }
+
+        .card {
+            background: #1c1c1c;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            border: 1px solid #333;
+            overflow: hidden;
+            display: flex;
+            gap: 24px;
+        }
+
+        .card-img {
+            width: 200px;
+            height: 100%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .card-content {
+            padding: 24px;
+            flex: 1;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        input[type="checkbox"].slot-checkbox {
+            width: 22px;
+            height: 22px;
+            accent-color: #bdd124;
+            cursor: pointer;
+            margin-top: 4px;
+        }
+
+        .card h3 {
+            margin-bottom: 8px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .rating {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 20px;
+        }
+
+        .badminton {
+            font-weight: 600;
+            font-size: 18px;
+            margin-bottom: 16px;
+        }
+
+        .time-box {
+            background: #2a2a2a;
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-size: 15px;
+            position: relative;
+            line-height: 1.6;
+        }
+
+        .time-box::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 6px;
+            background: #bdd124;
+            border-radius: 12px 0 0 12px;
+        }
+
+        
+        .right {
+            flex: 1;
+        }
+
+        .summary-box {
+            background: #1c1c1c;
+            padding: 28px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            border: 1px solid #333;
+        }
+
+        .summary-box h4 {
+            margin-bottom: 20px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            font-size: 16px;
+        }
+
+        .summary-row span:first-child {
+            color: #ffffff;
+        }
+
+        .summary-row span:last-child {
+            color: #ffffff;
+        }
+
+        .total {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+
+        .total span:first-child {
+            color: #ffffff;
+        }
+
+        .total span:last-child {
+            color: #ffffff;
+        }
+
+        .btn-sewa-primary {
+            width: 100%;
+            padding: 16px;
+            border-radius: 15px;
+            border: 1px solid #ffffff;
+            background: none;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 16px;
+            transition: 0.3s;
+        }
+
+        .btn-sewa-primary:hover {
+            background: #bdd124;
+            border-color: #bdd124;
+            color: black;
+        }
+
+        .small-box {
+            background: #1c1c1c;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 16px;
+            border: 1px solid #333;
+            transition: 0.3s;
+        }
+
+        .small-box:hover {
+            border-color: #bdd124;
+        }
+
+        
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: #1c1c1c;
+            width: 90%;
+            max-width: 450px;
+            border-radius: 20px;
+            border: 1px solid #333;
+            padding: 32px;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .policy-list {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+
+        .policy-list li {
+            position: relative;
+            padding-left: 28px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            color: #ccc;
+            line-height: 1.6;
+        }
+
+        .policy-list li::before {
+            content: "\f058";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            position: absolute;
+            left: 0;
+            color: #bdd124;
+        }
+    </style>
+</head>
+
+<body>
+
+    
+    <header class="navbar">
+        <div class="container nav-wrapper">
+
+            <div class="logo">
+                <a href="../index.html"><img src="../asset/logo.png" alt="logo"></a>
+            </div>
+
+            <nav>
+                <a href="sewa_lapangan.html">Sewa Lapangan</a>
+                <a href="../main bareng/main_bareng.html">Main Bareng</a>
+                <a href="../kemitraan/kemitraan.html">Kemitraan</a>
+                <a href="../komunitas/komunitas.html">Komunitas</a>
+            </nav>
+
+            <div class="nav-btn">
+                <button class="btn-outline" onclick="window.location.href='../buat akun/sign-up.html'">Sign-Up</button>
+                <button class="btn-primary" onclick="window.location.href='../buat akun/login.html'">Login</button>
+            </div>
+
+        </div>
+    </header>
+
+    
+    <div class="sewa-container">
+
+        
+        <div class="left">
+            <button class="btn-tambah">Tambah Pesanan</button>
+
+            
+            <div class="card" data-price="250000">
+                <img src="../asset/kalam-kudus.png" alt="Venue" class="card-img">
+                <div class="card-content">
+                    <div class="card-header">
+                        <div>
+                            <h3>Kalam Kudus Sport Center</h3>
+                            <div class="rating"><i class="fa-solid fa-star" style="color: #f59e0b; margin-right: 4px;"></i>
+                                4.9 <i class="fa-solid fa-location-dot" style="margin-left: 10px; margin-right: 4px;"></i>
+                                Kota Surakarta, Jawa Tengah</div>
+                        </div>
+                        <input type="checkbox" class="slot-checkbox" checked onchange="updateTotal()">
+                    </div>
+
+                    <div class="badminton">Badminton Blue Court 1</div>
+
+                    <div class="time-box">
+                        Jumat, 6 Maret 2026 | 19:00 - 20:00
+                        <br>
+                        Rp250.000
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="card" data-price="250000">
+                <img src="../asset/kalam-kudus.png" alt="Venue" class="card-img">
+                <div class="card-content">
+                    <div class="card-header">
+                        <div>
+                            <h3>Kalam Kudus Sport Center</h3>
+                            <div class="rating"><i class="fa-solid fa-star" style="color: #f59e0b; margin-right: 4px;"></i>
+                                4.9 <i class="fa-solid fa-location-dot" style="margin-left: 10px; margin-right: 4px;"></i>
+                                Kota Surakarta, Jawa Tengah</div>
+                        </div>
+                        <input type="checkbox" class="slot-checkbox" checked onchange="updateTotal()">
+                    </div>
+
+                    <div class="badminton">Badminton Blue Court 1</div>
+
+                    <div class="time-box">
+                        Jumat, 6 Maret 2026 | 20:00 - 21:00
+                        <br>
+                        Rp250.000
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        
+        <div class="right">
+
+            <div class="small-box" style="cursor: pointer;" onclick="openVoucherModal()"><i class="fa-solid fa-ticket"
+                    style="color: #bdd124; margin-right: 12px;"></i> Gunakan Voucher</div>
+
+            <div class="summary-box">
+                <h4>Rincian Biaya</h4>
+
+                <div class="summary-row">
+                    <span>Biaya Sewa</span>
+                    <span id="biaya-sewa">Rp500.000</span>
+                </div>
+
+                <div class="summary-row">
+                    <span>Biaya Produk Tambahan</span>
+                    <span>Rp0</span>
+                </div>
+
+                <hr style="border:1px solid #333; margin:10px 0;">
+
+                <div class="total">
+                    <p class="total-p">Total Biaya</p>
+                    <p class="total-p" id="total-biaya">Rp500.000</p>
+                </div>
+            </div>
+
+            <div class="summary-box">
+                <h4>Metode Pembayaran</h4>
+                <div class="summary-row">
+                    <span>Bayar Lunas</span>
+                    <span id="bayar-lunas">Rp500.000</span>
+                </div>
+            </div>
+
+            <div class="small-box" style="cursor: pointer;" onclick="openRescheduleModal()">
+                <i class="fa-solid fa-circle-info" style="color: #bdd124; margin-right: 12px;"></i> Kebijakan Pembatalan
+                & Reschedule
+            </div>
+
+            <button class="btn-sewa-primary" onclick="window.location.href='checkout.html'">Lanjutkan ke
+                Pembayaran</button>
+
+        </div>
+
+    </div>
+
+    
+    <footer class="footer">
+
+        <div class="container footer-grid">
+
+            <div>
+                <div class="logo-footer">
+                    <img src="../asset/logo.png" alt="logo-footer">
+                </div>
+            </div>
+
+            <div>
+                <h4>Perusahaan</h4>
+                <a href="#">Tentang Kami</a>
+                <a href="#">Kebijakan Privasi</a>
+                <a href="#">Syarat & Ketentuan</a>
+                <br>
+                <br>
+            </div>
+            <div>
+                <h4>Ekosistem</h4>
+                <a href="#">Direktori Lapangan</a>
+            </div>
+
+            <div>
+                <h4>Hubungi Kami</h4>
+                <a href="#">Kontak</a>
+            </div>
+
+            <div class="social-media">
+                <img src="../asset/facebook.png" alt="facebook">
+                <img src="../asset/instagram.png" alt="instagram">
+                <img src="../asset/linkedin.png" alt="linkedin">
+                <img src="../asset/youtube.png" alt="youtube">
+            </div>
+
+        </div>
+
+    </footer>
+
+    
+    <div id="rescheduleModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Kebijakan Reschedule</h2>
+                <button class="close-btn" onclick="closeRescheduleModal()">&times;</button>
+            </div>
+
+            <ul class="policy-list">
+                <li>Reschedule dapat dilakukan maksimal 24 jam sebelum waktu sewa dimulai.</li>
+                <li>Pengembalian dana (refund) tidak tersedia untuk pembatalan sepihak.</li>
+                <li>Reschedule hanya berlaku untuk GOR yang sama dengan durasi sewa yang sama.</li>
+                <li>Jika terdapat perbedaan harga pada slot baru, penyewa wajib membayar selisihnya.</li>
+            </ul>
+
+            <button class="btn-tambah" style="width: 100%; margin-bottom: 0;" onclick="closeRescheduleModal()">Saya
+                Mengerti</button>
+        </div>
+    </div>
+
+    
+    <div id="voucherModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Gunakan Voucher</h2>
+                <button class="close-btn" onclick="closeVoucherModal()">&times;</button>
+            </div>
+
+            <div style="margin-bottom: 24px;">
+                <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                    <input type="text" placeholder="Masukkan kode voucher"
+                        style="flex: 1; background: #000; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 10px; outline: none; font-family: inherit;">
+                    <button class="btn-tambah" style="margin-bottom: 0; padding: 10px 20px;">Gunakan</button>
+                </div>
+                <p style="font-size: 12px; color: #888;">Punya kode promo? Masukkan kodenya di sini.</p>
+            </div>
+
+            <div style="margin-bottom: 8px; font-weight: 600; font-size: 14px;">Voucher Tersedia</div>
+            <div class="voucher-list" style="max-height: 250px; overflow-y: auto; padding-right: 5px;">
+                
+                <div
+                    style="background: #2a2a2a; border-radius: 12px; padding: 16px; margin-bottom: 12px; border: 1px dashed #bdd124; position: relative;">
+                    <div style="font-weight: 700; color: #bdd124; margin-bottom: 4px;">DISKON MINTON 10%</div>
+                    <div style="font-size: 13px; color: #ccc; margin-bottom: 8px;">Potongan harga 10% hingga Rp25.000
+                    </div>
+                    <div style="font-size: 11px; color: #888;">Berlaku hingga 12 Mar 2026</div>
+                </div>
+                
+                <div
+                    style="background: #2a2a2a; border-radius: 12px; padding: 16px; margin-bottom: 12px; border: 1px solid #333;">
+                    <div style="font-weight: 700; color: #fff; margin-bottom: 4px;">MAINKAN SURAKARTA</div>
+                    <div style="font-size: 13px; color: #ccc; margin-bottom: 8px;">Potongan Rp15.000 tanpa minimal sewa
+                    </div>
+                    <div style="font-size: 11px; color: #888;">Berlaku hingga 15 Mar 2026</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openRescheduleModal() {
+            const modal = document.getElementById('rescheduleModal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeRescheduleModal() {
+            const modal = document.getElementById('rescheduleModal');
+            modal.classList.remove('active');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+            document.body.style.overflow = 'auto';
+        }
+
+        
+        window.onclick = function (event) {
+            const rescheduleModal = document.getElementById('rescheduleModal');
+            const voucherModal = document.getElementById('voucherModal');
+            if (event.target == rescheduleModal) {
+                closeRescheduleModal();
+            } else if (event.target == voucherModal) {
+                closeVoucherModal();
+            }
+        }
+
+        function openVoucherModal() {
+            const modal = document.getElementById('voucherModal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeVoucherModal() {
+            const modal = document.getElementById('voucherModal');
+            modal.classList.remove('active');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+            document.body.style.overflow = 'auto';
+        }
+
+        function updateTotal() {
+            let total = 0;
+            const checkboxes = document.querySelectorAll('.slot-checkbox');
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    const price = parseInt(cb.closest('.card').getAttribute('data-price'));
+                    total += price;
+                }
+            });
+
+            const formattedTotal = 'Rp' + total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+            document.getElementById('biaya-sewa').innerText = formattedTotal;
+            document.getElementById('total-biaya').innerText = formattedTotal;
+            document.getElementById('bayar-lunas').innerText = formattedTotal;
+        }
+    </script>
+    <script src="../script.js"></script>
+
+</body>
+
+</html>

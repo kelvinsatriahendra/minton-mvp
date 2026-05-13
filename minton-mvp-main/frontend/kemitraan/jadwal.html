@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minton - Atur Jadwal Lapangan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="dashboard.css">
+
+    <style>
+        .court-pills {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .court-pill {
+            padding: 7px 18px;
+            border-radius: 30px;
+            background: #1a1a1a;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            font-size: 13px;
+            color: var(--text-gray);
+            transition: 0.2s;
+            font-family: inherit;
+        }
+
+        .court-pill:hover { border-color: #555; color: #fff; }
+        .court-pill.active {
+            background: var(--primary-lime);
+            color: #000;
+            border-color: var(--primary-lime);
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="logo-section">
+            <a href="../index.html"><img src="../asset/logo.png" alt="Minton Logo"></a>
+        </div>
+        <nav class="nav-menu">
+            <a href="mitra.html" class="nav-item"><i class="fa-solid fa-calendar-check"></i> Booking</a>
+            <a href="jadwal.html" class="nav-item active"><i class="fa-solid fa-clock"></i> Schedule</a>
+            <a href="layanan.html" class="nav-item"><i class="fa-solid fa-box-archive"></i> Service</a>
+            <a href="survei.html" class="nav-item"><i class="fa-solid fa-file-lines"></i> Survey</a>
+            <div class="nav-divider"></div>
+            <a href="member.html" class="nav-item"><i class="fa-solid fa-users"></i> Members</a>
+            <a href="pengaturan.html" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
+            <a href="login_mitra.html" class="nav-item logout"><i class="fa-solid fa-right-from-bracket"></i> Keluar</a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="#" class="user-profile">
+                <div class="avatar">GS</div>
+                <div>
+                    <p class="user-name">GOR Sudirman</p>
+                    <p class="user-role">Pengelola</p>
+                </div>
+            </a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="page-header">
+            <h1>Atur Jadwal Lapangan</h1>
+            <div class="header-actions">
+                <button class="btn-secondary-dash">Tutup Semua Sesi</button>
+                <button class="btn-primary-dash"><i class="fa-solid fa-plus"></i> Tambah Sesi</button>
+            </div>
+        </header>
+
+        <div class="dashboard-body">
+            <div class="content-card">
+                <div class="court-pills">
+                    <button class="court-pill active">Semua Lapangan</button>
+                    <button class="court-pill">Lapangan 1</button>
+                    <button class="court-pill">Lapangan 2</button>
+                    <button class="court-pill">Lapangan 3</button>
+                </div>
+
+                <table class="dash-table">
+                    <thead>
+                        <tr>
+                            <th>Waktu Sesi</th>
+                            <th>Status</th>
+                            <th>Harga / Jam</th>
+                            <th>Pemesan</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>08:00 – 09:00</td>
+                            <td><span class="badge badge-closed">Closed</span></td>
+                            <td>Rp 45.000</td>
+                            <td style="color: var(--text-gray);">—</td>
+                            <td><button class="btn-action-sm">Buka Sesi</button></td>
+                        </tr>
+                        <tr>
+                            <td>09:00 – 10:00</td>
+                            <td><span class="badge badge-open">Open</span></td>
+                            <td>Rp 45.000</td>
+                            <td style="color: var(--text-gray);">—</td>
+                            <td><button class="btn-action-sm">Tutup Sesi</button></td>
+                        </tr>
+                        <tr>
+                            <td>10:00 – 11:00</td>
+                            <td><span class="badge badge-booked">Booked</span></td>
+                            <td>Rp 45.000</td>
+                            <td>Andi Wijaya</td>
+                            <td><button class="btn-action-sm">Lihat Detail</button></td>
+                        </tr>
+                        <tr>
+                            <td>11:00 – 12:00</td>
+                            <td><span class="badge badge-booked">Booked</span></td>
+                            <td>Rp 45.000</td>
+                            <td>Rina S.</td>
+                            <td><button class="btn-action-sm">Lihat Detail</button></td>
+                        </tr>
+                        <tr>
+                            <td>12:00 – 13:00</td>
+                            <td><span class="badge badge-open">Open</span></td>
+                            <td>Rp 35.000</td>
+                            <td style="color: var(--text-gray);">—</td>
+                            <td><button class="btn-action-sm">Tutup Sesi</button></td>
+                        </tr>
+                        <tr>
+                            <td>13:00 – 14:00</td>
+                            <td><span class="badge badge-open">Open</span></td>
+                            <td>Rp 35.000</td>
+                            <td style="color: var(--text-gray);">—</td>
+                            <td><button class="btn-action-sm">Tutup Sesi</button></td>
+                        </tr>
+                        <tr>
+                            <td>14:00 – 15:00</td>
+                            <td><span class="badge badge-booked">Booked</span></td>
+                            <td>Rp 50.000</td>
+                            <td>Budi A.</td>
+                            <td><button class="btn-action-sm">Lihat Detail</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

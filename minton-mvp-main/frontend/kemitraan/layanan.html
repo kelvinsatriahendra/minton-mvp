@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minton - Layanan Tambahan GOR</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="dashboard.css">
+
+    <style>
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .service-card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            transition: border-color 0.2s;
+        }
+
+        .service-card:hover { border-color: #444; }
+
+        .service-icon {
+            width: 52px;
+            height: 52px;
+            background: rgba(189, 209, 36, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-lime);
+            font-size: 22px;
+        }
+
+        .service-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .service-desc {
+            font-size: 13px;
+            color: var(--text-gray);
+            line-height: 1.5;
+        }
+
+        .btn-toggle {
+            margin-top: auto;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: none;
+            color: var(--text-gray);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-toggle:hover { border-color: #555; color: #fff; }
+
+        .btn-toggle.on {
+            background: rgba(189, 209, 36, 0.12);
+            color: var(--primary-lime);
+            border-color: rgba(189, 209, 36, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="logo-section">
+            <a href="../index.html"><img src="../asset/logo.png" alt="Minton Logo"></a>
+        </div>
+        <nav class="nav-menu">
+            <a href="mitra.html" class="nav-item"><i class="fa-solid fa-calendar-check"></i> Booking</a>
+            <a href="jadwal.html" class="nav-item"><i class="fa-solid fa-clock"></i> Schedule</a>
+            <a href="layanan.html" class="nav-item active"><i class="fa-solid fa-box-archive"></i> Service</a>
+            <a href="survei.html" class="nav-item"><i class="fa-solid fa-file-lines"></i> Survey</a>
+            <div class="nav-divider"></div>
+            <a href="member.html" class="nav-item"><i class="fa-solid fa-users"></i> Members</a>
+            <a href="pengaturan.html" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
+            <a href="login_mitra.html" class="nav-item logout"><i class="fa-solid fa-right-from-bracket"></i> Keluar</a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="#" class="user-profile">
+                <div class="avatar">GS</div>
+                <div>
+                    <p class="user-name">GOR Sudirman</p>
+                    <p class="user-role">Pengelola</p>
+                </div>
+            </a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="page-header">
+            <h1>Layanan Tambahan</h1>
+            <div class="header-actions">
+                <button class="btn-primary-dash"><i class="fa-solid fa-plus"></i> Tambah Layanan</button>
+            </div>
+        </header>
+
+        <div class="dashboard-body">
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon"><i class="fa-solid fa-socks"></i></div>
+                    <div>
+                        <p class="service-name">Sewa Sepatu</p>
+                        <p class="service-desc">Persewaan sepatu badminton berbagai ukuran untuk pelanggan yang tidak membawa perlengkapan.</p>
+                    </div>
+                    <button class="btn-toggle on"><i class="fa-solid fa-circle-check"></i> Aktif</button>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon"><i class="fa-solid fa-bottle-water"></i></div>
+                    <div>
+                        <p class="service-name">Kantin & Minuman</p>
+                        <p class="service-desc">Penjualan minuman dingin dan makanan ringan di area GOR untuk pelanggan.</p>
+                    </div>
+                    <button class="btn-toggle on"><i class="fa-solid fa-circle-check"></i> Aktif</button>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+                    <div>
+                        <p class="service-name">Jasa Pasang Senar</p>
+                        <p class="service-desc">Layanan profesional pemasangan senar raket badminton dengan berbagai pilihan senar.</p>
+                    </div>
+                    <button class="btn-toggle"><i class="fa-solid fa-circle-xmark"></i> Non-Aktif</button>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon"><i class="fa-solid fa-shower"></i></div>
+                    <div>
+                        <p class="service-name">Shower Air Hangat</p>
+                        <p class="service-desc">Fasilitas mandi air hangat tersedia setelah berolahraga bagi pelanggan.</p>
+                    </div>
+                    <button class="btn-toggle on"><i class="fa-solid fa-circle-check"></i> Aktif</button>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon"><i class="fa-solid fa-shuttle-space"></i></div>
+                    <div>
+                        <p class="service-name">Sewa Raket & Kok</p>
+                        <p class="service-desc">Persewaan raket dan penjualan kok untuk keperluan bermain pelanggan.</p>
+                    </div>
+                    <button class="btn-toggle on"><i class="fa-solid fa-circle-check"></i> Aktif</button>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon"><i class="fa-solid fa-car"></i></div>
+                    <div>
+                        <p class="service-name">Parkir Berbayar</p>
+                        <p class="service-desc">Area parkir luas dengan tarif per kendaraan untuk pengelolaan yang lebih tertib.</p>
+                    </div>
+                    <button class="btn-toggle"><i class="fa-solid fa-circle-xmark"></i> Non-Aktif</button>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>

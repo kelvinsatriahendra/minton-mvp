@@ -33,7 +33,7 @@ export default function LoginPage() {
     setError(null);
 
     const formData = new FormData(event.currentTarget);
-    const result = await loginAction(formData);
+    const result = await loginAction(null, formData);
 
     if (result?.error) {
       setError(result.error);
@@ -113,8 +113,8 @@ export default function LoginPage() {
 
             <form onSubmit={handleSubmit}>
               <div className="form-group">
-                <label>E-mail</label>
-                <input type="email" name="email" required />
+                <label>Email atau Whatsapp</label>
+                <input type="text" name="loginId" required />
               </div>
               <div className="form-group">
                 <label>Kata Sandi</label>

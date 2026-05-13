@@ -34,7 +34,7 @@ export default function SignUpPage() {
     setError(null);
 
     const formData = new FormData(event.currentTarget);
-    const result = await signUpAction(formData);
+    const result = await signUpAction(null, formData);
 
     if (result?.error) {
       setError(result.error);
@@ -116,7 +116,7 @@ export default function SignUpPage() {
             <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label>Nama Lengkap</label>
-                <input type="text" name="fullName" required />
+                <input type="text" name="nama" required />
               </div>
               <div className="form-row">
                 <div className="form-group">

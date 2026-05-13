@@ -93,7 +93,7 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
             </div>
 
             <div className="info-box" style={{ background: '#171717', padding: '24px', borderRadius: '12px', marginBottom: '30px', border: '1px solid #333' }}>
-              <div style={{ display: 'flex', justifyBetween: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                 <strong style={{ fontSize: '16px' }}>Lokasi Venue</strong>
                 <button className="btn-map" style={{ padding: '6px 16px', borderRadius: '20px', border: '1px solid #fff', background: 'none', color: '#fff', fontSize: '12px', cursor: 'pointer' }}>Buka Peta</button>
               </div>

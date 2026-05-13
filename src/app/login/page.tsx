@@ -13,6 +13,7 @@ export default function LoginPage() {
   const router = useRouter();
 
   async function handleGoogleLogin() {
+    alert("Tombol Google Diklik!");
     console.log("Memulai Login Google...");
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',

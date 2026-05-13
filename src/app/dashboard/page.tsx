@@ -19,12 +19,23 @@ interface Booking {
 export default async function DashboardPage() {
   const cookieStore = await cookies();
   const userName = cookieStore.get('userName')?.value || 'Jagoan';
+  const userEmail = cookieStore.get('userEmail')?.value;
   const isLoggedIn = cookieStore.get('isLoggedIn')?.value === 'true';
 
-  // Fetch Booking History (Mockup filtering by user for now)
+  if (!isLoggedIn || !userEmail) {
+    return (
+      <div style={{ background: '#000', color: '#fff', height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <h2 style={{ marginBottom: '20px' }}>Silakan login untuk melihat dashboard.</h2>
+        <a href="/login" style={{ background: '#bdd124', color: '#000', padding: '12px 24px', borderRadius: '8px', fontWeight: 'bold', textDecoration: 'none' }}>Login Sekarang</a>
+      </div>
+    );
+  }
+
+  // Fetch Booking History filtered by user email
   const { data: bookings } = await supabase
     .from('bookings')
     .select('*')
+    .eq('user_email', userEmail)
     .order('booking_date', { ascending: false });
 
   return (

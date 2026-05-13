@@ -1,11 +1,14 @@
-
 "use client";
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
 export default function KemitraanPage() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+
   useEffect(() => {
     const autoRevealSelectors = ['.card', '.feature-item', '.testimoni-header', '.section-image', '.venue-card', '.mabar-card', '.lb-list', '.klub-card', '.recommend-card'];
     autoRevealSelectors.forEach(selector => {
@@ -41,9 +44,118 @@ export default function KemitraanPage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    // Mock API call
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setIsSuccess(true);
+      setTimeout(() => {
+        setIsSuccess(false);
+        setIsModalOpen(false);
+      }, 3000);
+    }, 1500);
+  };
+
   return (
     <>
       <Navbar />
+
+      <style dangerouslySetInnerHTML={{__html: `
+        .modal-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,0.85);
+          backdrop-filter: blur(8px);
+          z-index: 2000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+        }
+        .modal-content {
+          background: #111;
+          border: 1px solid #333;
+          border-radius: 24px;
+          padding: 40px;
+          width: 100%;
+          max-width: 500px;
+          position: relative;
+        }
+        .modal-close {
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          background: none;
+          border: none;
+          color: #888;
+          font-size: 24px;
+          cursor: pointer;
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-size: 14px; color: #aaa; }
+        .form-group input, .form-group textarea {
+          width: 100%;
+          background: #0a0a0a;
+          border: 1px solid #333;
+          border-radius: 12px;
+          padding: 14px 16px;
+          color: #fff;
+          font-size: 15px;
+          outline: none;
+        }
+        .form-group input:focus { border-color: #bdd124; }
+        .btn-submit {
+          width: 100%;
+          background: #bdd124;
+          color: #000;
+          padding: 16px;
+          border: none;
+          border-radius: 12px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: 0.3s;
+        }
+        .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+      `}} />
+
+      {isModalOpen && (
+        <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setIsModalOpen(false)}>&times;</button>
+            {isSuccess ? (
+              <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                <i className="fa-solid fa-circle-check" style={{ fontSize: '64px', color: '#bdd124', marginBottom: '24px' }}></i>
+                <h2 style={{ marginBottom: '12px' }}>Pendaftaran Berhasil!</h2>
+                <p style={{ color: '#aaa' }}>Tim Minton akan menghubungi Anda dalam 1x24 jam melalui WhatsApp.</p>
+              </div>
+            ) : (
+              <>
+                <h2 style={{ marginBottom: '10px' }}>Daftar Mitra Minton</h2>
+                <p style={{ color: '#aaa', marginBottom: '30px', fontSize: '14px' }}>Lengkapi data GOR Anda untuk mulai digitalisasi.</p>
+                <form onSubmit={handleSubmit}>
+                  <div className="form-group">
+                    <label>Nama GOR / Venue</label>
+                    <input type="text" placeholder="Contoh: GOR Sudirman" required />
+                  </div>
+                  <div className="form-group">
+                    <label>Lokasi (Kota)</label>
+                    <input type="text" placeholder="Contoh: Surabaya" required />
+                  </div>
+                  <div className="form-group">
+                    <label>No. WhatsApp Aktif</label>
+                    <input type="tel" placeholder="0812xxxxxx" required />
+                  </div>
+                  <button type="submit" className="btn-submit" disabled={isSubmitting}>
+                    {isSubmitting ? 'Mengirim...' : 'Kirim Pendaftaran'}
+                  </button>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
     <main>
         
@@ -57,7 +169,7 @@ export default function KemitraanPage() {
             <div className="hero-right">
                 <p>Bergabung di ekosistem digital Minton dan ubah manajemen lapangan manual Anda menjadi serba otomatis.
                 </p>
-                <button className="btn-outline" style={{ borderRadius: '8px', padding: '12px 24px' }}>Daftar GOR Anda Sekarang <i
+                <button className="btn-outline" style={{ borderRadius: '8px', padding: '12px 24px' }} onClick={() => setIsModalOpen(true)}>Daftar GOR Anda Sekarang <i
                         className="fa-solid fa-arrow-right"></i></button>
             </div>
         </section>
@@ -139,7 +251,7 @@ export default function KemitraanPage() {
                     <h2>Siap <span className="text-highlight">Digitalisasi<br />Bisnis GOR</span> anda?</h2>
                     <p>Jadilah bagian dari revolusi sport-tech bersama Minton. dan biarkan teknologi bekerja untuk Anda.
                     </p>
-                    <button className="btn-cta">Daftarkan GOR anda sekarang!</button>
+                    <button className="btn-cta" onClick={() => setIsModalOpen(true)}>Daftarkan GOR anda sekarang!</button>
                 </div>
             </div>
         </section>

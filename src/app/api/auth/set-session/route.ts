@@ -24,6 +24,7 @@ export async function POST(request: Request) {
   });
   cookieStore.set('isLoggedIn', 'true', { path: '/' });
   cookieStore.set('userName', userName, { path: '/' });
+  cookieStore.set('userEmail', email, { path: '/' });
 
   return NextResponse.json({ success: true });
 }

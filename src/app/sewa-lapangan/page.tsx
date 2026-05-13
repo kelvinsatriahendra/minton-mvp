@@ -23,6 +23,7 @@ export default function SewaLapanganPage() {
   const [filteredVenues, setFilteredVenues] = useState<Venue[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [cityQuery, setCityQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('Semua');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -46,14 +47,16 @@ export default function SewaLapanganPage() {
     }
   }
 
-  // Real-time search logic
+  // Real-time search & category logic
   useEffect(() => {
-    const filtered = venues.filter(venue => 
-      venue.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      venue.city.toLowerCase().includes(cityQuery.toLowerCase())
-    );
+    const filtered = venues.filter(venue => {
+      const matchesSearch = venue.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCity = venue.city.toLowerCase().includes(cityQuery.toLowerCase());
+      const matchesCategory = selectedCategory === 'Semua' || venue.category === selectedCategory;
+      return matchesSearch && matchesCity && matchesCategory;
+    });
     setFilteredVenues(filtered);
-  }, [searchQuery, cityQuery, venues]);
+  }, [searchQuery, cityQuery, selectedCategory, venues]);
 
   useEffect(() => {
     // Reveal animation logic exactly like script.js
@@ -154,10 +157,31 @@ export default function SewaLapanganPage() {
               onChange={(e) => setCityQuery(e.target.value)}
             />
           </div>
-          <button className="btn-filter">
-            <i className="fa-solid fa-sliders"></i> Filter
-          </button>
-          <button className="btn-primary">Cari Venue</button>
+          <button className="btn-primary" style={{ padding: '0 30px' }}>Cari Venue</button>
+        </div>
+
+        <div className="category-pills" style={{ display: 'flex', gap: '12px', marginTop: '24px', overflowX: 'auto', paddingBottom: '8px' }}>
+          {['Semua', 'Badminton', 'Futsal', 'Basket', 'Tenis'].map(cat => (
+            <button 
+              key={cat} 
+              onClick={() => setSelectedCategory(cat)}
+              style={{
+                padding: '10px 24px',
+                borderRadius: '20px',
+                border: '1px solid',
+                borderColor: selectedCategory === cat ? '#bdd124' : '#333',
+                background: selectedCategory === cat ? '#bdd124' : 'transparent',
+                color: selectedCategory === cat ? '#000' : '#fff',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: '0.3s',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {cat}
+            </button>
+          ))}
         </div>
       </div>
 

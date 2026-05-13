@@ -28,9 +28,12 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
   const [venue, setVenue] = useState<Venue | null>(null);
   const [courts, setCourts] = useState<Court[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const [selectedDate, setSelectedDate] = useState(0); 
   const [activeCourt, setActiveCourt] = useState<number | null>(null);
   const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
 
   const dates = [
     { day: 'Jum', date: '6 Mar' },
@@ -87,20 +90,95 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
 
   const totalPrice = venue ? selectedSlots.length * venue.price_per_hour : 0;
 
+  const handleBooking = async () => {
+    const cookies = document.cookie.split(';').reduce((acc, c) => {
+      const [key, val] = c.trim().split('=');
+      acc[key] = val;
+      return acc;
+    }, {} as Record<string, string>);
+
+    if (cookies['isLoggedIn'] !== 'true') {
+      alert('Silakan login terlebih dahulu untuk melakukan booking!');
+      window.location.href = '/login';
+      return;
+    }
+
+    if (selectedSlots.length === 0) {
+      alert('Pilih jam terlebih dahulu!');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      
+      const sortedSlots = [...selectedSlots].sort();
+      const startTime = sortedSlots[0] + ':00';
+      const lastSlot = sortedSlots[sortedSlots.length - 1];
+      const endTime = (parseInt(lastSlot.split(':')[0]) + 1).toString().padStart(2, '0') + ':00:00';
+
+      const { error } = await supabase.from('bookings').insert({
+        user_email: decodeURIComponent(cookies['userEmail']),
+        venue_name: venue!.name,
+        court_name: courts.find(c => c.id === activeCourt)?.name || 'Lapangan Utama',
+        booking_date: '2026-03-06',
+        start_time: startTime,
+        end_time: endTime,
+        total_price: totalPrice,
+        status: 'Lunas'
+      });
+
+      if (error) throw error;
+
+      setIsBookingModalOpen(true);
+      setSelectedSlots([]);
+      setActiveCourt(null);
+
+    } catch (err) {
+      console.error('Booking failed:', err);
+      alert('Gagal melakukan booking. Silakan coba lagi.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   if (loading) return <div style={{ background: '#000', color: '#fff', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Memuat Detail Venue...</div>;
   if (!venue) return <div style={{ background: '#000', color: '#fff', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Venue tidak ditemukan.</div>;
 
   return (
     <>
       <Navbar />
+
+      {isBookingModalOpen && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', zIndex: 3000,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'
+        }}>
+          <div style={{ background: '#111', border: '1px solid #333', borderRadius: '24px', padding: '40px', width: '100%', maxWidth: '400px', textAlign: 'center' }}>
+            <i className="fa-solid fa-circle-check" style={{ fontSize: '64px', color: '#bdd124', marginBottom: '24px', display: 'block' }}></i>
+            <h2 style={{ marginBottom: '12px' }}>Booking Sukses!</h2>
+            <p style={{ color: '#aaa', marginBottom: '32px', fontSize: '15px', lineHeight: '1.6' }}>Pesanan Anda telah tercatat. Silakan cek detailnya di Dashboard.</p>
+            <button 
+              onClick={() => window.location.href = '/dashboard'}
+              style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: '#bdd124', color: '#000', fontWeight: '700', cursor: 'pointer' }}
+            >
+              Ke Dashboard Saya
+            </button>
+            <button 
+              onClick={() => setIsBookingModalOpen(false)}
+              style={{ width: '100%', padding: '14px', marginTop: '10px', background: 'transparent', border: 'none', color: '#888', cursor: 'pointer' }}
+            >
+              Nanti Saja
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="detail-container" style={{ width: '90%', maxWidth: '1600px', margin: '120px auto 80px' }}>
-        
         <div className="detail-hero" style={{ marginBottom: '40px' }}>
           <img src={venue.image_url} alt={venue.name} style={{ width: '100%', height: '350px', objectFit: 'cover', borderRadius: '12px' }} />
         </div>
 
         <div className="title-wrapper" style={{ display: 'flex', justifyContent: 'space-between', gap: '40px', flexWrap: 'wrap' }}>
-          
           <div className="title-left" style={{ flex: 1, minWidth: '300px' }}>
             <h1 style={{ fontSize: '32px', marginBottom: '10px' }}>{venue.name}</h1>
             <div className="rating" style={{ color: '#aaa', fontSize: '15px', marginBottom: '40px' }}>
@@ -148,23 +226,15 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
             <button 
               className="btn-primary" 
               style={{ width: '100%', marginBottom: '12px', opacity: selectedSlots.length > 0 ? 1 : 0.5 }}
-              onClick={() => {
-                if (selectedSlots.length > 0) {
-                  alert(`Berhasil memesan ${venue.name} untuk ${selectedSlots.length} jam!`);
-                  setSelectedSlots([]);
-                  setActiveCourt(null);
-                } else {
-                  alert('Pilih jam terlebih dahulu!');
-                }
-              }}
+              onClick={handleBooking}
+              disabled={isSubmitting}
             >
-              Booking Sekarang
+              {isSubmitting ? 'Memproses...' : 'Booking Sekarang'}
             </button>
             <button className="btn-outline" style={{ width: '100%' }}>
               <i className="fa-brands fa-whatsapp" style={{ marginRight: '8px' }}></i> Chat CS
             </button>
           </div>
-
         </div>
 
         <div style={{ marginTop: '80px' }}>
@@ -177,7 +247,7 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
                 className={`date-pill ${selectedDate === index ? 'active' : ''}`}
                 onClick={() => {
                   setSelectedDate(index);
-                  setSelectedSlots([]); // Reset selection on date change
+                  setSelectedSlots([]);
                 }}
                 style={{ 
                   background: selectedDate === index ? '#bdd124' : '#1e1e1e',
@@ -246,7 +316,6 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
             )}
           </div>
         </div>
-
       </div>
       <Footer />
     </>

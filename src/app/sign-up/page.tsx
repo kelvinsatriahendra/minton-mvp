@@ -152,7 +152,7 @@ export default function SignUpPage() {
           <div style={{ backgroundColor: '#1f1f1f', padding: '40px 30px', borderRadius: '16px', width: '90%', maxWidth: '400px', textAlign: 'center', border: '1px solid #333' }}>
             <i className="fa-solid fa-circle-check" style={{ fontSize: '64px', color: '#bdd124', marginBttom: '24px', display: 'block', marginBottom: '20px' }}></i>
             <h2 style={{ fontSize: '24px', marginBottom: '12px', color: '#fff', fontWeight: '600' }}>Pendaftaran Sukses!</h2>
-            <p style={{ color: '#aaa', marginBottom: '32px', fontSize: '15px', line-height: '1.6' }}>Akun Anda berhasil dibuat. Silakan login untuk melanjutkan.</p>
+            <p style={{ color: '#aaa', marginBottom: '32px', fontSize: '15px', lineHeight: '1.6' }}>Akun Anda berhasil dibuat. Silakan login untuk melanjutkan.</p>
             <button onClick={() => router.push('/login')} style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', backgroundColor: '#bdd124', color: '#000', fontSize: '16px', fontWeight: '600', cursor: 'pointer', transition: '0.3s' }}>Lanjut ke Login</button>
           </div>
         </div>

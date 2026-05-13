@@ -9,6 +9,7 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState('');
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -32,6 +33,11 @@ export default function Navbar() {
 
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Close menu when pathname changes
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [pathname]);
 
   return (
     <>
@@ -139,8 +145,50 @@ export default function Navbar() {
           justify-content: center;
           font-weight: 700;
         }
-        @media (max-width: 768px) {
+        
+        .hamburger {
+          display: none;
+          flex-direction: column;
+          gap: 6px;
+          cursor: pointer;
+          z-index: 1100;
+        }
+        .hamburger span {
+          width: 28px;
+          height: 2px;
+          background-color: #fff;
+          transition: 0.3s;
+        }
+
+        @media (max-width: 992px) {
+          .navbar { padding: 18px 0; }
           nav { display: none; }
+          .hamburger { display: flex; }
+          
+          nav.mobile-open {
+            display: flex;
+            flex-direction: column;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: #0a0a0a;
+            padding: 30px;
+            gap: 20px;
+            border-bottom: 1px solid #222;
+          }
+
+          .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+          .hamburger.open span:nth-child(2) { opacity: 0; }
+          .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(7px, -7px); }
+          
+          .nav-btn { display: none; }
+          nav.mobile-open .nav-btn-mobile {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+          }
         }
       `}} />
       <header className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
@@ -149,11 +197,25 @@ export default function Navbar() {
             <Link href="/"><img src="/asset/logo.png" alt="logo" /></Link>
           </div>
 
-          <nav id="nav-menu">
+          <nav id="nav-menu" className={isMenuOpen ? 'mobile-open' : ''}>
             <Link href="/sewa-lapangan" style={pathname.includes('sewa-lapangan') ? {color: '#bdd124'} : {}}>Sewa Lapangan</Link>
             <Link href="/main-bareng" style={pathname.includes('main-bareng') ? {color: '#bdd124'} : {}}>Main Bareng</Link>
             <Link href="/kemitraan" style={pathname.includes('kemitraan') ? {color: '#bdd124'} : {}}>Kemitraan</Link>
             <Link href="/komunitas" style={pathname.includes('komunitas') ? {color: '#bdd124'} : {}}>Komunitas</Link>
+            
+            <div className="nav-btn-mobile" style={{ display: isMenuOpen ? 'flex' : 'none' }}>
+               {isLoggedIn ? (
+                  <Link href="/dashboard" className="user-profile">
+                    <span>{userName}</span>
+                    <div className="user-avatar">{userName.charAt(0).toUpperCase()}</div>
+                  </Link>
+                ) : (
+                  <>
+                    <Link href="/login"><button className="btn-primary" style={{ width: '100%' }}>Login</button></Link>
+                    <Link href="/sign-up"><button className="btn-outline" style={{ width: '100%' }}>Sign-Up</button></Link>
+                  </>
+                )}
+            </div>
           </nav>
 
           <div className="nav-btn">
@@ -169,8 +231,17 @@ export default function Navbar() {
               </>
             )}
           </div>
+
+          <div className={`hamburger ${isMenuOpen ? 'open' : ''}`} onClick={() => setIsMenuOpen(!isMenuOpen)}>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
         </div>
       </header>
+    </>
+  );
+}
     </>
   );
 }

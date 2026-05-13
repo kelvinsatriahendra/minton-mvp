@@ -46,6 +46,80 @@ export default function Home() {
 
   return (
     <>
+      <style dangerouslySetInnerHTML={{__html: `
+        :root { --primary-lime: #bdd124; --bg-dark: #000000; --bg-card: #1c1c1c; }
+        .container { width: 90%; max-width: 1600px; margin: auto; }
+        .hero { min-height: 100vh; padding: 180px 0 100px; background: url('/asset/background-header-minton-1.png') no-repeat center bottom / cover; }
+        .hero-text h1 { font-size: 84px; font-weight: 700; line-height: 1.1; margin-bottom: 24px; }
+        .hero-text span { color: var(--primary-lime); }
+        .hero-text p { font-size: 20px; color: #ccc; max-width: 600px; line-height: 1.6; }
+        .hero-btn { display: flex; gap: 20px; margin-top: 40px; }
+        
+        .why { padding: 120px 0; }
+        .why h2 { font-size: 48px; text-align: center; margin-bottom: 60px; }
+        .why h2 span { color: var(--primary-lime); }
+        .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+        .card { background: var(--bg-card); padding: 50px 40px; border-radius: 20px; border: 1px solid #333; transition: 0.3s; }
+        .card:hover { border-color: var(--primary-lime); transform: translateY(-10px); }
+        .feature-icon { height: 60px; margin-bottom: 30px; }
+        .card h3 { font-size: 24px; margin-bottom: 16px; }
+        .card p { color: #aaa; line-height: 1.7; }
+
+        .partner { padding: 120px 0; background: #0a0a0a; }
+        .partner h1 { font-size: 48px; text-align: center; margin-bottom: 60px; }
+        .partner h1 span { color: var(--primary-lime); }
+        .section-image { width: 100%; border-radius: 24px; margin-bottom: 60px; }
+        .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
+        .feature-item { display: flex; gap: 24px; }
+        .feature-item img { width: 48px; height: 48px; }
+        .feature-content h2 { font-size: 22px; margin-bottom: 12px; }
+        .feature-content p { color: #aaa; line-height: 1.6; }
+
+        .dominate { padding: 150px 0; background: url('/asset/Pesan.-Main.-Dominasi..png') no-repeat right center / contain; }
+        .dominate-grid { display: grid; grid-template-columns: 1fr 1fr; }
+        .dominate-text h1 { font-size: 64px; margin-bottom: 60px; line-height: 1.1; }
+        .dominate-text span { color: var(--primary-lime); }
+        .dominate-text .feature-item { margin-bottom: 40px; }
+        .dominate-icon img { width: 56px; margin-right: 24px; }
+
+        .testimoni { padding: 120px 0; }
+        .testimoni h2 { font-size: 42px; text-align: center; margin-bottom: 80px; }
+        .testimoni h2 span { color: var(--primary-lime); }
+        .testimoni-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px; }
+        .testimoni-header { display: flex; gap: 24px; background: var(--bg-card); padding: 40px; border-radius: 20px; border: 1px solid #333; }
+        .testimoni-header img { width: 80px; height: 80px; border-radius: 50%; }
+        .testimoni-header p { font-style: italic; color: #ccc; margin-bottom: 16px; line-height: 1.6; }
+        .testimoni-header h4 { color: var(--primary-lime); }
+
+        .cta { padding: 150px 0; background: url('/asset/background-header-minton-1.png') no-repeat center top / cover; }
+        .cta h1 { font-size: 64px; margin-bottom: 24px; line-height: 1.1; }
+        .cta span { color: var(--primary-lime); }
+
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        /* RESPONSIVE QUERIES */
+        @media (max-width: 1200px) {
+          .hero-text h1 { font-size: 64px; }
+          .dominate-text h1 { font-size: 48px; }
+        }
+
+        @media (max-width: 992px) {
+          .card-grid, .feature-grid, .testimoni-grid { grid-template-columns: 1fr 1fr; }
+          .dominate-grid { grid-template-columns: 1fr; }
+          .dominate { background: #000; }
+        }
+
+        @media (max-width: 768px) {
+          .hero { padding-top: 140px; }
+          .hero-text h1 { font-size: 42px; }
+          .hero-btn { flex-direction: column; }
+          .card-grid, .feature-grid, .testimoni-grid { grid-template-columns: 1fr; }
+          .why h2, .partner h1, .testimoni h2, .cta h1 { font-size: 32px; }
+          .cta h1 { font-size: 36px; }
+          .testimoni-header { flex-direction: column; text-align: center; align-items: center; }
+        }
+      `}} />
       <Navbar />
 
 <section className="hero">

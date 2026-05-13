@@ -55,6 +55,12 @@ export default function Footer() {
           transform: translateY(-5px) scale(1.1);
           filter: brightness(1.4);
         }
+        @media (max-width: 992px) {
+          .footer-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+          }
+        }
         @media (max-width: 768px) {
           .footer-grid {
             grid-template-columns: 1fr;

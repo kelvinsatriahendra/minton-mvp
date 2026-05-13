@@ -33,7 +33,10 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
   const [selectedDate, setSelectedDate] = useState(0); 
   const [activeCourt, setActiveCourt] = useState<number | null>(null);
   const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
+  
+  const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState('qris');
 
   const dates = [
     { day: 'Jum', date: '6 Mar' },
@@ -90,7 +93,7 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
 
   const totalPrice = venue ? selectedSlots.length * venue.price_per_hour : 0;
 
-  const handleBooking = async () => {
+  const handleBookingStart = () => {
     const cookies = document.cookie.split(';').reduce((acc, c) => {
       const [key, val] = c.trim().split('=');
       acc[key] = val;
@@ -107,6 +110,16 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
       alert('Pilih jam terlebih dahulu!');
       return;
     }
+
+    setIsCheckoutModalOpen(true);
+  };
+
+  const handlePaymentConfirm = async () => {
+    const cookies = document.cookie.split(';').reduce((acc, c) => {
+      const [key, val] = c.trim().split('=');
+      acc[key] = val;
+      return acc;
+    }, {} as Record<string, string>);
 
     try {
       setIsSubmitting(true);
@@ -129,13 +142,14 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
 
       if (error) throw error;
 
+      setIsCheckoutModalOpen(false);
       setIsBookingModalOpen(true);
       setSelectedSlots([]);
       setActiveCourt(null);
 
     } catch (err) {
       console.error('Booking failed:', err);
-      alert('Gagal melakukan booking. Silakan coba lagi.');
+      alert('Gagal melakukan pembayaran. Silakan coba lagi.');
     } finally {
       setIsSubmitting(false);
     }
@@ -148,6 +162,70 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
     <>
       <Navbar />
 
+      {/* Checkout Modal */}
+      {isCheckoutModalOpen && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', zIndex: 3000,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'
+        }}>
+          <div style={{ background: '#111', border: '1px solid #333', borderRadius: '24px', padding: '40px', width: '100%', maxWidth: '500px' }}>
+            <h2 style={{ marginBottom: '24px' }}>Konfirmasi Pesanan</h2>
+            
+            <div style={{ background: '#0a0a0a', padding: '20px', borderRadius: '16px', marginBottom: '24px', border: '1px solid #222' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                <span style={{ color: '#888' }}>Venue</span>
+                <span>{venue.name}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                <span style={{ color: '#888' }}>Lapangan</span>
+                <span>{courts.find(c => c.id === activeCourt)?.name || 'Lapangan Utama'}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                <span style={{ color: '#888' }}>Durasi</span>
+                <span>{selectedSlots.length} Jam</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '12px', borderTop: '1px solid #222', marginTop: '12px' }}>
+                <span style={{ fontWeight: 'bold' }}>Total Bayar</span>
+                <span style={{ color: '#bdd124', fontWeight: 'bold', fontSize: '18px' }}>Rp {totalPrice.toLocaleString('id-ID')}</span>
+              </div>
+            </div>
+
+            <h4 style={{ marginBottom: '16px' }}>Pilih Metode Pembayaran</h4>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', marginBottom: '32px' }}>
+              {['QRIS', 'Gopay', 'VA Mandiri', 'VA BCA'].map(method => (
+                <div 
+                  key={method}
+                  onClick={() => setSelectedPayment(method.toLowerCase())}
+                  style={{ 
+                    padding: '12px', borderRadius: '12px', border: '1px solid', 
+                    borderColor: selectedPayment === method.toLowerCase() ? '#bdd124' : '#333',
+                    background: selectedPayment === method.toLowerCase() ? 'rgba(189, 209, 36, 0.05)' : '#0a0a0a',
+                    cursor: 'pointer', textAlign: 'center', transition: '0.3s', fontSize: '14px'
+                  }}
+                >
+                  {method}
+                </div>
+              ))}
+            </div>
+
+            <button 
+              onClick={handlePaymentConfirm}
+              disabled={isSubmitting}
+              style={{ width: '100%', padding: '16px', borderRadius: '12px', border: 'none', background: '#bdd124', color: '#000', fontWeight: '700', cursor: 'pointer' }}
+            >
+              {isSubmitting ? 'Memproses Pembayaran...' : 'Bayar Sekarang'}
+            </button>
+            <button 
+              onClick={() => setIsCheckoutModalOpen(false)}
+              style={{ width: '100%', padding: '14px', marginTop: '10px', background: 'transparent', border: 'none', color: '#888', cursor: 'pointer' }}
+            >
+              Batal
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Success Modal */}
       {isBookingModalOpen && (
         <div style={{
           position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', zIndex: 3000,
@@ -155,19 +233,13 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
         }}>
           <div style={{ background: '#111', border: '1px solid #333', borderRadius: '24px', padding: '40px', width: '100%', maxWidth: '400px', textAlign: 'center' }}>
             <i className="fa-solid fa-circle-check" style={{ fontSize: '64px', color: '#bdd124', marginBottom: '24px', display: 'block' }}></i>
-            <h2 style={{ marginBottom: '12px' }}>Booking Sukses!</h2>
-            <p style={{ color: '#aaa', marginBottom: '32px', fontSize: '15px', lineHeight: '1.6' }}>Pesanan Anda telah tercatat. Silakan cek detailnya di Dashboard.</p>
+            <h2 style={{ marginBottom: '12px' }}>Pembayaran Berhasil!</h2>
+            <p style={{ color: '#aaa', marginBottom: '32px', fontSize: '15px', lineHeight: '1.6' }}>E-Tiket Anda sudah terbit. Silakan cek detailnya di Dashboard.</p>
             <button 
               onClick={() => window.location.href = '/dashboard'}
               style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: '#bdd124', color: '#000', fontWeight: '700', cursor: 'pointer' }}
             >
               Ke Dashboard Saya
-            </button>
-            <button 
-              onClick={() => setIsBookingModalOpen(false)}
-              style={{ width: '100%', padding: '14px', marginTop: '10px', background: 'transparent', border: 'none', color: '#888', cursor: 'pointer' }}
-            >
-              Nanti Saja
             </button>
           </div>
         </div>
@@ -226,7 +298,7 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
             <button 
               className="btn-primary" 
               style={{ width: '100%', marginBottom: '12px', opacity: selectedSlots.length > 0 ? 1 : 0.5 }}
-              onClick={handleBooking}
+              onClick={handleBookingStart}
               disabled={isSubmitting}
             >
               {isSubmitting ? 'Memproses...' : 'Booking Sekarang'}

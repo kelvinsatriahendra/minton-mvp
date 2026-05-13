@@ -23,6 +23,7 @@ export default function MainBarengPage() {
   const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
   const [cityFilter, setCityFilter] = useState('');
   const [loading, setLoading] = useState(true);
+  const [joinedMatches, setJoinedMatches] = useState<number[]>([]);
 
   useEffect(() => {
     fetchMatches();
@@ -44,6 +45,23 @@ export default function MainBarengPage() {
       setLoading(false);
     }
   }
+
+  const handleJoin = (matchId: number) => {
+    const isLoggedIn = document.cookie.split(';').some(c => c.trim().startsWith('isLoggedIn=true'));
+    
+    if (!isLoggedIn) {
+      alert('Silakan login terlebih dahulu untuk bergabung!');
+      window.location.href = '/login';
+      return;
+    }
+
+    if (joinedMatches.includes(matchId)) {
+      setJoinedMatches(joinedMatches.filter(id => id !== matchId));
+    } else {
+      setJoinedMatches([...joinedMatches, matchId]);
+      alert('Berhasil bergabung ke pertandingan! Sampai jumpa di lapangan.');
+    }
+  };
 
   const handleFilter = () => {
     const results = matches.filter(match => 
@@ -190,7 +208,21 @@ export default function MainBarengPage() {
                           {match.price_per_person !== 0 && <span style={{ fontSize: '12px', fontWeight: 'normal', color: 'var(--text-gray)' }}>/org</span>}
                         </div>
                       </div>
-                      <button className="btn btn-outline" onClick={() => alert('Anda berhasil bergabung!')}>Ikut Main Bareng</button>
+                      <button 
+                        className={`btn ${joinedMatches.includes(match.id) ? 'btn-joined' : 'btn-outline'}`} 
+                        onClick={() => handleJoin(match.id)}
+                        style={{
+                          background: joinedMatches.includes(match.id) ? '#22c55e' : 'transparent',
+                          borderColor: joinedMatches.includes(match.id) ? '#22c55e' : 'var(--border-color)',
+                          color: joinedMatches.includes(match.id) ? '#fff' : 'var(--text-white)'
+                        }}
+                      >
+                        {joinedMatches.includes(match.id) ? (
+                          <><i className="fa-solid fa-check"></i> Bergabung</>
+                        ) : (
+                          'Ikut Main Bareng'
+                        )}
+                      </button>
                     </div>
                   </div>
                 </div>

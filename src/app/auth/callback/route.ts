@@ -4,9 +4,12 @@ import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
+  const requestUrl = new URL(request.url);
+  const { searchParams, origin } = requestUrl;
   const code = searchParams.get('code');
   const next = searchParams.get('next') ?? '/';
+
+  console.log('Auth Callback Hit:', requestUrl.toString());
 
   if (code) {
     const supabase = createClient(
@@ -14,27 +17,30 @@ export async function GET(request: Request) {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
     
+    console.log('Exchanging code for session...');
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     
-    if (!error && data.user) {
+    if (error) {
+      console.error('Exchange Error:', error.message);
+      return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(error.message)}`);
+    }
+
+    if (data.user) {
+      console.log('User authenticated:', data.user.email);
       const cookieStore = await cookies();
       const user = data.user;
       const userName = user.user_metadata.full_name || user.email?.split('@')[0] || 'Jagoan';
       
-      // 1. Sync to public.users table (Task 2 Requirement Integration)
+      // Sync to public.users
       const { error: dbError } = await supabase.from('users').upsert({
         email: user.email,
         nama_lengkap: userName,
-        whatsapp: `google-${user.id.substring(0, 8)}`, // Unique placeholder to avoid constraint error
+        whatsapp: `google-${user.id.substring(0, 8)}`,
         password: 'oauth-user' 
       }, { onConflict: 'email' });
 
-      if (dbError) {
-        console.error('Database Sync Error:', dbError);
-        // Tetap lanjut agar user bisa login walau sync gagal sementara
-      }
+      if (dbError) console.error('Database Sync Error:', dbError);
 
-      // 2. Set cookies (Middleware & UI requirements)
       cookieStore.set('session', 'supabase-session-token', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -48,6 +54,6 @@ export async function GET(request: Request) {
     }
   }
 
-  // Return the user to an error page with some instructions
-  return NextResponse.redirect(`${origin}/login?error=Could not authenticate user`);
+  console.warn('No code found in callback URL');
+  return NextResponse.redirect(`${origin}/login?error=No authentication code found`);
 }

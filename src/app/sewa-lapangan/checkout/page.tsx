@@ -70,7 +70,9 @@ function CheckoutContent() {
       });
 
       if (error) throw error;
-      setIsSuccess(true);
+      
+      const slotStr = slots.join(',');
+      window.location.href = `/sewa-lapangan/success?venueId=${venueId}&courtId=${courtId}&slots=${slotStr}`;
     } catch (err) {
       console.error('Checkout failed:', err);
       alert('Gagal memproses pembayaran.');
@@ -199,17 +201,6 @@ function CheckoutContent() {
           {isSubmitting ? 'Memproses...' : 'Lakukan Pembayaran'}
         </button>
       </div>
-
-      {isSuccess && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 5000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ background: '#1f1f1f', padding: '40px', borderRadius: '16px', textAlign: 'center', maxWidth: '450px', border: '1px solid #333' }}>
-            <i className="fa-solid fa-circle-check" style={{ fontSize: '64px', color: '#bdd124', marginBottom: '24px' }}></i>
-            <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>Pembayaran Berhasil!</h2>
-            <p style={{ color: '#ccc', marginBottom: '30px' }}>E-Tiket Anda telah terbit. Silakan cek detail jadwal di Dashboard.</p>
-            <button className="btn-primary" style={{ width: '100%' }} onClick={() => window.location.href = '/dashboard'}>Ke Dashboard Saya</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

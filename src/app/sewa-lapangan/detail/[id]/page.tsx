@@ -112,9 +112,9 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
       return;
     }
 
-    // Redirect to checkout page with data
+    // Redirect to keranjang page with data
     const slotStr = selectedSlots.join(',');
-    window.location.href = `/sewa-lapangan/checkout?venueId=${id}&courtId=${activeCourt}&slots=${slotStr}`;
+    window.location.href = `/sewa-lapangan/keranjang?venueId=${id}&courtId=${activeCourt}&slots=${slotStr}`;
   };
 
   const handlePaymentConfirm = async () => {
@@ -178,7 +178,7 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
                 style={{ padding: '15px 40px', borderRadius: '12px', opacity: selectedSlots.length > 0 ? 1 : 0.5 }}
                 disabled={selectedSlots.length === 0}
               >
-                Pilih Jam Terpilih
+                Masuk Keranjang
               </button>
               {selectedSlots.length > 0 && (
                 <div style={{ color: '#aaa' }}>{selectedSlots.length} Jam Terpilih - <span style={{ color: '#bdd124', fontWeight: 'bold' }}>Rp {totalPrice.toLocaleString('id-ID')}</span></div>

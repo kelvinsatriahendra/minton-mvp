@@ -122,7 +122,7 @@ function CheckoutContent() {
       `}</style>
 
       <div className="left" style={{ flex: 2 }}>
-        <button className="btn-outline" style={{ marginBottom: '32px', padding: '10px 24px' }} onClick={() => window.history.back()}>Kembali</button>
+        <button className="btn-outline" style={{ marginBottom: '32px', padding: '10px 24px' }} onClick={() => window.history.back()}>Lihat Keranjang</button>
         
         <div className="card">
           <h3>Data Penyewa</h3>

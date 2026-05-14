@@ -49,7 +49,7 @@ export default function Home() {
       <style dangerouslySetInnerHTML={{__html: `
         :root { --primary-lime: #bdd124; --bg-dark: #000000; --bg-card: #1c1c1c; }
         .container { width: 90%; max-width: 1600px; margin: auto; }
-        .hero { min-height: 100vh; padding: 180px 0 100px; background: url('/asset/background-header-minton-1.png') no-repeat center bottom / cover; }
+        .hero { min-height: 100vh; padding: 180px 0 100px; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('/asset/herosection.png') no-repeat center center / cover; }
         .hero-text h1 { font-size: 84px; font-weight: 700; line-height: 1.1; margin-bottom: 24px; }
         .hero-text span { color: var(--primary-lime); }
         .hero-text p { font-size: 20px; color: #ccc; max-width: 600px; line-height: 1.6; }
@@ -75,7 +75,7 @@ export default function Home() {
         .feature-content h2 { font-size: 22px; margin-bottom: 12px; }
         .feature-content p { color: #aaa; line-height: 1.6; }
 
-        .dominate { padding: 150px 0; background: url('/asset/Pesan.-Main.-Dominasi..png') no-repeat right center / contain; }
+        .dominate { padding: 150px 0; background: url('/asset/dominasi.png') no-repeat right center / contain; }
         .dominate-grid { display: grid; grid-template-columns: 1fr 1fr; }
         .dominate-text h1 { font-size: 64px; margin-bottom: 60px; line-height: 1.1; }
         .dominate-text span { color: var(--primary-lime); }
@@ -91,7 +91,7 @@ export default function Home() {
         .testimoni-header p { font-style: italic; color: #ccc; margin-bottom: 16px; line-height: 1.6; }
         .testimoni-header h4 { color: var(--primary-lime); }
 
-        .cta { padding: 150px 0; background: url('/asset/background-header-minton-1.png') no-repeat center top / cover; }
+        .cta { padding: 150px 0; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('/asset/cta.png') no-repeat center center / cover; }
         .cta h1 { font-size: 64px; margin-bottom: 24px; line-height: 1.1; }
         .cta span { color: var(--primary-lime); }
 

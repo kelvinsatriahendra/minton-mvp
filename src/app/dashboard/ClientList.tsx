@@ -49,7 +49,7 @@ export default function ClientList({ initialData }: { initialData: Lapangan[] })
         <input
           type="text"
           placeholder="Cari lapangan badminton..."
-          className="w-full p-4 rounded-xl bg-[#1D1D1D] border border-[#333] focus:border-[#bdd124] outline-none text-white transition-colors"
+          className="w-full p-4 rounded-xl bg-[#1D1D1D] border border-[#333] focus:border-[var(--primary-lime)] outline-none text-white transition-colors"
           defaultValue={searchParams.get('query')?.toString()}
           onChange={(e) => {
             handleSearch(e.target.value);
@@ -68,7 +68,7 @@ export default function ClientList({ initialData }: { initialData: Lapangan[] })
           </div>
         ) : (
           optimisticData.map((item) => (
-            <div key={item.id} className="bg-[#1D1D1D] border border-[#333] p-4 rounded-xl flex justify-between items-center transition-transform hover:-translate-y-1 hover:border-[#bdd124]">
+            <div key={item.id} className="bg-[#1D1D1D] border border-[#333] p-4 rounded-xl flex justify-between items-center transition-transform hover:-translate-y-1 hover:border-[var(--primary-lime)]">
               <div className="flex gap-4 items-center">
                 <div className="h-12 w-12 bg-[#2c2c2c] rounded-lg flex items-center justify-center text-2xl">
                   🏸
@@ -80,7 +80,7 @@ export default function ClientList({ initialData }: { initialData: Lapangan[] })
               </div>
               <div className="flex items-center gap-4">
                 <div className="text-right">
-                  <p className="text-[#bdd124] font-bold">{item.harga}</p>
+                  <p className="text-[var(--primary-lime)] font-bold">{item.harga}</p>
                   <p className="text-xs text-gray-500">/ jam</p>
                 </div>
                 <button

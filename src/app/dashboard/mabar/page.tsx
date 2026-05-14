@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DashboardSidebar from '@/components/DashboardSidebar';
 
 const sessions = [
@@ -12,6 +12,7 @@ const sessions = [
 export default function MabarDashboardPage() {
   const [tab, setTab] = useState(0);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  useEffect(() => { document.title = 'Main Bareng Dashboard - Minton'; }, []);
   const tabs = ['Eksplorasi Sesi', 'Mabar Saya', 'Permintaan'];
 
   const openCreateModal = () => {
@@ -43,35 +44,37 @@ export default function MabarDashboardPage() {
         <style>{`
           .mabar-tabs { display: flex; gap: 24px; margin-bottom: 24px; border-bottom: 1px solid #333; }
           .mabar-tabs .tab-item { padding: 12px 4px; color: #aaa; font-size: 14px; font-weight: 600; cursor: pointer; position: relative; }
-          .mabar-tabs .tab-item.active { color: #bdd124; }
-          .mabar-tabs .tab-item.active::after { content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background: #bdd124; }
+          .mabar-tabs .tab-item.active { color: var(--primary-lime); }
+          .mabar-tabs .tab-item.active::after { content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background: var(--primary-lime); }
           .mabar-dash-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
           .mabar-dash-card { background: var(--card-bg, #1d1d1d); border: 1px solid #333; border-radius: 16px; transition: 0.3s; display: flex; flex-direction: column; overflow: hidden; }
-          .mabar-dash-card:hover { border-color: #bdd124; transform: translateY(-4px); }
+          .mabar-dash-card:hover { border-color: var(--primary-lime); transform: translateY(-4px); }
           .mabar-card-img { width: 100%; height: 180px; object-fit: cover; }
           .mabar-dash-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
           .mabar-header-info { display: flex; justify-content: space-between; align-items: flex-start; }
           .mabar-venue h4 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
           .mabar-venue p { font-size: 12px; color: #aaa; }
-          .level-badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; background: rgba(189,209,36,0.1); color: #bdd124; }
+          .level-badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; background: rgba(189,209,36,0.1); color: var(--primary-lime); }
           .mabar-details { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 12px; }
           .detail-item-small { display: flex; flex-direction: column; gap: 4px; }
           .detail-item-small span:first-child { font-size: 10px; color: #666; text-transform: uppercase; }
           .detail-item-small span:last-child { font-size: 13px; font-weight: 600; }
           .mabar-footer-dash { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 16px; border-top: 1px solid #333; }
           .slot-pill { font-size: 12px; color: #aaa; display: flex; align-items: center; gap: 6px; }
-          .slot-pill i { color: #bdd124; }
+          .slot-pill i { color: var(--primary-lime); }
           .price-text { font-size: 15px; font-weight: 700; }
-          .modal-overlay-mabar { position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; }
-          .modal-content-mabar { background: #121212; border: 1px solid #333; width: 90%; max-width: 600px; border-radius: 24px; padding: 32px; }
+          .modal-overlay-mabar { position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; animation: fadeIn 0.3s ease; }
+          .modal-content-mabar { background: #121212; border: 1px solid #333; width: 90%; max-width: 600px; border-radius: 24px; padding: 32px; animation: slideUp 0.3s ease; }
+          @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+          @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
           .modal-header-mabar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
           .modal-header-mabar h3 { font-size: 24px; font-weight: 700; color: #fff; }
           .close-modal-mabar { background: none; border: none; color: #666; font-size: 28px; cursor: pointer; }
           .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
           .form-group label { display: block; color: #888; font-size: 12px; margin-bottom: 8px; text-transform: uppercase; }
           .form-group input, .form-group select, .form-group textarea { width: 100%; background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 12px; font-family: inherit; outline: none; }
-          .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #bdd124; box-shadow: 0 0 0 4px rgba(189,209,36,0.1); background: #1f1f1f; }
-          .btn-modal-primary { padding: 14px; border-radius: 12px; border: none; background: #bdd124; color: #000; font-weight: 700; cursor: pointer; transition: 0.3s; }
+          .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--primary-lime); box-shadow: 0 0 0 4px rgba(189,209,36,0.1); background: #1f1f1f; }
+          .btn-modal-primary { padding: 14px; border-radius: 12px; border: none; background: var(--primary-lime); color: #000; font-weight: 700; cursor: pointer; transition: 0.3s; }
           .btn-modal-primary:hover { background: #bce025; box-shadow: 0 0 20px rgba(189,209,36,0.4); transform: translateY(-2px); }
           .btn-modal-cancel { padding: 14px; border-radius: 12px; border: 1px solid #333; background: transparent; color: #fff; font-weight: 600; cursor: pointer; transition: 0.3s; }
           .btn-modal-cancel:hover { background: #ff4444; border-color: #ff4444; color: #fff; }
@@ -129,7 +132,7 @@ export default function MabarDashboardPage() {
         <div className="modal-overlay-mabar" onClick={(e) => { if (e.target === e.currentTarget) closeCreateModal(); }}>
           <div className="modal-content-mabar">
             <div className="modal-header-mabar">
-              <h3>Buat Jadwal <span style={{ color: '#bdd124' }}>Mabar.</span></h3>
+              <h3>Buat Jadwal <span style={{ color: 'var(--primary-lime)' }}>Mabar.</span></h3>
               <button className="close-modal-mabar" onClick={closeCreateModal}>&times;</button>
             </div>
             <form onSubmit={submitMabar}>

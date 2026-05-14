@@ -1,4 +1,5 @@
 "use client";
+import { useEffect } from 'react';
 import MitraSidebar from "@/components/MitraSidebar";
 
 const feedbacks = [
@@ -15,6 +16,7 @@ function renderStars(n: number) {
 }
 
 export default function SurveiPage() {
+  useEffect(() => { document.title = 'Survei Pelanggan - Minton'; }, []);
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
       <MitraSidebar active="Survey" />

@@ -1,4 +1,7 @@
+import type { Metadata } from 'next';
 import DashboardSidebar from '@/components/DashboardSidebar';
+
+export const metadata: Metadata = { title: 'Dashboard - Minton' };
 
 export default function DashboardPage() {
   return (
@@ -26,7 +29,7 @@ export default function DashboardPage() {
             font-size: 14px;
           }
           .points-badge {
-            background: #bdd124;
+            background: var(--primary-lime);
             color: #000;
             padding: 12px 20px;
             border-radius: 12px;
@@ -78,7 +81,7 @@ export default function DashboardPage() {
           .avatar {
             width: 36px;
             height: 36px;
-            background-color: #bdd124;
+            background-color: var(--primary-lime);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -103,7 +106,7 @@ export default function DashboardPage() {
         <div className="mitra-body">
           <div className="reward-banner">
             <div className="reward-info">
-              <h2>Kumpulkan <span style={{ color: '#bdd124' }}>Minton Points.</span></h2>
+              <h2>Kumpulkan <span style={{ color: 'var(--primary-lime)' }}>Minton Points.</span></h2>
               <p>Main lebih sering, kumpulkan poin, dan dapatkan potongan harga sewa lapangan!</p>
             </div>
             <div className="points-badge">2,450 pts</div>
@@ -132,7 +135,7 @@ export default function DashboardPage() {
             <div className="content-card">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
                 <span className="content-card-title" style={{ margin: 0 }}>Jadwal Terdekat</span>
-                <a href="/booking-saya" style={{ color: '#bdd124', fontSize: 13, textDecoration: 'none' }}>Lihat Semua</a>
+                <a href="/booking-saya" style={{ color: 'var(--primary-lime)', fontSize: 13, textDecoration: 'none' }}>Lihat Semua</a>
               </div>
               <div className="activity-item">
                 <img src="/asset/surabaya-badminton.png" alt="Venue" style={{ width: 44, height: 44, borderRadius: 10, objectFit: 'cover' }} />
@@ -140,7 +143,7 @@ export default function DashboardPage() {
                   <h5>Main Bareng: GOR Sudirman</h5>
                   <p>Besok, 19:00 - 21:00 • Lapangan 3</p>
                 </div>
-                <div className="match-status" style={{ color: '#bdd124' }}>Terkonfirmasi</div>
+                <div className="match-status" style={{ color: 'var(--primary-lime)' }}>Terkonfirmasi</div>
               </div>
               <div className="activity-item">
                 <img src="/asset/kalam-kudus.png" alt="Venue" style={{ width: 44, height: 44, borderRadius: 10, objectFit: 'cover' }} />
@@ -156,7 +159,7 @@ export default function DashboardPage() {
                   <h5>Main Bareng: Surabaya Hall</h5>
                   <p>Minggu, 11 Mei • 16:00 - 18:00</p>
                 </div>
-                <div className="match-status" style={{ color: '#bdd124' }}>Terkonfirmasi</div>
+                <div className="match-status" style={{ color: 'var(--primary-lime)' }}>Terkonfirmasi</div>
               </div>
             </div>
 
@@ -213,14 +216,14 @@ export default function DashboardPage() {
                   <td>05 Mei 2024</td>
                   <td>GOR Sudirman</td>
                   <td><span className="badge badge-open">Selesai</span></td>
-                  <td style={{ color: '#bdd124' }}>+50 pts</td>
+                  <td style={{ color: 'var(--primary-lime)' }}>+50 pts</td>
                 </tr>
                 <tr>
                   <td>Main Bareng</td>
                   <td>03 Mei 2024</td>
                   <td>Kalam Kudus</td>
                   <td><span className="badge badge-open">Selesai</span></td>
-                  <td style={{ color: '#bdd124' }}>+30 pts</td>
+                  <td style={{ color: 'var(--primary-lime)' }}>+30 pts</td>
                 </tr>
                 <tr>
                   <td>Sewa Lapangan</td>

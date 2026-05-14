@@ -38,7 +38,7 @@ export default function Footer() {
           transition: color 0.2s, padding-left 0.2s;
         }
         .footer a:hover {
-          color: #bdd124;
+          color: var(--primary-lime);
           padding-left: 4px;
         }
         .social-media {

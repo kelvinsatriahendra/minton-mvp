@@ -61,7 +61,7 @@ export default function AuthCallbackPage() {
       <div style={{ 
         width: '40px', 
         height: '40px', 
-        border: '3px solid #bdd124', 
+        border: '3px solid var(--primary-lime)', 
         borderTopColor: 'transparent', 
         borderRadius: '50%', 
         animation: 'spin 1s linear infinite',

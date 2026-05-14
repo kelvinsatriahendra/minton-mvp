@@ -106,8 +106,8 @@ function CheckoutContent() {
           font-family: inherit;
         }
         .btn-back:hover {
-          background: #bdd124;
-          border-color: #bdd124;
+          background: var(--primary-lime);
+          border-color: var(--primary-lime);
           color: black;
         }
         .card {
@@ -149,7 +149,7 @@ function CheckoutContent() {
           border: 1px solid transparent;
         }
         .payment-option:hover {
-          border: 1px solid #bdd124;
+          border: 1px solid var(--primary-lime);
         }
         .payment-left {
           display: flex;
@@ -169,7 +169,7 @@ function CheckoutContent() {
         input.payment-radio {
           width: 18px;
           height: 18px;
-          accent-color: #bdd124;
+          accent-color: var(--primary-lime);
           cursor: pointer;
         }
         .summary-box {
@@ -227,8 +227,8 @@ function CheckoutContent() {
           font-family: inherit;
         }
         .btn-checkout:hover {
-          background: #bdd124;
-          border-color: #bdd124;
+          background: var(--primary-lime);
+          border-color: var(--primary-lime);
           color: black;
         }
         .terms {
@@ -238,11 +238,10 @@ function CheckoutContent() {
           line-height: 1.4;
         }
         .terms span {
-          color: #bdd124;
+          color: var(--primary-lime);
           cursor: pointer;
         }
         .modal-overlay {
-          display: none;
           position: fixed;
           z-index: 1000;
           left: 0;
@@ -252,8 +251,12 @@ function CheckoutContent() {
           background-color: rgba(0, 0, 0, 0.8);
           justify-content: center;
           align-items: center;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.3s;
+          display: flex;
         }
-        .modal-overlay.active { display: flex; }
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
         .modal-content {
           background-color: #1f1f1f;
           padding: 30px;
@@ -261,6 +264,10 @@ function CheckoutContent() {
           width: 90%;
           max-width: 500px;
           position: relative;
+          transform: translateY(20px);
+          transition: transform 0.3s;
+        }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
           text-align: center;
         }
         .close-btn {
@@ -292,7 +299,7 @@ function CheckoutContent() {
           </div>
 
           <div className="card">
-            <h3 style={{ marginBottom: '24px' }}><i className="fa-solid fa-wallet" style={{ color: '#bdd124', marginRight: '12px', fontSize: '20px' }}></i> Metode Pembayaran</h3>
+            <h3 style={{ marginBottom: '24px' }}><i className="fa-solid fa-wallet" style={{ color: 'var(--primary-lime)', marginRight: '12px', fontSize: '20px' }}></i> Metode Pembayaran</h3>
 
             <label className="payment-option" onClick={() => setSelectedPayment('va')}>
               <div className="payment-left">
@@ -446,6 +453,7 @@ function CheckoutContent() {
 }
 
 export default function CheckoutPage() {
+  useEffect(() => { document.title = 'Checkout - Minton'; }, []);
   return (
     <Suspense fallback={<div style={{ background: '#000', color: '#fff', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>}>
       <CheckoutContent />

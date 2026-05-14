@@ -1,7 +1,9 @@
 "use client";
+import { useEffect } from 'react';
 import MitraSidebar from "@/components/MitraSidebar";
 
 export default function DashboardMitraPage() {
+  useEffect(() => { document.title = 'Dashboard Mitra - Minton'; }, []);
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
       <MitraSidebar active="Booking" />

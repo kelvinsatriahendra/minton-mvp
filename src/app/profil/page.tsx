@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DashboardSidebar from '@/components/DashboardSidebar';
 
 export default function ProfilPage() {
   const [tab, setTab] = useState(0);
+  useEffect(() => { document.title = 'Profil Saya - Minton'; }, []);
 
   return (
     <DashboardSidebar>

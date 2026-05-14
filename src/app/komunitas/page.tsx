@@ -1,5 +1,8 @@
+import type { Metadata } from 'next';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+
+export const metadata: Metadata = { title: 'Komunitas - Minton' };
 
 export default function KomunitasPage() {
   return (
@@ -205,7 +208,7 @@ export default function KomunitasPage() {
             </div>
           </div>
           <div style={{ textAlign: 'right', marginTop: '24px' }}>
-            <button className="btn btn-outline" style={{ borderColor: '#bdd124', color: '#bdd124' }}>
+            <button className="btn btn-outline" style={{ borderColor: 'var(--primary-lime)', color: 'var(--primary-lime)' }}>
               <i className="fa-solid fa-plus"></i> Muat Lebih Banyak
             </button>
           </div>

@@ -1,7 +1,9 @@
 "use client";
+import { useEffect } from 'react';
 import MitraSidebar from "@/components/MitraSidebar";
 
 export default function PengaturanPage() {
+  useEffect(() => { document.title = 'Pengaturan GOR - Minton'; }, []);
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
       <MitraSidebar active="Settings" />

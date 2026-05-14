@@ -1,7 +1,9 @@
 "use client";
+import { useEffect } from 'react';
 import Link from "next/link";
 
 export default function RegistrasiPage() {
+  useEffect(() => { document.title = 'Registrasi Mitra - Minton'; }, []);
   return (
     <>
       <header className="navbar">
@@ -17,7 +19,7 @@ export default function RegistrasiPage() {
 
       <div className="reg-container">
         <div className="reg-header">
-          <h1>Daftarkan <span style={{ color: "#bdd124" }}>GOR Anda</span></h1>
+          <h1>Daftarkan <span style={{ color: "var(--primary-lime)" }}>GOR Anda</span></h1>
           <p>Lengkapi data di bawah untuk bergabung dalam ekosistem digital Minton.</p>
         </div>
 

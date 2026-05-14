@@ -27,6 +27,8 @@ export default function SewaLapanganPage() {
   const [loading, setLoading] = useState(true);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
+  useEffect(() => { document.title = 'Sewa Lapangan - Minton'; }, []);
+
   useEffect(() => {
     fetchVenues();
   }, []);
@@ -71,7 +73,7 @@ export default function SewaLapanganPage() {
       <style dangerouslySetInnerHTML={{__html: `
         .page-hero { width: 90%; max-width: 1600px; margin: 40px auto 0; padding: 80px 60px; background: url('/asset/header-sewa-lapangan-3.png') no-repeat center / cover; border-radius: 16px; position: relative; overflow: hidden; }
         .page-hero h1 { font-size: 56px; font-weight: 700; line-height: 1.2; margin-bottom: 24px; }
-        .page-hero h1 span { color: #bdd124; }
+        .page-hero h1 span { color: var(--primary-lime); }
         .hero-sub { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
         .hero-sub p { font-size: 18px; color: #cccccc; }
         
@@ -82,7 +84,7 @@ export default function SewaLapanganPage() {
         .search-input-group input { background: transparent; border: none; color: #ffffff; width: 100%; outline: none; font-size: 15px; font-family: 'Plus Jakarta Sans', sans-serif; }
         
         .btn-filter { display: flex; align-items: center; gap: 8px; padding: 0 24px; background: #1c1c1c; border: 1px solid #333; color: #ffffff; border-radius: 12px; cursor: pointer; font-size: 15px; font-family: 'Plus Jakarta Sans', sans-serif; transition: 0.3s; }
-        .btn-filter:hover { border-color: #bdd124; color: #bdd124; }
+        .btn-filter:hover { border-color: var(--primary-lime); color: var(--primary-lime); }
         
         .section-label { width: 90%; max-width: 1600px; margin: 0 auto 24px; }
         .section-label h2 { font-size: 28px; font-weight: 700; margin-bottom: 4px; }
@@ -91,7 +93,7 @@ export default function SewaLapanganPage() {
         .venue-section { width: 90%; max-width: 1600px; margin: 0 auto 80px; }
         .venue-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
         .venue-card { background: #1c1c1c; border: 1px solid #333; border-radius: 12px; overflow: hidden; transition: transform 0.3s, border-color 0.3s; cursor: pointer; text-decoration: none; color: inherit; display: block; }
-        .venue-card:hover { transform: translateY(-5px); border-color: #bdd124; }
+        .venue-card:hover { transform: translateY(-5px); border-color: var(--primary-lime); }
         .venue-card img { width: 100%; height: 210px; object-fit: cover; display: block; }
         .venue-card-body { padding: 20px 24px 24px; }
         .venue-tag { display: inline-block; font-size: 12px; color: #ffffff; background: rgba(255, 255, 255, 0.1); padding: 2px 10px; border-radius: 20px; margin-bottom: 10px; font-weight: 500; }
@@ -100,7 +102,7 @@ export default function SewaLapanganPage() {
         .venue-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid #2a2a2a; }
         .venue-price { font-size: 15px; font-weight: 600; color: #ffffff; }
         .btn-pilih { padding: 8px 20px; border-radius: 15px; border: 1px solid #ffffff; background: none; color: #ffffff; font-size: 14px; font-weight: 500; cursor: pointer; transition: 0.3s; }
-        .btn-pilih:hover { background: #bdd124; border-color: #bdd124; color: black; }
+        .btn-pilih:hover { background: var(--primary-lime); border-color: var(--primary-lime); color: black; }
 
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 2000; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .modal-overlay.active { opacity: 1; pointer-events: all; }
@@ -113,10 +115,10 @@ export default function SewaLapanganPage() {
         .filter-group label { display: block; font-size: 14px; font-weight: 600; color: #aaa; margin-bottom: 12px; }
         .filter-options { display: flex; flex-wrap: wrap; gap: 10px; }
         .filter-opt { padding: 8px 16px; background: #0f0f0f; border: 1px solid #333; border-radius: 30px; font-size: 13px; cursor: pointer; transition: 0.2s; }
-        .filter-opt.active { background: #bdd124; border-color: #bdd124; color: #000; font-weight: 700; }
+        .filter-opt.active { background: var(--primary-lime); border-color: var(--primary-lime); color: #000; font-weight: 700; }
         .modal-footer { margin-top: 32px; display: flex; gap: 12px; }
         .btn-reset { flex: 1; padding: 14px; background: transparent; border: 1px solid #333; color: #fff; border-radius: 12px; cursor: pointer; font-weight: 600; }
-        .btn-apply { flex: 2; padding: 14px; background: #bdd124; border: none; color: #000; border-radius: 12px; cursor: pointer; font-weight: 700; }
+        .btn-apply { flex: 2; padding: 14px; background: var(--primary-lime); border: none; color: #000; border-radius: 12px; cursor: pointer; font-weight: 700; }
 
         .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
         .reveal.visible { opacity: 1; transform: translateY(0); }

@@ -84,7 +84,7 @@ export default function DashboardSidebar({ children, active }: { children?: Reac
     return (
       <>
         <style>{`
-          :root { --sidebar-bg: #111111; --card-bg: #1d1d1d; --primary-lime: #bdd124; --text-gray: #aaaaaa; --border-color: #333333; }
+          :root { --sidebar-bg: #111111; --card-bg: #1d1d1d; --primary-lime: var(--primary-lime); --text-gray: #aaaaaa; --border-color: #333333; }
           .dash-layout { display: flex; height: 100vh; overflow: hidden; background: #000; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; }
           .sidebar { width: 260px; background: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 28px 20px; flex-shrink: 0; }
           .sidebar-logo { padding: 0 8px; margin-bottom: 48px; }
@@ -98,10 +98,10 @@ export default function DashboardSidebar({ children, active }: { children?: Reac
           .sidebar-nav a.logout:hover { background: rgba(244, 67, 54, 0.1); color: #ff5252; }
           .sidebar-divider { height: 1px; background: var(--border-color); margin: 12px 8px; }
           .sidebar-footer { padding-top: 20px; border-top: 1px solid var(--border-color); }
-          .sidebar-user { display: flex; align-items: center; gap: 12px; padding: 10px 8px; border-radius: 10px; text-decoration: none; color: #fff; }
-          .sidebar-avatar { width: 36px; height: 36px; background: var(--primary-lime); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 700; font-size: 14px; }
-          .sidebar-user-info .name { font-size: 14px; font-weight: 600; }
-          .sidebar-user-info .role { font-size: 12px; color: var(--text-gray); }
+          .sidebar-user { display: flex; align-items: center; gap: 12px; padding: 10px 8px; border-radius: 12px; text-decoration: none; color: #1a1608; background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 45%, #b38728 100%); border: none; position: relative; overflow: hidden; box-shadow: 0 15px 35px rgba(191, 149, 63, 0.3); }
+          .sidebar-avatar { width: 36px; height: 36px; background: #1a1608; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fcf6ba; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+          .sidebar-user-info .name { font-size: 14px; font-weight: 800; color: #1a1608; }
+          .sidebar-user-info .role { font-size: 12px; color: rgba(0, 0, 0, 0.7); font-weight: 600; }
           .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #000; }
           .page-header { padding: 20px 36px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
           .page-header h1 { font-size: 22px; font-weight: 700; }

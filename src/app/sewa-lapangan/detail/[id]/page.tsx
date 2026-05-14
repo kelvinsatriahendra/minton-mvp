@@ -67,6 +67,8 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
 
   const availableSlots = timeSlots.filter(s => !BOOKED_SLOTS.includes(s));
 
+  useEffect(() => { document.title = 'Detail Lapangan - Minton'; }, []);
+
   useEffect(() => {
     fetchDetail();
   }, [id]);
@@ -175,12 +177,12 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
         .rules { margin-top: 20px; color: white; font-size: 16px; line-height: 1.8; }
         .facilities { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 15px; }
         .facility { display: flex; align-items: center; gap: 12px; font-size: 16px; color: white; }
-        .facility i { color: #bdd124; font-size: 18px; width: 24px; text-align: center; }
+        .facility i { color: var(--primary-lime); font-size: 18px; width: 24px; text-align: center; }
         .date-filter-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; gap: 20px; flex-wrap: wrap; }
         .date-pills { display: flex; gap: 12px; align-items: center; flex-wrap: nowrap; }
         .date-pill { background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 12px; color: #fff; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 24px; cursor: pointer; transition: all 0.25s ease; white-space: nowrap; line-height: 1.3; }
         .date-pill:hover { border-color: #555; background: #2a2a2a; }
-        .date-pill.active { background: #bdd124; border-color: #bdd124; color: #000; font-weight: 700; }
+        .date-pill.active { background: var(--primary-lime); border-color: var(--primary-lime); color: #000; font-weight: 700; }
         .date-pill.active .day-name, .date-pill.active .day-num { color: #000; }
         .date-pill .day-name { font-size: 13px; font-weight: 400; }
         .date-pill .day-num { font-size: 14px; font-weight: 700; }
@@ -200,8 +202,10 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
         .slot-btn { margin-top: 15px; width: 100%; padding: 10px; border-radius: 8px; background: none; border: 1px solid #333; color: white; cursor: pointer; transition: 0.3s; }
         .slot-btn:hover { border-color: white; }
         .slot-btn:disabled { border-color: #222; color: #555; cursor: not-allowed; }
-        .modal-overlay-detail { position: fixed; z-index: 1000; inset: 0; background-color: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; }
-        .modal-content-detail { background-color: #1f1f1f; padding: 30px; border-radius: 16px; width: 90%; max-width: 900px; position: relative; max-height: 90vh; overflow-y: auto; }
+        .modal-overlay-detail { position: fixed; z-index: 1000; inset: 0; background-color: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; animation: fadeIn 0.3s ease; }
+        .modal-content-detail { background-color: #1f1f1f; padding: 30px; border-radius: 16px; width: 90%; max-width: 900px; position: relative; max-height: 90vh; overflow-y: auto; animation: slideUp 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .close-btn-detail { position: absolute; top: 15px; right: 25px; color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
         .close-btn-detail:hover { color: white; }
         .modal-content-detail h2 { font-size: 26px; margin-bottom: 25px; }
@@ -221,7 +225,7 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; text-align: center; }
         .cal-day { padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
         .cal-day:hover:not(.empty) { background: #333; }
-        .cal-day.active { background: #bdd124 !important; color: #000 !important; font-weight: 700; }
+        .cal-day.active { background: var(--primary-lime) !important; color: #000 !important; font-weight: 700; }
         .cal-day.disabled { color: #444 !important; cursor: not-allowed; }
         .cal-day.empty { color: transparent; pointer-events: none; }
         @media (max-width: 768px) { .title-wrapper { flex-direction: column; gap: 20px; } }
@@ -232,12 +236,12 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
       {isBookingModalOpen && (
         <div className="modal-overlay-detail" style={{ zIndex: 3000 }} onClick={() => setIsBookingModalOpen(false)}>
           <div style={{ background: '#111', border: '1px solid #333', borderRadius: '24px', padding: '40px', width: '100%', maxWidth: '400px', textAlign: 'center' }} onClick={e => e.stopPropagation()}>
-            <i className="fa-solid fa-circle-check" style={{ fontSize: '64px', color: '#bdd124', marginBottom: '24px', display: 'block' }}></i>
+            <i className="fa-solid fa-circle-check" style={{ fontSize: '64px', color: 'var(--primary-lime)', marginBottom: '24px', display: 'block' }}></i>
             <h2 style={{ marginBottom: '12px' }}>Pembayaran Berhasil!</h2>
             <p style={{ color: '#aaa', marginBottom: '32px', fontSize: '15px', lineHeight: '1.6' }}>E-Tiket Anda sudah terbit. Silakan cek detailnya di Dashboard.</p>
             <button 
               onClick={() => window.location.href = '/dashboard'}
-              style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: '#bdd124', color: '#000', fontWeight: '700', cursor: 'pointer' }}
+              style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: 'var(--primary-lime)', color: '#000', fontWeight: '700', cursor: 'pointer' }}
             >
               Ke Dashboard Saya
             </button>
@@ -282,7 +286,7 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
                 Pilih Waktu Sewa
               </button>
               {selectedSlots.length > 0 && (
-                <div style={{ color: '#aaa' }}>{selectedSlots.length} Jam Terpilih - <span style={{ color: '#bdd124', fontWeight: 'bold' }}>Rp {totalPrice.toLocaleString('id-ID')}</span></div>
+                <div style={{ color: '#aaa' }}>{selectedSlots.length} Jam Terpilih - <span style={{ color: 'var(--primary-lime)', fontWeight: 'bold' }}>Rp {totalPrice.toLocaleString('id-ID')}</span></div>
               )}
             </div>
           </div>
@@ -331,7 +335,7 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
           <div className="title-left" style={{ flex: 1 }}>
             <h1>{venue.name}</h1>
             <div className="rating" style={{ marginBottom: '40px' }}>
-              <i className="fa-solid fa-star" style={{ color: '#bdd124', marginRight: '5px' }}></i> 
+              <i className="fa-solid fa-star" style={{ color: 'var(--primary-lime)', marginRight: '5px' }}></i> 
               {venue.rating} • {venue.city}
             </div>
 
@@ -347,7 +351,7 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
               <strong style={{ fontSize: '16px', marginBottom: '10px', display: 'block' }}>Aturan:</strong>
               <ol style={{ marginLeft: '20px' }}>
                 <li>Menjaga kebersihan selama berada di lingkungan venue / lapangan.</li>
-                <li>Menggunakan alas kaki khusus SPORT yang benar.</li>
+                <li>Menggunakan alas kaki khusus SPORT yang benar. Jadi tidak merusak lapangan yang ada / tempat ganti baju.</li>
                 <li>Makanan & minuman manis dilarang masuk area lapangan.</li>
                 <li>Dilarang merokok di dalam area indoor.</li>
               </ol>
@@ -480,7 +484,7 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
                 <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Badminton Blue Court 1</h4>
                 <p style={{ fontSize: '13px', color: '#aaa', marginBottom: '20px', lineHeight: '1.5' }}>Lapangan sangat nyaman digunakan dan sangat bersih. Harga sesuai dengan fasilitas yang diberikan.</p>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
-                  <div><span style={{ color: '#bdd124' }}>★</span> 5.0</div>
+                  <div><span style={{ color: 'var(--primary-lime)' }}>★</span> 5.0</div>
                   <div style={{ color: '#aaa' }}>2 hari yang lalu</div>
                 </div>
              </div>
@@ -495,7 +499,7 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
                 <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Badminton Blue Court 2</h4>
                 <p style={{ fontSize: '13px', color: '#aaa', marginBottom: '20px', lineHeight: '1.5' }}>Pelayanan ramah, lapangan terang, sirkulasi udara baik. Namun parkir agak susah saat weekend.</p>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
-                  <div><span style={{ color: '#bdd124' }}>★</span> 4.5</div>
+                  <div><span style={{ color: 'var(--primary-lime)' }}>★</span> 4.5</div>
                   <div style={{ color: '#aaa' }}>4 hari yang lalu</div>
                 </div>
              </div>
@@ -510,7 +514,7 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
                 <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Badminton Green Court 1</h4>
                 <p style={{ fontSize: '13px', color: '#aaa', marginBottom: '20px', lineHeight: '1.5' }}>Kualitas karpetnya bagus, tidak licin. Sangat recommended buat main bareng teman kantor.</p>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
-                  <div><span style={{ color: '#bdd124' }}>★</span> 5.0</div>
+                  <div><span style={{ color: 'var(--primary-lime)' }}>★</span> 5.0</div>
                   <div style={{ color: '#aaa' }}>1 mgg yang lalu</div>
                 </div>
              </div>
@@ -525,7 +529,7 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
                 <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Badminton Green Court 2</h4>
                 <p style={{ fontSize: '13px', color: '#aaa', marginBottom: '20px', lineHeight: '1.5' }}>Overall baik. Harga sewa cukup terjangkau untuk fasilitas yang disediakan oleh GOR ini.</p>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
-                  <div><span style={{ color: '#bdd124' }}>★</span> 4.0</div>
+                  <div><span style={{ color: 'var(--primary-lime)' }}>★</span> 4.0</div>
                   <div style={{ color: '#aaa' }}>2 mgg yang lalu</div>
                 </div>
              </div>
@@ -539,7 +543,7 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
                 <img src="/asset/kalam-kudus.png" style={{ width: '100%', height: '160px', objectFit: 'cover' }} />
                 <div style={{ padding: '16px' }}>
                   <h3 style={{ fontSize: '14px', marginBottom: '8px', fontWeight: 600 }}>Kalam Kudus Sport Center</h3>
-                  <p style={{ fontSize: '12px', color: '#aaa', marginBottom: '16px' }}><span style={{ color: '#bdd124' }}>★</span> 4.9 • Surakarta, Jawa Tengah</p>
+                  <p style={{ fontSize: '12px', color: '#aaa', marginBottom: '16px' }}><span style={{ color: 'var(--primary-lime)' }}>★</span> 4.9 • Surakarta, Jawa Tengah</p>
                   <div style={{ fontSize: '10px', color: '#aaa', marginBottom: '4px' }}>Mulai</div>
                   <div style={{ fontWeight: 700, fontSize: '16px' }}>Rp250.000<span style={{ fontSize: '12px', fontWeight: 'normal', color: '#aaa' }}>/sesi</span></div>
                 </div>
@@ -548,7 +552,7 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
                 <img src="/asset/surabaya-badminton.png" style={{ width: '100%', height: '160px', objectFit: 'cover' }} />
                 <div style={{ padding: '16px' }}>
                   <h3 style={{ fontSize: '14px', marginBottom: '8px', fontWeight: 600 }}>Surabaya Badminton Hall</h3>
-                  <p style={{ fontSize: '12px', color: '#aaa', marginBottom: '16px' }}><span style={{ color: '#bdd124' }}>★</span> 4.8 • Surabaya, Jawa Timur</p>
+                  <p style={{ fontSize: '12px', color: '#aaa', marginBottom: '16px' }}><span style={{ color: 'var(--primary-lime)' }}>★</span> 4.8 • Surabaya, Jawa Timur</p>
                   <div style={{ fontSize: '10px', color: '#aaa', marginBottom: '4px' }}>Mulai</div>
                   <div style={{ fontWeight: 700, fontSize: '16px' }}>Rp150.000<span style={{ fontSize: '12px', fontWeight: 'normal', color: '#aaa' }}>/sesi</span></div>
                 </div>
@@ -557,7 +561,7 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
                 <img src="/asset/gor-arek-surabaya.png" style={{ width: '100%', height: '160px', objectFit: 'cover' }} />
                 <div style={{ padding: '16px' }}>
                   <h3 style={{ fontSize: '14px', marginBottom: '8px', fontWeight: 600 }}>GOR Arak Surabaya</h3>
-                  <p style={{ fontSize: '12px', color: '#aaa', marginBottom: '16px' }}><span style={{ color: '#bdd124' }}>★</span> 4.5 • Surabaya, Jawa Timur</p>
+                  <p style={{ fontSize: '12px', color: '#aaa', marginBottom: '16px' }}><span style={{ color: 'var(--primary-lime)' }}>★</span> 4.5 • Surabaya, Jawa Timur</p>
                   <div style={{ fontSize: '10px', color: '#aaa', marginBottom: '4px' }}>Mulai</div>
                   <div style={{ fontWeight: 700, fontSize: '16px' }}>Rp80.000<span style={{ fontSize: '12px', fontWeight: 'normal', color: '#aaa' }}>/sesi</span></div>
                 </div>
@@ -566,14 +570,14 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
                 <img src="/asset/supersmash-badminton-hall.png" style={{ width: '100%', height: '160px', objectFit: 'cover' }} />
                 <div style={{ padding: '16px' }}>
                   <h3 style={{ fontSize: '14px', marginBottom: '8px', fontWeight: 600 }}>Supermash Badminton</h3>
-                  <p style={{ fontSize: '12px', color: '#aaa', marginBottom: '16px' }}><span style={{ color: '#bdd124' }}>★</span> 4.7 • Surabaya, Jawa Timur</p>
+                  <p style={{ fontSize: '12px', color: '#aaa', marginBottom: '16px' }}><span style={{ color: 'var(--primary-lime)' }}>★</span> 4.7 • Surabaya, Jawa Timur</p>
                   <div style={{ fontSize: '10px', color: '#aaa', marginBottom: '4px' }}>Mulai</div>
                   <div style={{ fontWeight: 700, fontSize: '16px' }}>Rp120.000<span style={{ fontSize: '12px', fontWeight: 'normal', color: '#aaa' }}>/sesi</span></div>
                 </div>
              </div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '30px' }}>
-            <button style={{ background: '#bdd124', color: 'black', padding: '12px 24px', borderRadius: '8px', fontWeight: 600, border: 'none', cursor: 'pointer', transition: '0.3s' }} onClick={() => window.location.href = '/sewa-lapangan'}>
+            <button style={{ background: 'var(--primary-lime)', color: 'black', padding: '12px 24px', borderRadius: '8px', fontWeight: 600, border: 'none', cursor: 'pointer', transition: '0.3s' }} onClick={() => window.location.href = '/sewa-lapangan'}>
               <i className="fa-solid fa-magnifying-glass" style={{ marginRight: '8px' }}></i> Cari Lapangan Lain
             </button>
           </div>

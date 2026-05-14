@@ -1,7 +1,9 @@
 "use client";
+import { useEffect } from 'react';
 import Link from "next/link";
 
 export default function LoginMitraPage() {
+  useEffect(() => { document.title = 'Login Mitra - Minton'; }, []);
   return (
     <>
       <div className="header-overlay" style={{ position: "absolute", top: 0, left: 0, width: "100%", padding: "26px 0", zIndex: 20 }}>

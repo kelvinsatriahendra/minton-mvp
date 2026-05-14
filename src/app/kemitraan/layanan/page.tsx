@@ -1,4 +1,5 @@
 "use client";
+import { useEffect } from 'react';
 import MitraSidebar from "@/components/MitraSidebar";
 
 const services = [
@@ -11,6 +12,7 @@ const services = [
 ];
 
 export default function LayananPage() {
+  useEffect(() => { document.title = 'Layanan Tambahan - Minton'; }, []);
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
       <MitraSidebar active="Service" />

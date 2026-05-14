@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DashboardSidebar from '@/components/DashboardSidebar';
 
 interface DetailData { venue: string; img: string; id: string; status: string; date: string; time: string; court: string; price: string; }
@@ -19,6 +19,7 @@ export default function BookingSayaPage() {
   const [activeTab, setActiveTab] = useState(0);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [detailData, setDetailData] = useState<DetailData | null>(null);
+  useEffect(() => { document.title = 'Booking Saya - Minton'; }, []);
   const [isTicketOpen, setIsTicketOpen] = useState(false);
   const [ticketData, setTicketData] = useState<TicketData | null>(null);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
@@ -53,7 +54,8 @@ export default function BookingSayaPage() {
           .booking-time p:first-child { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
           .booking-time p:last-child { font-size: 13px; color: var(--text-gray); }
           .booking-actions { display: flex; gap: 12px; }
-          .modal-overlay { position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); display: flex; justify-content: center; align-items: center; backdrop-filter: blur(8px); }
+          .modal-overlay { position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.85); display: flex; justify-content: center; align-items: center; backdrop-filter: blur(8px); animation: fadeIn 0.3s ease; }
+          @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
           .btn-cancel-modal { transition: all 0.3s ease; }
           .btn-cancel-modal:hover { background: #f44336 !important; border-color: #f44336 !important; color: #fff !important; }
           @media (max-width: 768px) {
@@ -121,7 +123,7 @@ export default function BookingSayaPage() {
                   <p style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>ID Booking: {detailData.id}</p>
                   <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#fff' }}>{detailData.venue}</h2>
                 </div>
-                <span style={{ background: 'rgba(189, 209, 36, 0.1)', color: '#bdd124', padding: '6px 12px', borderRadius: '8px', fontSize: '11px', fontWeight: 700 }}>{detailData.status}</span>
+                <span style={{ background: 'rgba(189, 209, 36, 0.1)', color: 'var(--primary-lime)', padding: '6px 12px', borderRadius: '8px', fontSize: '11px', fontWeight: 700 }}>{detailData.status}</span>
               </div>
               <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '16px', padding: '20px', marginBottom: '24px', border: '1px solid #222' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
@@ -139,10 +141,10 @@ export default function BookingSayaPage() {
                 <div style={{ height: '1px', background: '#333', margin: '12px 0' }}></div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: '#666', fontSize: '13px' }}>Total Bayar</span>
-                  <span style={{ color: '#bdd124', fontSize: '13px', fontWeight: 700 }}>{detailData.price}</span>
+                  <span style={{ color: 'var(--primary-lime)', fontSize: '13px', fontWeight: 700 }}>{detailData.price}</span>
                 </div>
               </div>
-              <button onClick={closeAll} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: 'none', background: '#bdd124', color: '#000', fontWeight: 700, cursor: 'pointer' }}>Tutup</button>
+              <button onClick={closeAll} style={{ width: '100%', padding: '12px', borderRadius: '12px', border: 'none', background: 'var(--primary-lime)', color: '#000', fontWeight: 700, cursor: 'pointer' }}>Tutup</button>
             </div>
           </div>
         </div>
@@ -155,7 +157,7 @@ export default function BookingSayaPage() {
             <div style={{ padding: '32px 24px', textAlign: 'center', borderBottom: '2px dashed #333', position: 'relative', background: 'linear-gradient(135deg, #1a1a1a, #222)' }}>
               <div style={{ position: 'absolute', bottom: '-11px', left: '-11px', width: '22px', height: '22px', background: 'rgba(0,0,0,0.85)', borderRadius: '50%', zIndex: 2 }}></div>
               <div style={{ position: 'absolute', bottom: '-11px', right: '-11px', width: '22px', height: '22px', background: 'rgba(0,0,0,0.85)', borderRadius: '50%', zIndex: 2 }}></div>
-              <p style={{ color: '#bdd124', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '8px' }}>E-Ticket Sewa Lapangan</p>
+              <p style={{ color: 'var(--primary-lime)', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '8px' }}>E-Ticket Sewa Lapangan</p>
               <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#fff', marginBottom: '24px' }}>{ticketData.venue}</h2>
               <div style={{ background: '#fff', width: '160px', height: '160px', margin: '0 auto 24px', padding: '12px', borderRadius: '12px' }}>
                 <img src={`https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${ticketData.id}`} alt="QR Code" style={{ width: '100%', height: '100%' }} />
@@ -195,7 +197,7 @@ export default function BookingSayaPage() {
             <div style={{ backgroundColor: '#121212', borderRadius: '24px', width: '90%', maxWidth: '400px', position: 'relative', overflow: 'hidden', border: '1px solid #333' }} onClick={e => e.stopPropagation()}>
               <div style={{ padding: '32px 24px', textAlign: 'center' }}>
                 <div style={{ width: '64px', height: '64px', background: 'rgba(189, 209, 36, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
-                  <i className="fa-solid fa-wallet" style={{ fontSize: '28px', color: '#bdd124' }}></i>
+                  <i className="fa-solid fa-wallet" style={{ fontSize: '28px', color: 'var(--primary-lime)' }}></i>
                 </div>
                 <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#fff', marginBottom: '8px' }}>Selesaikan Pembayaran</h2>
                 <p style={{ color: '#666', fontSize: '13px' }}>{paymentData.venue}</p>
@@ -206,19 +208,19 @@ export default function BookingSayaPage() {
                 <div style={{ textAlign: 'left', marginBottom: '32px' }}>
                   <p style={{ color: '#fff', fontSize: '14px', fontWeight: 600, marginBottom: '16px' }}>Pilih Metode Pembayaran</p>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', background: '#1a1a1a', borderRadius: '12px', border: '1px solid #333', marginBottom: '12px', cursor: 'pointer' }}>
-                    <input type="radio" name="payment" defaultChecked style={{ accentColor: '#bdd124' }} />
+                    <input type="radio" name="payment" defaultChecked style={{ accentColor: 'var(--primary-lime)' }} />
                     <img src="/asset/logo.png" style={{ height: '14px', marginRight: '4px' }} />
                     <span style={{ color: '#fff', fontSize: '13px' }}>Minton Pay (Saldo: Rp 250.000)</span>
                   </label>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px', background: '#1a1a1a', borderRadius: '12px', border: '1px solid #333', cursor: 'pointer' }}>
-                    <input type="radio" name="payment" style={{ accentColor: '#bdd124' }} />
+                    <input type="radio" name="payment" style={{ accentColor: 'var(--primary-lime)' }} />
                     <i className="fa-solid fa-building-columns" style={{ color: '#666' }}></i>
                     <span style={{ color: '#fff', fontSize: '13px' }}>Transfer Bank (VA)</span>
                   </label>
                 </div>
                 <div style={{ display: 'flex', gap: '12px' }}>
                   <button onClick={closeAll} className="btn-cancel-modal" style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1px solid #333', background: 'transparent', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>Batal</button>
-                  <button onClick={() => setIsPaymentSuccess(true)} style={{ flex: 2, padding: '14px', borderRadius: '12px', border: 'none', background: '#bdd124', color: '#000', fontWeight: 700, cursor: 'pointer' }}>Bayar Sekarang</button>
+                  <button onClick={() => setIsPaymentSuccess(true)} style={{ flex: 2, padding: '14px', borderRadius: '12px', border: 'none', background: 'var(--primary-lime)', color: '#000', fontWeight: 700, cursor: 'pointer' }}>Bayar Sekarang</button>
                 </div>
               </div>
             </div>
@@ -230,7 +232,7 @@ export default function BookingSayaPage() {
                 </div>
                 <h2 style={{ fontSize: '24px', fontWeight: 700, color: '#fff', marginBottom: '12px' }}>Pembayaran Berhasil!</h2>
                 <p style={{ color: '#aaa', fontSize: '14px', lineHeight: 1.6, marginBottom: '32px' }}>Transaksi Anda telah kami terima. Lapangan telah berhasil dipesan dan siap digunakan.</p>
-                <button onClick={() => location.reload()} style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: '#bdd124', color: '#000', fontWeight: 700, cursor: 'pointer' }}>Selesai</button>
+                <button onClick={() => location.reload()} style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: 'var(--primary-lime)', color: '#000', fontWeight: 700, cursor: 'pointer' }}>Selesai</button>
               </div>
             </div>
           )}

@@ -71,17 +71,17 @@ function KeranjangContent() {
         .sewa-container { display: flex; gap: 48px; padding: 120px 0 80px; width: 90%; max-width: 1600px; margin: auto; color: #fff; }
         .left { flex: 2; }
         .btn-tambah { padding: 12px 28px; border: 1px solid #ffffff; border-radius: 15px; background: none; color: #ffffff; font-size: 16px; font-weight: 500; margin-bottom: 32px; cursor: pointer; transition: 0.3s; }
-        .btn-tambah:hover { background: #bdd124; border-color: #bdd124; color: black; }
+        .btn-tambah:hover { background: var(--primary-lime); border-color: var(--primary-lime); color: black; }
         .card { background: #1c1c1c; border-radius: 12px; margin-bottom: 24px; border: 1px solid #333; overflow: hidden; display: flex; gap: 24px; }
         .card-img { width: 200px; height: 100%; object-fit: cover; flex-shrink: 0; min-height: 180px; }
         .card-content { padding: 24px; flex: 1; }
         .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
-        input[type="checkbox"].slot-checkbox { width: 22px; height: 22px; accent-color: #bdd124; cursor: pointer; margin-top: 4px; }
+        input[type="checkbox"].slot-checkbox { width: 22px; height: 22px; accent-color: var(--primary-lime); cursor: pointer; margin-top: 4px; }
         .card h3 { margin-bottom: 8px; font-size: 24px; font-weight: 600; }
         .rating { font-size: 14px; color: #aaa; margin-bottom: 20px; }
         .badminton { font-weight: 600; font-size: 18px; margin-bottom: 16px; }
         .time-box { background: #2a2a2a; padding: 16px 20px; border-radius: 12px; font-size: 15px; position: relative; line-height: 1.6; }
-        .time-box::before { content: ""; position: absolute; left: 0; top: 0; height: 100%; width: 6px; background: #bdd124; border-radius: 12px 0 0 12px; }
+        .time-box::before { content: ""; position: absolute; left: 0; top: 0; height: 100%; width: 6px; background: var(--primary-lime); border-radius: 12px 0 0 12px; }
         .right { flex: 1; }
         .summary-box { background: #1c1c1c; padding: 28px; border-radius: 12px; margin-bottom: 24px; border: 1px solid #333; }
         .summary-box h4 { margin-bottom: 20px; font-size: 16px; font-weight: 600; }
@@ -90,19 +90,21 @@ function KeranjangContent() {
         .summary-row span:last-child { color: #ffffff; }
         .total { display: flex; justify-content: space-between; font-weight: 600; font-size: 16px; margin-top: 20px; }
         .btn-sewa-primary { width: 100%; padding: 16px; border-radius: 15px; border: 1px solid #ffffff; background: none; color: #ffffff; font-size: 16px; font-weight: 500; cursor: pointer; margin-top: 16px; transition: 0.3s; }
-        .btn-sewa-primary:hover { background: #bdd124; border-color: #bdd124; color: black; }
+        .btn-sewa-primary:hover { background: var(--primary-lime); border-color: var(--primary-lime); color: black; }
         .btn-sewa-primary:disabled { opacity: 0.4; cursor: not-allowed; }
         .btn-sewa-primary:disabled:hover { background: none; border-color: #ffffff; color: #ffffff; }
         .small-box { background: #1c1c1c; padding: 16px; border-radius: 12px; margin-bottom: 16px; text-align: center; cursor: pointer; font-size: 16px; border: 1px solid #333; transition: 0.3s; }
-        .small-box:hover { border-color: #bdd124; }
-        .modal-overlay { position: fixed; z-index: 2000; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; }
-        .modal-content { background: #1c1c1c; width: 90%; max-width: 450px; border-radius: 20px; border: 1px solid #333; padding: 32px; position: relative; }
+        .small-box:hover { border-color: var(--primary-lime); }
+        .modal-overlay { position: fixed; z-index: 2000; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; animation: fadeIn 0.3s ease; }
+        .modal-content { background: #1c1c1c; width: 90%; max-width: 450px; border-radius: 20px; border: 1px solid #333; padding: 32px; position: relative; animation: slideUp 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
         .modal-header h2 { font-size: 20px; font-weight: 700; }
         .close-btn { background: none; border: none; color: #aaa; font-size: 24px; cursor: pointer; }
         .policy-list { list-style: none; margin-bottom: 30px; }
         .policy-list li { position: relative; padding-left: 28px; margin-bottom: 16px; font-size: 14px; color: #ccc; line-height: 1.6; }
-        .policy-list li::before { content: "✓"; font-weight: 900; position: absolute; left: 0; color: #bdd124; }
+        .policy-list li::before { content: "✓"; font-weight: 900; position: absolute; left: 0; color: var(--primary-lime); }
         @media (max-width: 992px) { .sewa-container { flex-direction: column; } .card { flex-direction: column; } .card-img { width: 100%; height: 180px; } }
       `}} />
 
@@ -146,7 +148,7 @@ function KeranjangContent() {
 
         <div className="right">
           <div className="small-box" onClick={() => setIsVoucherModalOpen(true)}>
-            <i className="fa-solid fa-ticket" style={{ color: '#bdd124', marginRight: '12px' }}></i> Gunakan Voucher
+            <i className="fa-solid fa-ticket" style={{ color: 'var(--primary-lime)', marginRight: '12px' }}></i> Gunakan Voucher
           </div>
 
           <div className="summary-box">
@@ -175,7 +177,7 @@ function KeranjangContent() {
           </div>
 
           <div className="small-box" onClick={() => setIsRescheduleModalOpen(true)}>
-            <i className="fa-solid fa-circle-info" style={{ color: '#bdd124', marginRight: '12px' }}></i> Kebijakan Pembatalan & Reschedule
+            <i className="fa-solid fa-circle-info" style={{ color: 'var(--primary-lime)', marginRight: '12px' }}></i> Kebijakan Pembatalan & Reschedule
           </div>
 
           <button className="btn-sewa-primary" onClick={handleCheckout} disabled={activeSlots.length === 0}>
@@ -225,8 +227,8 @@ function KeranjangContent() {
 
             <div style={{ marginBottom: '8px', fontWeight: 600, fontSize: '14px' }}>Voucher Tersedia</div>
             <div className="voucher-list" style={{ maxHeight: '250px', overflowY: 'auto', paddingRight: '5px' }}>
-              <div style={{ background: '#2a2a2a', borderRadius: '12px', padding: '16px', marginBottom: '12px', border: '1px dashed #bdd124' }}>
-                <div style={{ fontWeight: 700, color: '#bdd124', marginBottom: '4px' }}>DISKON MINTON 10%</div>
+              <div style={{ background: '#2a2a2a', borderRadius: '12px', padding: '16px', marginBottom: '12px', border: '1px dashed var(--primary-lime)' }}>
+                <div style={{ fontWeight: 700, color: 'var(--primary-lime)', marginBottom: '4px' }}>DISKON MINTON 10%</div>
                 <div style={{ fontSize: '13px', color: '#ccc', marginBottom: '8px' }}>Potongan harga 10% hingga Rp25.000</div>
                 <div style={{ fontSize: '11px', color: '#888' }}>Berlaku hingga 12 Mar 2026</div>
               </div>
@@ -244,6 +246,7 @@ function KeranjangContent() {
 }
 
 export default function KeranjangPage() {
+  useEffect(() => { document.title = 'Keranjang - Minton'; }, []);
   return (
     <>
       <Navbar />

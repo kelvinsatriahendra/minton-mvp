@@ -9,6 +9,8 @@ export default function KemitraanPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
+  useEffect(() => { document.title = 'Kemitraan - Minton'; }, []);
+
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -36,7 +38,7 @@ export default function KemitraanPage() {
         .hero-left { flex: 1; }
         .badge { font-size: 24px; color: #ffffff; margin-bottom: 24px; display: block; font-weight: 500; }
         .hero-left h1 { font-size: 48px; font-weight: 700; line-height: 1.2; }
-        .text-highlight { color: #bdd124; }
+        .text-highlight { color: var(--primary-lime); }
         .hero-right { flex: 0.8; display: flex; flex-direction: column; align-items: flex-start; gap: 20px; }
         .hero-right p { color: #ffffff; font-size: 20px; line-height: 1.6; }
         .hero-image-container { width: 90%; max-width: 1600px; margin: 0 auto 80px; }
@@ -65,14 +67,16 @@ export default function KemitraanPage() {
         .cta-content h2 { font-size: 42px; font-weight: 700; margin-bottom: 24px; line-height: 1.3; }
         .cta-content p { font-size: 18px; color: #ffffff; margin-bottom: 32px; line-height: 1.6; }
         .btn-cta { margin-top: auto; background: #000; color: #fff; border: 1px solid #fff; padding: 16px 24px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; text-align: center; width: 100%; max-width: 400px; }
-        .btn-cta:hover { border-color: #bdd124; background: #bdd124; color: #000; }
+        .btn-cta:hover { border-color: var(--primary-lime); background: var(--primary-lime); color: #000; }
 
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: #111; border: 1px solid #333; border-radius: 24px; padding: 40px; width: 100%; max-width: 500px; position: relative; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; animation: fadeIn 0.3s ease; }
+        .modal-content { background: #111; border: 1px solid #333; border-radius: 24px; padding: 40px; width: 100%; max-width: 500px; position: relative; animation: slideUp 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; margin-bottom: 8px; font-size: 14px; color: #aaa; }
         .form-group input { width: 100%; background: #0a0a0a; border: 1px solid #333; border-radius: 12px; padding: 14px 16px; color: #fff; outline: none; }
-        .btn-submit { width: 100%; background: #bdd124; color: #000; padding: 16px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.3s; }
+        .btn-submit { width: 100%; background: var(--primary-lime); color: #000; padding: 16px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.3s; }
 
         .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
         .reveal.visible { opacity: 1; transform: translateY(0); }
@@ -84,7 +88,7 @@ export default function KemitraanPage() {
             <button style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', color: '#888', fontSize: '24px', cursor: 'pointer' }} onClick={() => setIsModalOpen(false)}>&times;</button>
             {isSuccess ? (
               <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                <i className="fa-solid fa-circle-check" style={{ fontSize: '64px', color: '#bdd124', marginBottom: '24px' }}></i>
+                <i className="fa-solid fa-circle-check" style={{ fontSize: '64px', color: 'var(--primary-lime)', marginBottom: '24px' }}></i>
                 <h2>Pendaftaran Berhasil!</h2>
                 <p style={{ color: '#aaa' }}>Tim Minton akan menghubungi Anda segera.</p>
               </div>

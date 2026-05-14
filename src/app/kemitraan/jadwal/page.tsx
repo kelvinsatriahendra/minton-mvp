@@ -1,4 +1,5 @@
 "use client";
+import { useEffect } from 'react';
 import MitraSidebar from "@/components/MitraSidebar";
 
 const sessions = [
@@ -12,6 +13,7 @@ const sessions = [
 ];
 
 export default function JadwalPage() {
+  useEffect(() => { document.title = 'Jadwal Lapangan - Minton'; }, []);
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
       <MitraSidebar active="Schedule" />

@@ -1,4 +1,5 @@
 "use client";
+import { useEffect } from 'react';
 import MitraSidebar from "@/components/MitraSidebar";
 
 const members = [
@@ -9,6 +10,7 @@ const members = [
 ];
 
 export default function MemberPage() {
+  useEffect(() => { document.title = 'Manajemen Member - Minton'; }, []);
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
       <MitraSidebar active="Members" />

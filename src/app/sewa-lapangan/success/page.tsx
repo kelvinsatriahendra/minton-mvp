@@ -59,9 +59,9 @@ function SuccessContent() {
         .left { flex: 2; }
         .right { flex: 1; }
         .btn-back { padding: 12px 28px; border: 1px solid #ffffff; border-radius: 12px; background: none; color: #ffffff; font-size: 14px; font-weight: 600; display: inline-block; margin-bottom: 56px; text-decoration: none; cursor: pointer; transition: 0.3s; }
-        .btn-back:hover { background: #bdd124; border-color: #bdd124; color: black; }
+        .btn-back:hover { background: var(--primary-lime); border-color: var(--primary-lime); color: black; }
         .success-header { display: flex; align-items: center; gap: 24px; margin-bottom: 32px; }
-        .success-icon { width: 72px; height: 72px; border-radius: 50%; border: 4px solid #bdd124; display: flex; justify-content: center; align-items: center; color: #bdd124; font-size: 36px; box-shadow: 0 0 30px rgba(189, 209, 36, 0.4); animation: successPulse 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .success-icon { width: 72px; height: 72px; border-radius: 50%; border: 4px solid var(--primary-lime); background: #0f0f0f; display: flex; justify-content: center; align-items: center; color: var(--primary-lime); font-size: 36px; box-shadow: 0 0 30px rgba(189, 209, 36, 0.4); animation: successPulse 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         .success-icon i { opacity: 0; transform: scale(0); animation: checkmarkGrow 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.3s forwards; }
         @keyframes successPulse {
             0% { transform: scale(0.5); box-shadow: 0 0 0 rgba(189, 209, 36, 0); opacity: 0; }
@@ -88,7 +88,7 @@ function SuccessContent() {
         .btn-cancel { flex: 1; padding: 16px; border-radius: 12px; border: 1px solid #ff4d4d; background: none; color: #ff4d4d; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.3s; text-align: center; }
         .btn-cancel:hover { background: #ff4d4d; color: white; }
         .btn-contact { flex: 1; padding: 16px; border-radius: 12px; border: 1px solid #ffffff; background: none; color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.3s; text-align: center; }
-        .btn-contact:hover { background: #bdd124; border-color: #bdd124; color: black; box-shadow: 0 0 20px rgba(189, 209, 36, 0.4); transform: translateY(-2px); }
+        .btn-contact:hover { background: var(--primary-lime); border-color: var(--primary-lime); color: black; box-shadow: 0 0 20px rgba(189, 209, 36, 0.4); transform: translateY(-2px); }
         .summary-box { background: #1c1c1c; border-radius: 12px; border: 1px solid #333; overflow: hidden; margin-bottom: 24px; }
         .summary-row { display: flex; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid #333; font-size: 14px; }
         .summary-row span:first-child { color: #ccc; }
@@ -121,7 +121,7 @@ function SuccessContent() {
                   {venue?.name || 'Venue Name'}
                 </div>
                 <div style={{ fontSize: '13px', color: '#aaa' }}>
-                  <i className="fa-solid fa-location-dot" style={{ color: '#bdd124', marginRight: '6px' }}></i> 
+                  <i className="fa-solid fa-location-dot" style={{ color: 'var(--primary-lime)', marginRight: '6px' }}></i> 
                   {venue?.location || 'Location Address'}
                 </div>
               </div>
@@ -188,6 +188,7 @@ function SuccessContent() {
 }
 
 export default function SuccessPage() {
+  useEffect(() => { document.title = 'Pembayaran Berhasil - Minton'; }, []);
   return (
     <>
       <Navbar />

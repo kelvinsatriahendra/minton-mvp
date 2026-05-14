@@ -48,10 +48,10 @@ export default function Navbar() {
           </div>
 
           <nav id="nav-menu" className={isMenuOpen ? 'mobile-open' : ''}>
-            <Link href="/sewa-lapangan" style={pathname.includes('sewa-lapangan') ? {color: '#bdd124'} : {}}>Sewa Lapangan</Link>
-            <Link href="/main-bareng" style={pathname.includes('main-bareng') ? {color: '#bdd124'} : {}}>Main Bareng</Link>
-            <Link href="/kemitraan" style={pathname.includes('kemitraan') ? {color: '#bdd124'} : {}}>Kemitraan</Link>
-            <Link href="/komunitas" style={pathname.includes('komunitas') ? {color: '#bdd124'} : {}}>Komunitas</Link>
+            <Link href="/sewa-lapangan" style={pathname.includes('sewa-lapangan') ? {color: 'var(--primary-lime)'} : {}}>Sewa Lapangan</Link>
+            <Link href="/main-bareng" style={pathname.includes('main-bareng') ? {color: 'var(--primary-lime)'} : {}}>Main Bareng</Link>
+            <Link href="/kemitraan" style={pathname.includes('kemitraan') ? {color: 'var(--primary-lime)'} : {}}>Kemitraan</Link>
+            <Link href="/komunitas" style={pathname.includes('komunitas') ? {color: 'var(--primary-lime)'} : {}}>Komunitas</Link>
             
             <div className="nav-btn-mobile" style={{ display: isMenuOpen ? 'flex' : 'none' }}>
                {isLoggedIn ? (

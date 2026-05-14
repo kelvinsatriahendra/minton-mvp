@@ -15,17 +15,41 @@ interface Match {
   skill_level: string;
   price_per_person: number;
   image_url: string;
+  slots_filled?: number;
+  total_slots?: number;
+  gender?: string;
+}
+
+const SLOT_DATA: Record<number, { filled: number; total: number }> = {
+  1: { filled: 5, total: 8 },
+  2: { filled: 3, total: 8 },
+  3: { filled: 2, total: 8 },
+  4: { filled: 6, total: 8 },
+  5: { filled: 1, total: 8 },
+  6: { filled: 4, total: 8 },
+};
+
+function getSlotInfo(match: Match): { filled: number; total: number } {
+  if (match.slots_filled !== undefined && match.total_slots !== undefined) {
+    return { filled: match.slots_filled, total: match.total_slots };
+  }
+  return SLOT_DATA[match.id] ?? { filled: 0, total: 8 };
 }
 
 export default function MainBarengPage() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
   const [cityFilter, setCityFilter] = useState('');
+  const [dayFilter, setDayFilter] = useState('');
+  const [timeFilter, setTimeFilter] = useState('');
+  const [genderFilter, setGenderFilter] = useState('');
   const [loading, setLoading] = useState(true);
 
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
+
+  useEffect(() => { document.title = 'Main Bareng - Minton'; }, []);
 
   useEffect(() => {
     fetchMatches();
@@ -46,7 +70,21 @@ export default function MainBarengPage() {
   }
 
   const handleFilter = () => {
-    const results = matches.filter(match => cityFilter === '' || match.city.toLowerCase() === cityFilter.toLowerCase());
+    const days = ['minggu', 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'];
+    const results = matches.filter(match => {
+      if (cityFilter && match.city.toLowerCase() !== cityFilter.toLowerCase()) return false;
+      if (dayFilter) {
+        const d = new Date(match.match_date);
+        const dayName = days[d.getDay()];
+        if (dayName !== dayFilter) return false;
+      }
+      if (timeFilter === 'malam') {
+        const hour = parseInt(match.start_time.substring(0, 2));
+        if (hour < 18) return false;
+      }
+      if (genderFilter && (match.gender || '').toLowerCase() !== genderFilter.toLowerCase()) return false;
+      return true;
+    });
     setFilteredMatches(results);
   };
 
@@ -114,7 +152,7 @@ export default function MainBarengPage() {
   return (
     <>
       <style dangerouslySetInnerHTML={{__html: `
-        :root { --bg-dark: #000000; --bg-card: #1c1c1c; --bg-input: #121212; --primary-green: #bdd124; --text-white: #ffffff; --text-gray: #aaaaaa; --border-color: #333333; }
+        :root { --bg-dark: #000000; --bg-card: #1c1c1c; --bg-input: #121212; --primary-green: var(--primary-lime); --text-white: #ffffff; --text-gray: #aaaaaa; --border-color: #333333; }
         .text-highlight { color: var(--primary-green); }
         .hero-mabar { display: flex; align-items: center; justify-content: space-between; gap: 40px; padding: 80px 0; margin-bottom: 60px; }
         .hero-text h1 { font-size: 56px; font-weight: 700; line-height: 1.1; margin-bottom: 24px; }
@@ -191,9 +229,9 @@ export default function MainBarengPage() {
           </div>
           <div className="filter-grid">
             <select className="form-select" value={cityFilter} onChange={(e) => setCityFilter(e.target.value)}><option value="">Lokasi</option><option value="surakarta">Surakarta</option><option value="surabaya">Surabaya</option><option value="jakarta">Jakarta</option></select>
-            <select className="form-select" defaultValue=""><option value="" disabled>Hari</option><option value="senin">Senin</option><option value="minggu">Minggu</option></select>
-            <select className="form-select" defaultValue=""><option value="" disabled>Waktu</option><option value="malam">Malam (18:00 - 23:00)</option></select>
-            <select className="form-select" defaultValue=""><option value="" disabled>Jenis Kelamin</option><option value="campur">Campur</option></select>
+            <select className="form-select" value={dayFilter} onChange={(e) => setDayFilter(e.target.value)}><option value="">Hari</option><option value="senin">Senin</option><option value="selasa">Selasa</option><option value="rabu">Rabu</option><option value="kamis">Kamis</option><option value="jumat">Jumat</option><option value="sabtu">Sabtu</option><option value="minggu">Minggu</option></select>
+            <select className="form-select" value={timeFilter} onChange={(e) => setTimeFilter(e.target.value)}><option value="">Waktu</option><option value="malam">Malam (18:00 - 23:00)</option></select>
+            <select className="form-select" value={genderFilter} onChange={(e) => setGenderFilter(e.target.value)}><option value="">Jenis Kelamin</option><option value="campur">Campur</option></select>
             <button className="btn btn-primary filter-btn" onClick={handleFilter}>Terapkan Filter</button>
           </div>
           <div className="filter-actions-bottom">
@@ -220,6 +258,14 @@ export default function MainBarengPage() {
                     <span className="label-text">Waktu</span>
                     <div className="value-text">{match.start_time.substring(0,5)} - {match.end_time.substring(0,5)}</div>
                   </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', fontSize: '13px' }}>
+                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width: 16, height: 16 }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  <span className={`font-semibold ${getSlotInfo(match).filled >= getSlotInfo(match).total ? 'text-red-500' : 'text-green-600'}`}>
+                    {getSlotInfo(match).filled}/{getSlotInfo(match).total} slot tersedia
+                  </span>
                 </div>
                 <div className="mabar-footer">
                   <div>
@@ -271,7 +317,15 @@ export default function MainBarengPage() {
             </div>
             <div className="slot-info-mabar">
               <i className="fa-solid fa-users"></i>
-              <span>Tersisa slot lagi!</span>
+              <span>
+                {(() => {
+                  const s = getSlotInfo(selectedMatch);
+                  const remaining = s.total - s.filled;
+                  return remaining > 0
+                    ? `${remaining} slot tersisa dari ${s.total} slot`
+                    : 'Slot sudah penuh';
+                })()}
+              </span>
             </div>
             <div className="modal-footer-mabar">
               <div className="footer-top">

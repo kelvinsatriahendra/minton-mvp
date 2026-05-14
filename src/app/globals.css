@@ -3,6 +3,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --primary-lime: #bdd124;
 }
 
 @theme inline {
@@ -43,7 +44,7 @@ body {
 }
 
 span {
-  color: #bdd124;
+  color: var(--primary-lime);
 }
 
 
@@ -123,7 +124,7 @@ nav a {
 
 .btn-primary {
   font-family: "Plus Jakarta Sans";
-  background: #bdd124;
+  background: var(--primary-lime);
   border: none;
   padding: 12px 36px;
   border-radius: 15px;
@@ -432,6 +433,79 @@ nav a {
   margin-top: 40px;
 }
 
+.card {
+  background-color: #1D1D1D;
+  border: 2px solid #333;
+  padding: 36px;
+  border-radius: 12px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s;
+  cursor: default;
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 40px rgba(189, 209, 36, 0.12);
+  border-color: var(--primary-lime) !important;
+}
+
+.card .icon img {
+  transition: transform 0.35s ease;
+}
+
+.card:hover .icon img {
+  transform: scale(1.12) rotate(-4deg);
+}
+
+.card h3 {
+  font-family: "Plus Jakarta Sans";
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.feature-item {
+  transition: transform 0.25s ease;
+  cursor: default;
+}
+
+.feature-item:hover {
+  transform: translateX(6px);
+}
+
+.feature-item:hover .feature-icon,
+.feature-item:hover .dominate-icon img {
+  filter: drop-shadow(0 0 8px rgba(189, 209, 36, 0.5));
+  transform: scale(1.08);
+  transition: filter 0.3s, transform 0.3s;
+}
+
+.section-image {
+  transition: transform 0.5s ease, box-shadow 0.5s ease;
+  border-radius: 16px;
+}
+
+.section-image:hover {
+  transform: scale(1.015);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+.testimoni-header {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: default;
+}
+
+.testimoni-header:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+}
+
+.testimoni-header img {
+  transition: transform 0.35s ease;
+}
+
+.testimoni-header:hover img {
+  transform: scale(1.06);
+}
+
 .card-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -681,14 +755,14 @@ nav a {
 }
 
 .profile-btn-ui:hover {
-  border-color: #bdd124;
+  border-color: var(--primary-lime);
 }
 
 .profile-avatar {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background-color: #bdd124;
+  background-color: var(--primary-lime);
   color: #000;
   display: flex;
   align-items: center;
@@ -737,7 +811,7 @@ nav a {
 
 .dropdown-item:hover {
   background: rgba(255, 255, 255, 0.05);
-  color: #bdd124;
+  color: var(--primary-lime);
 }
 
 .dropdown-divider {
@@ -772,8 +846,8 @@ nav a {
 }
 
 .btn-outline:hover {
-  background: #bdd124 !important;
-  border-color: #bdd124 !important;
+  background: var(--primary-lime) !important;
+  border-color: var(--primary-lime) !important;
   color: #000 !important;
   transform: translateY(-3px);
   box-shadow: 0 8px 20px rgba(189, 209, 36, 0.3);
@@ -797,13 +871,13 @@ nav a::after {
   bottom: -4px;
   width: 0;
   height: 2px;
-  background: #bdd124;
+  background: var(--primary-lime);
   border-radius: 2px;
   transition: width 0.3s ease;
 }
 
 nav a:hover {
-  color: #bdd124;
+  color: var(--primary-lime);
 }
 
 nav a:hover::after {
@@ -828,7 +902,7 @@ nav a:hover::after {
 }
 
 .footer a:hover {
-  color: #bdd124;
+  color: var(--primary-lime);
   padding-left: 4px;
 }
 
@@ -964,7 +1038,7 @@ nav a:hover::after {
         }
 
         .page-hero h1 span {
-            color: #bdd124;
+            color: var(--primary-lime);
         }
 
         .hero-sub {
@@ -1041,8 +1115,8 @@ nav a:hover::after {
         }
 
         .btn-filter:hover {
-            border-color: #bdd124;
-            color: #bdd124;
+            border-color: var(--primary-lime);
+            color: var(--primary-lime);
         }
 
         
@@ -1092,7 +1166,7 @@ nav a:hover::after {
 
         .venue-card:hover {
             transform: translateY(-5px);
-            border-color: #bdd124;
+            border-color: var(--primary-lime);
         }
 
         .venue-card img {
@@ -1177,8 +1251,8 @@ nav a:hover::after {
         }
 
         .btn-pilih:hover {
-            background: #bdd124;
-            border-color: #bdd124;
+            background: var(--primary-lime);
+            border-color: var(--primary-lime);
             color: black;
         }
 
@@ -1309,8 +1383,8 @@ nav a:hover::after {
         }
 
         .filter-opt.active {
-            background: #bdd124;
-            border-color: #bdd124;
+            background: var(--primary-lime);
+            border-color: var(--primary-lime);
             color: #000;
             font-weight: 700;
         }
@@ -1336,7 +1410,7 @@ nav a:hover::after {
         .btn-apply {
             flex: 2;
             padding: 14px;
-            background: #bdd124;
+            background: var(--primary-lime);
             border: none;
             color: #000;
             border-radius: 12px;
@@ -1353,7 +1427,7 @@ nav a:hover::after {
             --bg-dark: #000000;
             --bg-card: #1c1c1c;
             --bg-input: #121212;
-            --primary-green: #bdd124;
+            --primary-green: var(--primary-lime);
             --text-white: #ffffff;
             --text-gray: #aaaaaa;
             --border-color: #333333;
@@ -1854,8 +1928,8 @@ nav a:hover::after {
 .rank-1 {
     width: 350px;
     height: 600px;
-    border: 2px solid #bdd124;
-    background-color: #bdd124;
+    border: 2px solid var(--primary-lime);
+    background-color: var(--primary-lime);
 }
 
 .rank-1::before {
@@ -1863,7 +1937,7 @@ nav a:hover::after {
 }
 
 .rank-1::after {
-    background: linear-gradient(to top, #bdd124, rgba(255, 215, 0, 0) 60%);
+    background: linear-gradient(to top, var(--primary-lime), rgba(255, 215, 0, 0) 60%);
 }
 
 .rank-1 .podium-rank,
@@ -1921,8 +1995,8 @@ nav a:hover::after {
 
 .lb-tab.active,
 .lb-tab:hover {
-    color: #bdd124;
-    border-bottom-color: #bdd124;
+    color: var(--primary-lime);
+    border-bottom-color: var(--primary-lime);
 }
 
 .leaderboard-grid {
@@ -1954,7 +2028,7 @@ nav a:hover::after {
 
 .lb-rank {
     width: 30px;
-    color: #bdd124;
+    color: var(--primary-lime);
     font-weight: 700;
 }
 
@@ -2092,7 +2166,7 @@ nav a:hover::after {
 }
 
 .feed-card:hover {
-    border-color: #bdd124;
+    border-color: var(--primary-lime);
     transform: translateY(-4px);
 }
 
@@ -2145,7 +2219,7 @@ nav a:hover::after {
 
 .tournament-banner:hover {
     transform: scale(1.01);
-    border-color: #bdd124;
+    border-color: var(--primary-lime);
 }
 
 @media (max-width: 992px) {
@@ -2419,8 +2493,8 @@ nav a:hover::after {
 }
 
 .btn-cta:hover {
-    border-color: #bdd124;
-    background-color: #bdd124;
+    border-color: var(--primary-lime);
+    background-color: var(--primary-lime);
     color: #000000;
 }
 
@@ -2493,8 +2567,8 @@ nav a:hover::after {
 }
 
 .date-pill.active {
-  background: #bdd124;
-  border-color: #bdd124;
+  background: var(--primary-lime);
+  border-color: var(--primary-lime);
   color: #000;
   font-weight: 700;
 }
@@ -2617,7 +2691,7 @@ nav a:hover::after {
 }
 
 .facility i {
-  color: #bdd124;
+  color: var(--primary-lime);
   font-size: 18px;
   width: 24px;
   text-align: center;
@@ -2652,7 +2726,7 @@ nav a:hover::after {
 }
 
 .slot-card.available.selected {
-  border: 2px solid #bdd124;
+  border: 2px solid var(--primary-lime);
   background-color: #3a3a3a;
 }
 
@@ -2675,7 +2749,7 @@ nav a:hover::after {
 .slot-card .price {
   font-size: 16px;
   font-weight: bold;
-  color: #bdd124;
+  color: var(--primary-lime);
 }
 
 /* Bottom Sections */
@@ -2703,9 +2777,7 @@ nav a:hover::after {
     padding: 28px 20px;
     flex-shrink: 0;
     height: 100vh;
-    position: fixed;
-    left: 0;
-    top: 0;
+    position: static;
 }
 
 .mitra-sidebar .logo-section {
@@ -2751,7 +2823,7 @@ nav a:hover::after {
 
 .mitra-sidebar .nav-item.active {
     background-color: rgba(189, 209, 36, 0.12);
-    color: #bdd124;
+    color: var(--primary-lime);
     font-weight: 600;
 }
 
@@ -2794,7 +2866,7 @@ nav a:hover::after {
 .mitra-sidebar .avatar {
     width: 36px;
     height: 36px;
-    background-color: #bdd124;
+    background-color: var(--primary-lime);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -2823,7 +2895,6 @@ nav a:hover::after {
     flex-direction: column;
     overflow: hidden;
     background-color: #000000;
-    margin-left: 260px;
     min-height: 100vh;
 }
 
@@ -2856,7 +2927,7 @@ nav a:hover::after {
 
 /* Buttons */
 .btn-primary-dash {
-    background-color: #bdd124;
+    background-color: var(--primary-lime);
     color: #000;
     border: none;
     padding: 10px 20px;
@@ -2887,8 +2958,8 @@ nav a:hover::after {
 }
 
 .btn-secondary-dash:hover {
-    border-color: #bdd124;
-    color: #bdd124;
+    border-color: var(--primary-lime);
+    color: var(--primary-lime);
 }
 
 .btn-action-sm {
@@ -2904,8 +2975,8 @@ nav a:hover::after {
 }
 
 .btn-action-sm:hover {
-    border-color: #bdd124;
-    color: #bdd124;
+    border-color: var(--primary-lime);
+    color: var(--primary-lime);
 }
 
 /* Content Cards */
@@ -2943,7 +3014,7 @@ nav a:hover::after {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #bdd124;
+    color: var(--primary-lime);
     font-size: 18px;
     flex-shrink: 0;
 }
@@ -3004,9 +3075,9 @@ nav a:hover::after {
 }
 
 .badge-open     { background: rgba(76, 175, 80, 0.12); color: #4caf50; }
-.badge-booked   { background: rgba(189, 209, 36, 0.12); color: #bdd124; }
+.badge-booked   { background: rgba(189, 209, 36, 0.12); color: var(--primary-lime); }
 .badge-closed   { background: rgba(244, 67, 54, 0.12); color: #f44336; }
-.badge-pro      { background: rgba(189, 209, 36, 0.12); color: #bdd124; }
+.badge-pro      { background: rgba(189, 209, 36, 0.12); color: var(--primary-lime); }
 .badge-gold     { background: linear-gradient(135deg, #bf953f, #fcf6ba, #aa771c); color: #000; font-weight: 800; }
 .badge-regular  { background: rgba(255,255,255,0.06); color: #aaaaaa; }
 
@@ -3041,7 +3112,7 @@ nav a:hover::after {
 .form-input:focus,
 .form-select:focus,
 .form-textarea:focus {
-    border-color: #bdd124;
+    border-color: var(--primary-lime);
     box-shadow: 0 0 0 3px rgba(189, 209, 36, 0.1);
 }
 
@@ -3110,11 +3181,11 @@ table.court-table {
 }
 
 .cell-empty:hover {
-    outline: 1px solid #bdd124;
+    outline: 1px solid var(--primary-lime);
 }
 
 .cell-booked {
-    background-color: #bdd124;
+    background-color: var(--primary-lime);
     color: #000;
     box-shadow: 0 0 8px rgba(189, 209, 36, 0.25);
 }
@@ -3150,7 +3221,7 @@ table.court-table {
 .survey-stat-card h2 {
     font-size: 40px;
     font-weight: 700;
-    color: #bdd124;
+    color: var(--primary-lime);
     margin-bottom: 6px;
 }
 
@@ -3226,7 +3297,7 @@ table.court-table {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #bdd124;
+    color: var(--primary-lime);
     font-size: 22px;
 }
 
@@ -3260,7 +3331,7 @@ table.court-table {
 
 .btn-toggle.on {
     background: rgba(189, 209, 36, 0.12);
-    color: #bdd124;
+    color: var(--primary-lime);
     border-color: rgba(189, 209, 36, 0.3);
 }
 
@@ -3286,9 +3357,9 @@ table.court-table {
 
 .court-pill:hover { border-color: #555; color: #fff; }
 .court-pill.active {
-    background: #bdd124;
+    background: var(--primary-lime);
     color: #000;
-    border-color: #bdd124;
+    border-color: var(--primary-lime);
     font-weight: 600;
 }
 
@@ -3390,14 +3461,14 @@ table.court-table {
 
 .login-card input:focus {
     outline: none;
-    border-color: #bdd124;
+    border-color: var(--primary-lime);
     box-shadow: 0 0 0 4px rgba(189, 209, 36, 0.1);
 }
 
 .btn-login {
     width: 100%;
     padding: 16px;
-    background-color: #bdd124;
+    background-color: var(--primary-lime);
     color: #000;
     border: none;
     border-radius: 12px;
@@ -3423,7 +3494,7 @@ table.court-table {
 }
 
 .footer-links a {
-    color: #bdd124;
+    color: var(--primary-lime);
     text-decoration: none;
     font-weight: 600;
 }
@@ -3485,7 +3556,7 @@ table.court-table {
     font-size: 20px;
     font-weight: 700;
     margin-bottom: 24px;
-    color: #bdd124;
+    color: var(--primary-lime);
 }
 
 .section-title i {
@@ -3533,7 +3604,7 @@ table.court-table {
 .reg-body select:focus,
 .reg-body textarea:focus {
     outline: none;
-    border-color: #bdd124;
+    border-color: var(--primary-lime);
     background: #252525;
     box-shadow: 0 0 0 4px rgba(189, 209, 36, 0.1);
 }
@@ -3568,15 +3639,15 @@ table.court-table {
 }
 
 .facility-item input:checked + .facility-label {
-    border-color: #bdd124;
+    border-color: var(--primary-lime);
     background: rgba(189, 209, 36, 0.1);
-    color: #bdd124;
+    color: var(--primary-lime);
 }
 
 .btn-submit-reg {
     width: 100%;
     padding: 18px;
-    background: #bdd124;
+    background: var(--primary-lime);
     color: #000;
     border: none;
     border-radius: 14px;
@@ -3645,7 +3716,7 @@ table.court-table {
 }
 
 .search-input-wrapper input:focus {
-    border-color: #bdd124;
+    border-color: var(--primary-lime);
 }
 
 .member-info {
@@ -3716,11 +3787,11 @@ nav a::after {
   position: absolute;
   left: 0; bottom: -4px;
   width: 0; height: 2px;
-  background: #bdd124;
+  background: var(--primary-lime);
   border-radius: 2px;
   transition: width 0.3s ease;
 }
-nav a:hover { color: #bdd124; }
+nav a:hover { color: var(--primary-lime); }
 nav a:hover::after { width: 100%; }
 
 .nav-btn {
@@ -3729,7 +3800,7 @@ nav a:hover::after { width: 100%; }
   align-items: center;
 }
 .btn-primary {
-  background-color: #bdd124;
+  background-color: var(--primary-lime);
   color: #000;
   padding: 10px 24px;
   border-radius: 8px;
@@ -3751,8 +3822,8 @@ nav a:hover::after { width: 100%; }
   transition: all 0.3s;
 }
 .btn-outline:hover {
-  background: #bdd124 !important;
-  border-color: #bdd124 !important;
+  background: var(--primary-lime) !important;
+  border-color: var(--primary-lime) !important;
   color: #000 !important;
 }
 .user-profile {
@@ -3767,7 +3838,7 @@ nav a:hover::after { width: 100%; }
 .user-avatar {
   width: 32px;
   height: 32px;
-  background: #bdd124;
+  background: var(--primary-lime);
   color: #000;
   border-radius: 50%;
   display: flex;
@@ -3815,7 +3886,7 @@ nav a:hover::after { width: 100%; }
 }
 .dropdown-item:hover {
   background-color: #222;
-  color: #bdd124;
+  color: var(--primary-lime);
 }
 .dropdown-item i {
   width: 16px;

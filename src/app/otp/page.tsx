@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 export default function OTPPage() {
   const router = useRouter();
@@ -13,6 +13,7 @@ export default function OTPPage() {
     useRef<HTMLInputElement>(null)
   ];
 
+  useEffect(() => { document.title = 'Verifikasi OTP - Minton'; }, []);
   const handleKeyUp = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     const current = inputRefs[index].current;
     if (!current) return;
@@ -34,7 +35,7 @@ export default function OTPPage() {
   return (
     <>
       <style dangerouslySetInnerHTML={{__html: `
-        :root { --bg-dark: #000000; --bg-card: #1D1D1D; --primary-lime: #bdd124; --text-white: #ffffff; --text-gray: #aaaaaa; --input-bg: #111111; }
+        :root { --bg-dark: #000000; --bg-card: #1D1D1D; --text-white: #ffffff; --text-gray: #aaaaaa; --input-bg: #111111; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background-color: var(--bg-dark); color: var(--text-white); display: flex; min-height: 100vh; }
         .split-layout { display: flex; width: 100%; min-height: 100vh; }

@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useEffect } from 'react';
 import DashboardSidebar from '@/components/DashboardSidebar';
 
 const tournaments = [
@@ -10,6 +11,7 @@ const tournaments = [
 ];
 
 export default function TurnamenPage() {
+  useEffect(() => { document.title = 'Turnamen - Minton'; }, []);
   return (
     <DashboardSidebar>
       <header className="page-header">
@@ -22,19 +24,19 @@ export default function TurnamenPage() {
         <style>{`
           .tournament-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; margin-top: 24px; }
           .tournament-card { background: #1d1d1d; border: 1px solid #333; border-radius: 16px; overflow: hidden; transition: 0.3s; }
-          .tournament-card:hover { transform: translateY(-8px); border-color: #bdd124; }
+          .tournament-card:hover { transform: translateY(-8px); border-color: var(--primary-lime); }
           .tournament-card img { width: 100%; height: 180px; object-fit: cover; }
           .tournament-body { padding: 20px; }
-          .tournament-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; background: rgba(189,209,36,0.1); color: #bdd124; }
+          .tournament-badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; background: rgba(189,209,36,0.1); color: var(--primary-lime); }
           .tournament-body h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
           .tournament-info { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
           .tournament-info .info-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #aaa; }
-          .tournament-info .info-item i { width: 16px; color: #bdd124; }
+          .tournament-info .info-item i { width: 16px; color: var(--primary-lime); }
           .tournament-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid #333; }
           .tournament-footer .price { font-size: 16px; font-weight: 700; }
         `}</style>
         <div style={{ marginBottom: 32 }}>
-          <h2 style={{ fontSize: 24, marginBottom: 8 }}>Turnamen <span style={{ color: '#bdd124' }}>Mendatang</span></h2>
+          <h2 style={{ fontSize: 24, marginBottom: 8 }}>Turnamen <span style={{ color: 'var(--primary-lime)' }}>Mendatang</span></h2>
           <p style={{ color: '#aaa' }}>Daftarkan tim Anda dan menangkan hadiah jutaan rupiah!</p>
         </div>
         <div className="tournament-grid">

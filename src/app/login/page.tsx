@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { loginAction } from './actions';
@@ -11,6 +11,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  useEffect(() => { document.title = 'Login - Minton'; }, []);
 
   async function handleGoogleLogin() {
     console.log("Memulai Login Google...");
@@ -53,13 +54,13 @@ export default function LoginPage() {
   return (
     <>
       <style dangerouslySetInnerHTML={{__html: `
-        :root { --bg-dark: #000000; --bg-card: #1D1D1D; --primary-lime: #bdd124; --text-white: #ffffff; --text-gray: #aaaaaa; --input-bg: #111111; }
+        :root { --bg-dark: #000000; --bg-card: #1D1D1D; --text-white: #ffffff; --text-gray: #aaaaaa; --input-bg: #111111; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background-color: var(--bg-dark); color: var(--text-white); display: flex; min-height: 100vh; }
         .split-layout { display: flex; width: 100%; min-height: 100vh; }
         .left-side { flex: 1; position: relative; background: linear-gradient(to right, rgba(10, 10, 10, 0.1) 50%, var(--bg-dark) 100%), url('/asset/background-login.png') center/cover no-repeat; }
-        .header-overlay { position: absolute; top: 0; left: 0; width: 100%; padding: 26px 0; z-index: 20; }
-        .container-overlay { width: 90%; max-width: 1600px; margin: auto; }
+        .header-overlay { position: absolute; top: 0; left: 0; width: 100%; padding: 26px 0; z-index: 20; pointer-events: none; }
+        .container-overlay { width: 90%; max-width: 1600px; margin: auto; pointer-events: auto; }
         .logo-img { height: 28px; }
         .right-side { flex: 1; display: flex; justify-content: center; align-items: center; padding: 40px; background-color: var(--bg-dark); }
         .form-card { background-color: var(--bg-card); padding: 50px; border-radius: 16px; width: 100%; max-width: 550px; }
@@ -74,13 +75,15 @@ export default function LoginPage() {
         input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus { box-shadow: 0 0 0 2px var(--primary-lime); }
         .forgot-password { text-align: right; margin-top: 10px; }
         .forgot-password a { color: var(--text-gray); font-size: 13px; text-decoration: none; transition: 0.3s; }
+        .forgot-password a:hover { color: var(--primary-lime); text-decoration: underline; }
         .checkbox-group { display: flex; align-items: center; gap: 10px; margin-top: 40px; margin-bottom: 25px; }
         .checkbox-group input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--primary-lime); cursor: pointer; }
         .checkbox-group label { margin-bottom: 0; color: var(--text-gray); font-size: 14px; cursor: pointer; }
         .btn-submit { width: 100%; padding: 14px; background-color: var(--primary-lime); color: #000; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-bottom: 20px; }
         .btn-submit:hover { background-color: #a7bc1d; box-shadow: 0 4px 12px rgba(189, 209, 36, 0.4); }
         .register-link { text-align: center; font-size: 14px; color: var(--text-gray); }
-        .register-link a { color: var(--primary-lime); text-decoration: none; font-weight: 500; margin-left: 5px; }
+        .register-link a { color: var(--primary-lime); text-decoration: none; font-weight: 500; margin-left: 5px; transition: 0.3s; }
+        .register-link a:hover { text-decoration: underline; }
         @media (max-width: 992px) { .form-card { padding: 30px; } }
         @media (max-width: 768px) { .left-side { display: none; } .right-side { padding: 20px; } .social-buttons { flex-direction: column; } }
       `}} />

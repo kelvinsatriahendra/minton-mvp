@@ -146,6 +146,78 @@ export default function Navbar() {
           font-weight: 700;
         }
         
+        .user-dropdown {
+          position: relative;
+          display: inline-block;
+        }
+        .dropdown-menu {
+          display: none;
+          position: absolute;
+          right: 0;
+          top: 100%;
+          background-color: #171717;
+          min-width: 200px;
+          border-radius: 12px;
+          border: 1px solid #333;
+          padding: 10px 0;
+          margin-top: 10px;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+          z-index: 1200;
+        }
+        .user-dropdown:hover .dropdown-menu {
+          display: block;
+          animation: fadeIn 0.2s ease;
+        }
+        .dropdown-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px 20px;
+          color: #fff;
+          text-decoration: none;
+          transition: 0.2s;
+          font-size: 14px;
+          cursor: pointer;
+          border: none;
+          background: none;
+          width: 100%;
+          text-align: left;
+        }
+        .dropdown-item:hover {
+          background-color: #222;
+          color: #bdd124;
+        }
+        .dropdown-item i {
+          width: 16px;
+          text-align: center;
+        }
+        .dropdown-divider {
+          height: 1px;
+          background-color: #333;
+          margin: 8px 0;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(-10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .user-profile-btn {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          color: #fff;
+          font-weight: 500;
+          font-size: 14px;
+          cursor: pointer;
+          background: rgba(255, 255, 255, 0.05);
+          padding: 6px 16px 6px 6px;
+          border-radius: 30px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          transition: 0.3s;
+        }
+        .user-profile-btn:hover {
+          background: rgba(255, 255, 255, 0.1);
+          border-color: rgba(255, 255, 255, 0.2);
+        }
         .hamburger {
           display: none;
           flex-direction: column;
@@ -220,10 +292,33 @@ export default function Navbar() {
 
           <div className="nav-btn">
             {isLoggedIn ? (
-              <Link href="/dashboard" className="user-profile">
-                <span>{userName}</span>
-                <div className="user-avatar">{userName.charAt(0).toUpperCase()}</div>
-              </Link>
+              <div className="user-dropdown">
+                <div className="user-profile-btn">
+                  <div className="user-avatar">{userName.charAt(0).toUpperCase()}</div>
+                  <span>{userName}</span>
+                  <i className="fa-solid fa-chevron-down" style={{ fontSize: '12px', marginLeft: '4px' }}></i>
+                </div>
+                <div className="dropdown-menu">
+                  <Link href="/dashboard" className="dropdown-item">
+                    <i className="fa-solid fa-gauge"></i> Dashboard
+                  </Link>
+                  <Link href="/profil" className="dropdown-item">
+                    <i className="fa-solid fa-user"></i> Profil Saya
+                  </Link>
+                  <Link href="/booking-saya" className="dropdown-item">
+                    <i className="fa-solid fa-ticket"></i> Booking Saya
+                  </Link>
+                  <div className="dropdown-divider"></div>
+                  <button onClick={() => {
+                    document.cookie = "session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                    document.cookie = "isLoggedIn=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                    document.cookie = "userName=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                    window.location.href = '/';
+                  }} className="dropdown-item" style={{ color: '#ef4444' }}>
+                    <i className="fa-solid fa-right-from-bracket"></i> Logout
+                  </button>
+                </div>
+              </div>
             ) : (
               <>
                 <Link href="/sign-up"><button className="btn-outline">Sign-Up</button></Link>

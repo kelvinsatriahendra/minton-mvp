@@ -193,7 +193,7 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
           <img src={venue.image_url} alt={venue.name} />
         </div>
 
-        <div className="title-wrapper">
+        <div className="title-wrapper" style={{ alignItems: 'flex-start', gap: '40px' }}>
           <div className="title-left" style={{ flex: 1 }}>
             <h1>{venue.name}</h1>
             <div className="rating" style={{ marginBottom: '40px' }}>
@@ -232,7 +232,7 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
             </div>
           </div>
 
-          <div className="price-box">
+          <div className="price-box" style={{ width: '280px', position: 'sticky', top: '100px' }}>
             <h4 style={{ marginBottom: '12px', fontWeight: 'normal' }}>Mulai dari</h4>
             <div style={{ marginBottom: '15px' }}>
               <span style={{ fontSize: '24px' }}>Rp {venue.price_per_hour.toLocaleString('id-ID')}</span>
@@ -284,7 +284,13 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
                       <span>{court.is_indoor ? 'Indoor' : 'Outdoor'}</span>
                       <span>{court.type}</span>
                     </p>
-                    <button className="slot-btn" onClick={() => { setActiveCourt(court.id); setIsSlotModalOpen(true); }}>
+                    <button 
+                      className="slot-btn" 
+                      style={{ borderColor: '#333', cursor: 'pointer', transition: '0.3s' }}
+                      onMouseOver={(e) => e.currentTarget.style.borderColor = 'white'}
+                      onMouseOut={(e) => e.currentTarget.style.borderColor = '#333'}
+                      onClick={() => { setActiveCourt(court.id); setIsSlotModalOpen(true); }}
+                    >
                       Lihat Tersedia
                     </button>
                   </div>
@@ -299,28 +305,146 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
         {/* Bottom Sections */}
         <section style={{ marginTop: '100px' }}>
           <h2 style={{ fontSize: '26px', fontWeight: 'bold', marginBottom: '32px' }}>Paket Membership</h2>
-          <div className="membership-wrapper">
-             <div className="membership-card">
-                <p style={{ color: '#aaa' }}>Belum ada paket membership tersedia untuk venue ini.</p>
+          <div className="membership-wrapper" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '24px' }}>
+             <div className="membership-card" style={{ background: '#171717', borderRadius: '12px', padding: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid #2a2a2a' }}>
+                <div>
+                  <h3 style={{ marginBottom: '12px', fontSize: '18px' }}>Member Badminton Reguler</h3>
+                  <ul style={{ color: '#aaa', fontSize: '14px', lineHeight: '1.6', marginLeft: '20px' }}>
+                    <li>Langganan 4x main / minggu</li>
+                    <li>Bebas pilih jam dan hari</li>
+                  </ul>
+                </div>
+                <button style={{ background: 'none', border: '1px solid #333', color: 'white', padding: '10px 24px', borderRadius: '8px', cursor: 'pointer', fontWeight: 500 }}>Beli Paket</button>
+             </div>
+             <div className="membership-card" style={{ background: '#171717', borderRadius: '12px', padding: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid #2a2a2a' }}>
+                <div>
+                  <h3 style={{ marginBottom: '12px', fontSize: '18px' }}>Member Badminton Premium</h3>
+                  <ul style={{ color: '#aaa', fontSize: '14px', lineHeight: '1.6', marginLeft: '20px' }}>
+                    <li>Langganan 4x main / minggu</li>
+                    <li>Termasuk parkir gratis & free air</li>
+                  </ul>
+                </div>
+                <button style={{ background: 'none', border: '1px solid #333', color: 'white', padding: '10px 24px', borderRadius: '8px', cursor: 'pointer', fontWeight: 500 }}>Beli Paket</button>
              </div>
           </div>
         </section>
 
         <section style={{ marginTop: '100px' }}>
           <h2 style={{ fontSize: '26px', fontWeight: 'bold', marginBottom: '32px' }}>Ulasan</h2>
-          <div className="review-wrapper">
-             <div className="review-card">
-                <p style={{ color: '#aaa' }}>Belum ada ulasan untuk venue ini.</p>
+          <div className="review-wrapper" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
+             <div className="review-card" style={{ background: '#171717', borderRadius: '12px', padding: '24px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#ccc', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'black' }}><i className="fa-solid fa-user"></i></div>
+                  <div>
+                    <h4 style={{ fontSize: '14px', marginBottom: '2px' }}>Rudy Kurniawan</h4>
+                    <p style={{ fontSize: '12px', color: '#aaa' }}>Reviewer</p>
+                  </div>
+                </div>
+                <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Badminton Blue Court 1</h4>
+                <p style={{ fontSize: '13px', color: '#aaa', marginBottom: '20px', lineHeight: '1.5' }}>Lapangan sangat nyaman digunakan dan sangat bersih. Harga sesuai dengan fasilitas yang diberikan.</p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
+                  <div><span style={{ color: '#bdd124' }}>★</span> 5.0</div>
+                  <div style={{ color: '#aaa' }}>2 hari yang lalu</div>
+                </div>
+             </div>
+             
+             <div className="review-card" style={{ background: '#171717', borderRadius: '12px', padding: '24px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#ccc', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'black' }}><i className="fa-solid fa-user"></i></div>
+                  <div>
+                    <h4 style={{ fontSize: '14px', marginBottom: '2px' }}>Ahmad Fauzi</h4>
+                    <p style={{ fontSize: '12px', color: '#aaa' }}>Reviewer</p>
+                  </div>
+                </div>
+                <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Badminton Blue Court 2</h4>
+                <p style={{ fontSize: '13px', color: '#aaa', marginBottom: '20px', lineHeight: '1.5' }}>Pelayanan ramah, lapangan terang, sirkulasi udara baik. Namun parkir agak susah saat weekend.</p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
+                  <div><span style={{ color: '#bdd124' }}>★</span> 4.5</div>
+                  <div style={{ color: '#aaa' }}>4 hari yang lalu</div>
+                </div>
+             </div>
+
+             <div className="review-card" style={{ background: '#171717', borderRadius: '12px', padding: '24px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#ccc', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'black' }}><i className="fa-solid fa-user"></i></div>
+                  <div>
+                    <h4 style={{ fontSize: '14px', marginBottom: '2px' }}>Clarissa Anwar</h4>
+                    <p style={{ fontSize: '12px', color: '#aaa' }}>Reviewer</p>
+                  </div>
+                </div>
+                <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Badminton Green Court 1</h4>
+                <p style={{ fontSize: '13px', color: '#aaa', marginBottom: '20px', lineHeight: '1.5' }}>Kualitas karpetnya bagus, tidak licin. Sangat recommended buat main bareng teman kantor.</p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
+                  <div><span style={{ color: '#bdd124' }}>★</span> 5.0</div>
+                  <div style={{ color: '#aaa' }}>1 mgg yang lalu</div>
+                </div>
+             </div>
+
+             <div className="review-card" style={{ background: '#171717', borderRadius: '12px', padding: '24px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#ccc', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'black' }}><i className="fa-solid fa-user"></i></div>
+                  <div>
+                    <h4 style={{ fontSize: '14px', marginBottom: '2px' }}>Bambang Pamungkas</h4>
+                    <p style={{ fontSize: '12px', color: '#aaa' }}>Reviewer</p>
+                  </div>
+                </div>
+                <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Badminton Green Court 2</h4>
+                <p style={{ fontSize: '13px', color: '#aaa', marginBottom: '20px', lineHeight: '1.5' }}>Overall baik. Harga sewa cukup terjangkau untuk fasilitas yang disediakan oleh GOR ini.</p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
+                  <div><span style={{ color: '#bdd124' }}>★</span> 4.0</div>
+                  <div style={{ color: '#aaa' }}>2 mgg yang lalu</div>
+                </div>
              </div>
           </div>
         </section>
 
-        <section style={{ marginTop: '100px', marginBottom: '100px' }}>
+        <section style={{ marginTop: '100px', marginBottom: '100px', position: 'relative' }}>
           <h2 style={{ fontSize: '26px', fontWeight: 'bold', marginBottom: '32px' }}>Rekomendasi Lapangan</h2>
-          <div className="recommend-grid">
-             <div className="recommend-card" style={{ textAlign: 'center', padding: '40px' }}>
-                <button className="btn-primary" onClick={() => window.location.href = '/sewa-lapangan'}>Cari Lapangan Lain</button>
+          <div className="recommend-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
+             <div className="recommend-card" style={{ background: '#171717', borderRadius: '12px', overflow: 'hidden' }}>
+                <img src="/asset/kalam-kudus.png" style={{ width: '100%', height: '160px', objectFit: 'cover' }} />
+                <div style={{ padding: '16px' }}>
+                  <h3 style={{ fontSize: '14px', marginBottom: '8px', fontWeight: 600 }}>Kalam Kudus Sport Center</h3>
+                  <p style={{ fontSize: '12px', color: '#aaa', marginBottom: '16px' }}><span style={{ color: '#bdd124' }}>★</span> 4.9 • Surakarta, Jawa Tengah</p>
+                  <div style={{ fontSize: '10px', color: '#aaa', marginBottom: '4px' }}>Mulai</div>
+                  <div style={{ fontWeight: 700, fontSize: '16px' }}>Rp250.000<span style={{ fontSize: '12px', fontWeight: 'normal', color: '#aaa' }}>/sesi</span></div>
+                </div>
              </div>
+             
+             <div className="recommend-card" style={{ background: '#171717', borderRadius: '12px', overflow: 'hidden' }}>
+                <img src="/asset/surabaya-badminton.png" style={{ width: '100%', height: '160px', objectFit: 'cover' }} />
+                <div style={{ padding: '16px' }}>
+                  <h3 style={{ fontSize: '14px', marginBottom: '8px', fontWeight: 600 }}>Surabaya Badminton Hall</h3>
+                  <p style={{ fontSize: '12px', color: '#aaa', marginBottom: '16px' }}><span style={{ color: '#bdd124' }}>★</span> 4.8 • Surabaya, Jawa Timur</p>
+                  <div style={{ fontSize: '10px', color: '#aaa', marginBottom: '4px' }}>Mulai</div>
+                  <div style={{ fontWeight: 700, fontSize: '16px' }}>Rp150.000<span style={{ fontSize: '12px', fontWeight: 'normal', color: '#aaa' }}>/sesi</span></div>
+                </div>
+             </div>
+
+             <div className="recommend-card" style={{ background: '#171717', borderRadius: '12px', overflow: 'hidden' }}>
+                <img src="/asset/gor-arek-surabaya.png" style={{ width: '100%', height: '160px', objectFit: 'cover' }} />
+                <div style={{ padding: '16px' }}>
+                  <h3 style={{ fontSize: '14px', marginBottom: '8px', fontWeight: 600 }}>GOR Arak Surabaya</h3>
+                  <p style={{ fontSize: '12px', color: '#aaa', marginBottom: '16px' }}><span style={{ color: '#bdd124' }}>★</span> 4.5 • Surabaya, Jawa Timur</p>
+                  <div style={{ fontSize: '10px', color: '#aaa', marginBottom: '4px' }}>Mulai</div>
+                  <div style={{ fontWeight: 700, fontSize: '16px' }}>Rp80.000<span style={{ fontSize: '12px', fontWeight: 'normal', color: '#aaa' }}>/sesi</span></div>
+                </div>
+             </div>
+
+             <div className="recommend-card" style={{ background: '#171717', borderRadius: '12px', overflow: 'hidden' }}>
+                <img src="/asset/supersmash-badminton-hall.png" style={{ width: '100%', height: '160px', objectFit: 'cover' }} />
+                <div style={{ padding: '16px' }}>
+                  <h3 style={{ fontSize: '14px', marginBottom: '8px', fontWeight: 600 }}>Supermash Badminton</h3>
+                  <p style={{ fontSize: '12px', color: '#aaa', marginBottom: '16px' }}><span style={{ color: '#bdd124' }}>★</span> 4.7 • Surabaya, Jawa Timur</p>
+                  <div style={{ fontSize: '10px', color: '#aaa', marginBottom: '4px' }}>Mulai</div>
+                  <div style={{ fontWeight: 700, fontSize: '16px' }}>Rp120.000<span style={{ fontSize: '12px', fontWeight: 'normal', color: '#aaa' }}>/sesi</span></div>
+                </div>
+             </div>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '30px' }}>
+            <button style={{ background: '#bdd124', color: 'black', padding: '12px 24px', borderRadius: '8px', fontWeight: 600, border: 'none', cursor: 'pointer', transition: '0.3s' }} onClick={() => window.location.href = '/sewa-lapangan'}>
+              <i className="fa-solid fa-magnifying-glass" style={{ marginRight: '8px' }}></i> Cari Lapangan Lain
+            </button>
           </div>
         </section>
       </div>

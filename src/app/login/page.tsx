@@ -42,7 +42,10 @@ export default function LoginPage() {
       setError(result.message);
       setLoading(false);
     } else {
-      router.push('/');
+      // Get redirect param from URL
+      const params = new URLSearchParams(window.location.search);
+      const redirectTo = params.get('redirect') || '/';
+      router.push(redirectTo);
       router.refresh();
     }
   }

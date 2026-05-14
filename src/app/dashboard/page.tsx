@@ -1,120 +1,239 @@
-
-import { cookies } from 'next/headers';
-import LogoutButton from './LogoutButton';
-import { supabase } from '@/utils/supabase';
 import DashboardSidebar from '@/components/DashboardSidebar';
 
-interface Booking {
-  id: number;
-  venue_name: string;
-  court_name: string;
-  booking_date: string;
-  start_time: string;
-  end_time: string;
-  total_price: number;
-  status: string;
-}
-
-export default async function DashboardPage() {
-  const cookieStore = await cookies();
-  const userName = cookieStore.get('userName')?.value || 'Jagoan';
-  const userEmail = cookieStore.get('userEmail')?.value;
-  const isLoggedIn = cookieStore.get('isLoggedIn')?.value === 'true';
-
-  if (!isLoggedIn || !userEmail) {
-    return (
-      <div style={{ background: '#000', color: '#fff', height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <h2 style={{ marginBottom: '20px' }}>Silakan login untuk melihat dashboard.</h2>
-        <a href="/login" style={{ background: '#bdd124', color: '#000', padding: '12px 24px', borderRadius: '8px', fontWeight: 'bold', textDecoration: 'none' }}>Login Sekarang</a>
-      </div>
-    );
-  }
-
-  const { data: bookings } = await supabase
-    .from('bookings')
-    .select('*')
-    .eq('user_email', userEmail)
-    .order('booking_date', { ascending: false });
-
+export default function DashboardPage() {
   return (
-    <DashboardSidebar>
-      <header className="page-header">
-        <h1>Dashboard</h1>
-      </header>
-      <div className="page-body">
+    <div style={{ display: 'flex', minHeight: '100vh' }}>
+      <DashboardSidebar active="Dashboard" />
+      <main className="mitra-main">
         <style>{`
-          .dash-profile { background: #1d1d1d; border: 1px solid #333; border-radius: 20px; padding: 32px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
-          .dash-profile-left { display: flex; align-items: center; gap: 24px; }
-          .dash-avatar { width: 64px; height: 64px; background: #bdd124; color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 800; }
-          .dash-greeting h2 { font-size: 24px; margin-bottom: 4px; }
-          .dash-greeting h2 span { color: #bdd124; }
-          .dash-greeting p { color: #888; font-size: 14px; }
-          .dash-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 40px; }
-          .dash-stat { background: #1d1d1d; border: 1px solid #333; border-radius: 16px; padding: 24px; transition: 0.3s; }
-          .dash-stat:hover { border-color: #bdd124; transform: translateY(-4px); }
-          .dash-stat .label { color: #888; font-size: 13px; margin-bottom: 8px; }
-          .dash-stat .value { font-size: 22px; font-weight: 700; }
-          .dash-stat .value.lime { color: #bdd124; }
-          .dash-stat .value.blue { color: #3b82f6; }
-          .booking-row { background: #1d1d1d; border: 1px solid #333; border-radius: 16px; padding: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; transition: 0.3s; }
-          .booking-row:hover { border-color: #bdd124; }
-          .booking-row-left { display: flex; align-items: center; gap: 16px; }
-          .booking-icon-box { width: 48px; height: 48px; background: #222; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-          .booking-info h4 { font-size: 16px; margin-bottom: 2px; }
-          .booking-info p { color: #888; font-size: 13px; }
-          .booking-info .date { font-size: 12px; color: #666; margin-top: 6px; }
-          .booking-right { text-align: right; }
-          .booking-right .time { font-size: 13px; color: #888; margin-bottom: 8px; }
-          .booking-right .time strong { font-size: 16px; color: #fff; }
-          .status-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; background: rgba(34,197,94,0.1); color: #22c55e; border: 1px solid rgba(34,197,94,0.2); }
-          .empty-state { padding: 60px; text-align: center; background: #1d1d1d; border-radius: 20px; border: 1px dashed #444; color: #666; }
+          .reward-banner {
+            background: linear-gradient(135deg, #1d1d1d 0%, #111 100%);
+            border: 1px solid #333;
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+          }
+          .reward-info h2 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            color: #fff;
+          }
+          .reward-info p {
+            color: #aaa;
+            font-size: 14px;
+          }
+          .points-badge {
+            background: #bdd124;
+            color: #000;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 18px;
+          }
+          .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            transition: 0.3s;
+          }
+          .activity-item:hover {
+            background: rgba(255,255,255,0.04);
+          }
+          .activity-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+          }
+          .activity-info h5 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #fff;
+          }
+          .activity-info p {
+            font-size: 12px;
+            color: #aaa;
+          }
+          .match-status {
+            margin-left: auto;
+            font-size: 12px;
+            font-weight: 600;
+          }
+          .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 20px;
+          }
+          .avatar {
+            width: 36px;
+            height: 36px;
+            background-color: #bdd124;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+          }
           @media (max-width: 768px) {
-            .dash-profile { flex-direction: column; text-align: center; }
-            .dash-stats { grid-template-columns: 1fr; }
-            .booking-row { flex-direction: column; text-align: center; gap: 16px; }
-            .booking-row-left { flex-direction: column; }
+            .main-grid { grid-template-columns: 1fr; }
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
           }
         `}</style>
-        <div className="dash-profile">
-          <div className="dash-profile-left">
-            <div className="dash-avatar">{userName.charAt(0).toUpperCase()}</div>
-            <div className="dash-greeting">
-              <h2>Halo, <span>{decodeURIComponent(userName)}!</span></h2>
-              <p>Siap untuk mendominasi lapangan hari ini?</p>
+        <header className="mitra-header">
+          <h1>Dashboard Bagas</h1>
+          <div className="mitra-header-actions">
+            <button className="btn-secondary-dash"><i className="fa-solid fa-bell"></i></button>
+            <button className="btn-primary-dash"><i className="fa-solid fa-plus"></i> Cari Lapangan</button>
+          </div>
+        </header>
+        <div className="mitra-body">
+          <div className="reward-banner">
+            <div className="reward-info">
+              <h2>Kumpulkan <span style={{ color: '#bdd124' }}>Minton Points.</span></h2>
+              <p>Main lebih sering, kumpulkan poin, dan dapatkan potongan harga sewa lapangan!</p>
+            </div>
+            <div className="points-badge">2,450 pts</div>
+          </div>
+
+          <div className="stats-row">
+            <div className="stat-card">
+              <div className="stat-icon"><i className="fa-solid fa-shuttlecock"></i></div>
+              <div className="stat-info"><h4>Main Bareng</h4><p>24 Sesi</p></div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon"><i className="fa-solid fa-calendar-check"></i></div>
+              <div className="stat-info"><h4>Booking</h4><p>12 Kali</p></div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon"><i className="fa-solid fa-medal"></i></div>
+              <div className="stat-info"><h4>Win Rate</h4><p>68%</p></div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon"><i className="fa-solid fa-ranking-star"></i></div>
+              <div className="stat-info"><h4>Level</h4><p>Semi-Pro</p></div>
             </div>
           </div>
-          <LogoutButton />
-        </div>
-        <div className="dash-stats">
-          <div className="dash-stat"><div className="label">Poin Minton</div><div className="value lime">1.250 XP</div></div>
-          <div className="dash-stat"><div className="label">Total Main</div><div className="value">12 Pertandingan</div></div>
-          <div className="dash-stat"><div className="label">Level</div><div className="value blue">Intermediate</div></div>
-        </div>
-        <h2 style={{ fontSize: 22, marginBottom: 24 }}>Riwayat Pemesanan</h2>
-        {bookings && bookings.length > 0 ? (
-          bookings.map((booking: Booking) => (
-            <div key={booking.id} className="booking-row">
-              <div className="booking-row-left">
-                <div className="booking-icon-box">🏸</div>
-                <div className="booking-info">
-                  <h4>{booking.venue_name}</h4>
-                  <p>{booking.court_name}</p>
-                  <div className="date">{new Date(booking.booking_date).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+
+          <div className="main-grid">
+            <div className="content-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <span className="content-card-title" style={{ margin: 0 }}>Jadwal Terdekat</span>
+                <a href="/booking-saya" style={{ color: '#bdd124', fontSize: 13, textDecoration: 'none' }}>Lihat Semua</a>
+              </div>
+              <div className="activity-item">
+                <img src="/asset/surabaya-badminton.png" alt="Venue" style={{ width: 44, height: 44, borderRadius: 10, objectFit: 'cover' }} />
+                <div className="activity-info">
+                  <h5>Main Bareng: GOR Sudirman</h5>
+                  <p>Besok, 19:00 - 21:00 • Lapangan 3</p>
+                </div>
+                <div className="match-status" style={{ color: '#bdd124' }}>Terkonfirmasi</div>
+              </div>
+              <div className="activity-item">
+                <img src="/asset/kalam-kudus.png" alt="Venue" style={{ width: 44, height: 44, borderRadius: 10, objectFit: 'cover' }} />
+                <div className="activity-info">
+                  <h5>Sewa Lapangan: Kalam Kudus</h5>
+                  <p>Sabtu, 10 Mei • 08:00 - 10:00</p>
+                </div>
+                <div className="match-status" style={{ color: '#ffc107' }}>Menunggu Bayar</div>
+              </div>
+              <div className="activity-item">
+                <img src="/asset/supersmash-badminton-hall.png" alt="Venue" style={{ width: 44, height: 44, borderRadius: 10, objectFit: 'cover' }} />
+                <div className="activity-info">
+                  <h5>Main Bareng: Surabaya Hall</h5>
+                  <p>Minggu, 11 Mei • 16:00 - 18:00</p>
+                </div>
+                <div className="match-status" style={{ color: '#bdd124' }}>Terkonfirmasi</div>
+              </div>
+            </div>
+
+            <div className="content-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <span className="content-card-title" style={{ margin: 0 }}>Teman Aktif</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div className="avatar" style={{ width: 32, height: 32, fontSize: 11 }}>AW</div>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>Andi Wijaya</p>
+                    <p style={{ fontSize: 11, color: '#aaa' }}>Online</p>
+                  </div>
+                  <div style={{ width: 8, height: 8, background: '#4caf50', borderRadius: '50%' }}></div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div className="avatar" style={{ width: 32, height: 32, fontSize: 11, background: '#555' }}>BP</div>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>Budi Pratama</p>
+                    <p style={{ fontSize: 11, color: '#aaa' }}>Offline</p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div className="avatar" style={{ width: 32, height: 32, fontSize: 11 }}>CP</div>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>Citra Putri</p>
+                    <p style={{ fontSize: 11, color: '#aaa' }}>Online</p>
+                  </div>
+                  <div style={{ width: 8, height: 8, background: '#4caf50', borderRadius: '50%' }}></div>
                 </div>
               </div>
-              <div className="booking-right">
-                <div className="time">Jam Main<br /><strong>{booking.start_time.substring(0,5)} - {booking.end_time.substring(0,5)}</strong></div>
-                <span className="status-badge">{booking.status}</span>
-              </div>
+              <button className="btn-secondary-dash" style={{ width: '100%', marginTop: 24, padding: 8 }}>Cari Teman Baru</button>
             </div>
-          ))
-        ) : (
-          <div className="empty-state">
-            <i className="fa-regular fa-calendar-xmark" style={{ fontSize: 48, marginBottom: 20, display: 'block' }}></i>
-            Belum ada riwayat pemesanan. Ayo mulai booking lapangan pertamamu!
           </div>
-        )}
-      </div>
-    </DashboardSidebar>
+
+          <div className="content-card">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+              <span className="content-card-title" style={{ margin: 0 }}>Aktivitas Terakhir</span>
+            </div>
+            <table className="dash-table">
+              <thead>
+                <tr>
+                  <th>Kegiatan</th>
+                  <th>Tanggal</th>
+                  <th>Lokasi</th>
+                  <th>Status</th>
+                  <th>Poin</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Sewa Lapangan</td>
+                  <td>05 Mei 2024</td>
+                  <td>GOR Sudirman</td>
+                  <td><span className="badge badge-open">Selesai</span></td>
+                  <td style={{ color: '#bdd124' }}>+50 pts</td>
+                </tr>
+                <tr>
+                  <td>Main Bareng</td>
+                  <td>03 Mei 2024</td>
+                  <td>Kalam Kudus</td>
+                  <td><span className="badge badge-open">Selesai</span></td>
+                  <td style={{ color: '#bdd124' }}>+30 pts</td>
+                </tr>
+                <tr>
+                  <td>Sewa Lapangan</td>
+                  <td>01 Mei 2024</td>
+                  <td>Surabaya Hall</td>
+                  <td><span className="badge badge-closed">Dibatalkan</span></td>
+                  <td>0 pts</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
   );
 }

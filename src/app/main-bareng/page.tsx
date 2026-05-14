@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -23,7 +22,10 @@ export default function MainBarengPage() {
   const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
   const [cityFilter, setCityFilter] = useState('');
   const [loading, setLoading] = useState(true);
-  const [joinedMatches, setJoinedMatches] = useState<number[]>([]);
+
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
 
   useEffect(() => {
     fetchMatches();
@@ -43,24 +45,61 @@ export default function MainBarengPage() {
     }
   }
 
-  const handleJoin = (matchId: number) => {
-    const isLoggedIn = document.cookie.split(';').some(c => c.trim().startsWith('isLoggedIn=true'));
-    if (!isLoggedIn) {
+  const handleFilter = () => {
+    const results = matches.filter(match => cityFilter === '' || match.city.toLowerCase() === cityFilter.toLowerCase());
+    setFilteredMatches(results);
+  };
+
+  const openDetailModal = (match: Match) => {
+    const cookies = document.cookie.split(';').some(c => c.trim().startsWith('isLoggedIn=true'));
+    if (!cookies) {
       alert('Silakan login terlebih dahulu untuk bergabung!');
       window.location.href = '/login';
       return;
     }
-    if (joinedMatches.includes(matchId)) {
-      setJoinedMatches(joinedMatches.filter(id => id !== matchId));
-    } else {
-      setJoinedMatches([...joinedMatches, matchId]);
-      alert('Berhasil bergabung ke pertandingan! Sampai jumpa di lapangan.');
-    }
+    setSelectedMatch(match);
+    setShowDetailModal(true);
+    document.body.style.overflow = 'hidden';
   };
 
-  const handleFilter = () => {
-    const results = matches.filter(match => cityFilter === '' || match.city.toLowerCase() === cityFilter.toLowerCase());
-    setFilteredMatches(results);
+  const closeDetailModal = () => {
+    setShowDetailModal(false);
+    setSelectedMatch(null);
+    document.body.style.overflow = 'auto';
+  };
+
+  const confirmJoin = () => {
+    alert('Selamat! Anda berhasil bergabung ke pertandingan ini. Silakan cek menu Jadwal Saya atau hubungi Host.');
+    closeDetailModal();
+  };
+
+  const contactAdmin = () => {
+    if (!selectedMatch) return;
+    const message = `Halo Admin Minton, saya ingin bertanya tentang main bareng di ${selectedMatch.venue_name} jam ${selectedMatch.start_time.substring(0,5)} - ${selectedMatch.end_time.substring(0,5)}. Apakah masih ada slot?`;
+    const whatsappUrl = `https://wa.me/6281234567890?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
+  const openCreateModal = () => {
+    const cookies = document.cookie.split(';').some(c => c.trim().startsWith('isLoggedIn=true'));
+    if (!cookies) {
+      alert('Silakan login terlebih dahulu!');
+      window.location.href = '/login';
+      return;
+    }
+    setShowCreateModal(true);
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeCreateModal = () => {
+    setShowCreateModal(false);
+    document.body.style.overflow = 'auto';
+  };
+
+  const submitMabar = (e: React.FormEvent) => {
+    e.preventDefault();
+    alert('Jadwal Main Bareng Anda telah berhasil dibuat dan dipublikasikan!');
+    closeCreateModal();
   };
 
   useEffect(() => {
@@ -81,14 +120,13 @@ export default function MainBarengPage() {
         .hero-text h1 { font-size: 56px; font-weight: 700; line-height: 1.1; margin-bottom: 24px; }
         .hero-text p { color: var(--text-white); font-size: 24px; margin-top: 24px; line-height: 1.4; max-width: 90%; }
         .hero-img img { width: 100%; height: 250px; object-fit: cover; border-radius: 16px; }
-
         .filter-box { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; margin-bottom: 80px; }
         .filter-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
         .filter-header h3 { font-size: 32px; font-weight: 600; }
         .filter-grid { display: flex; gap: 16px; }
         .form-select { flex: 1; max-width: 220px; height: 48px; background-color: var(--bg-input); color: var(--text-white); border: 1px solid var(--border-color); padding: 0 16px; border-radius: 8px; font-size: 14px; outline: none; appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23a3a3a3%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 16px top 50%; background-size: 10px auto; cursor: pointer; }
         .filter-btn { width: 200px !important; height: 48px !important; }
-
+        .filter-actions-bottom { display: flex; justify-content: flex-end; margin-top: 16px; }
         .mabar-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-bottom: 80px; }
         .mabar-card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
         .mabar-card img { width: 100%; height: 200px; object-fit: cover; }
@@ -99,15 +137,38 @@ export default function MainBarengPage() {
         .sub-value-text { font-size: 14px; color: var(--text-gray); }
         .mabar-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 20px; border-top: 1px solid var(--border-color); margin-top: auto; }
         .price-val { font-size: 20px; font-weight: 700; }
-
         .bottom-banner { margin: 80px 0; }
         .banner-text-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px; }
         .banner-text-row h2 { font-size: 42px; font-weight: 700; max-width: 500px; line-height: 1.2; }
         .banner-text-row p { color: var(--text-gray); font-size: 18px; max-width: 450px; }
         .banner-img { width: 100%; height: 500px; object-fit: cover; border-radius: 16px; }
-
         .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
         .reveal.visible { opacity: 1; transform: translateY(0); }
+        .modal-overlay-mabar { display: flex; position: fixed; z-index: 1000; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); justify-content: center; align-items: center; animation: fadeIn 0.3s ease; }
+        .modal-content-mabar { background-color: var(--bg-card); border: 1px solid #333; width: 90%; max-width: 500px; border-radius: 20px; padding: 32px; position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.5); animation: slideUp 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-header-mabar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .modal-header-mabar h3 { font-size: 24px; font-weight: 700; }
+        .close-modal-mabar { background: transparent; border: none; color: var(--text-gray); font-size: 24px; cursor: pointer; transition: 0.3s; }
+        .close-modal-mabar:hover { color: var(--text-white); }
+        .match-detail-box { background: #252525; padding: 20px; border-radius: 12px; margin-bottom: 24px; }
+        .detail-row { display: flex; justify-content: space-between; margin-bottom: 12px; }
+        .detail-row:last-child { margin-bottom: 0; }
+        .detail-label { color: var(--text-gray); font-size: 14px; }
+        .detail-value { font-weight: 600; text-align: right; color: #fff; }
+        .slot-info-mabar { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; padding: 12px; background: rgba(189,209,36,0.1); border-radius: 8px; color: var(--primary-green); font-size: 14px; font-weight: 600; }
+        .modal-footer-mabar { display: flex; flex-direction: column; gap: 12px; }
+        .modal-footer-mabar .footer-top { display: flex; gap: 12px; }
+        .modal-footer-mabar button { padding: 14px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.3s; }
+        .btn-whatsapp { border-color: #25D366 !important; color: #25D366 !important; }
+        .btn-whatsapp:hover { background-color: rgba(37,211,102,0.1); }
+        .btn-cancel-mabar:hover { background-color: #ff4444 !important; border-color: #ff4444 !important; color: #fff !important; }
+        .create-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .form-group-mabar label { display: block; color: var(--text-gray); font-size: 12px; margin-bottom: 8px; }
+        .form-group-mabar input, .form-group-mabar select, .form-group-mabar textarea { width: 100%; background: #1a1a1a; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 8px; font-family: inherit; outline: none; }
+        .form-group-mabar input:focus, .form-group-mabar select:focus, .form-group-mabar textarea:focus { border-color: var(--primary-green); box-shadow: 0 0 0 4px rgba(189,209,36,0.1); background: #1f1f1f; }
+        @media (max-width: 768px) { .mabar-grid { grid-template-columns: 1fr; } .filter-grid { flex-direction: column; } .create-form-grid { grid-template-columns: 1fr; } }
       `}} />
 
       <Navbar />
@@ -136,7 +197,7 @@ export default function MainBarengPage() {
             <button className="btn btn-primary filter-btn" onClick={handleFilter}>Terapkan Filter</button>
           </div>
           <div className="filter-actions-bottom">
-            <button className="btn btn-primary filter-btn"><i className="fa-solid fa-circle-plus" style={{ marginRight: '4px' }}></i> Buat Jadwal</button>
+            <button className="btn btn-primary filter-btn" onClick={openCreateModal}><i className="fa-solid fa-circle-plus" style={{ marginRight: '4px' }}></i> Buat Jadwal</button>
           </div>
         </section>
 
@@ -165,9 +226,7 @@ export default function MainBarengPage() {
                     <span className="label-text">Harga / org</span>
                     <div className="price-val">{match.price_per_person === 0 ? 'Free' : `Rp${match.price_per_person.toLocaleString('id-ID')}`} {match.price_per_person !== 0 && <span style={{ fontSize: '12px', fontWeight: 'normal', color: 'var(--text-gray)' }}>/org</span>}</div>
                   </div>
-                  <button className={`btn ${joinedMatches.includes(match.id) ? 'btn-primary' : 'btn-outline'}`} onClick={() => handleJoin(match.id)}>
-                    {joinedMatches.includes(match.id) ? <><i className="fa-solid fa-check"></i> Bergabung</> : 'Ikut Main Bareng'}
-                  </button>
+                  <button className="btn btn-outline" onClick={() => openDetailModal(match)}>Ikut Main Bareng</button>
                 </div>
               </div>
             </div>
@@ -184,6 +243,100 @@ export default function MainBarengPage() {
       </div>
 
       <Footer />
+
+      {showDetailModal && selectedMatch && (
+        <div className="modal-overlay-mabar" onClick={(e) => { if (e.target === e.currentTarget) closeDetailModal(); }}>
+          <div className="modal-content-mabar">
+            <div className="modal-header-mabar">
+              <h3>Detail <span className="text-highlight">Pertandingan.</span></h3>
+              <button className="close-modal-mabar" onClick={closeDetailModal}>&times;</button>
+            </div>
+            <div className="match-detail-box">
+              <div className="detail-row">
+                <span className="detail-label">Venue</span>
+                <span className="detail-value">{selectedMatch.venue_name}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Waktu</span>
+                <span className="detail-value">{selectedMatch.start_time.substring(0,5)} - {selectedMatch.end_time.substring(0,5)}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Level</span>
+                <span className="detail-value">{selectedMatch.skill_level}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Harga</span>
+                <span className="detail-value">{selectedMatch.price_per_person === 0 ? 'Free' : `Rp${selectedMatch.price_per_person.toLocaleString('id-ID')}`}</span>
+              </div>
+            </div>
+            <div className="slot-info-mabar">
+              <i className="fa-solid fa-users"></i>
+              <span>Tersisa slot lagi!</span>
+            </div>
+            <div className="modal-footer-mabar">
+              <div className="footer-top">
+                <button className="btn btn-outline btn-cancel-mabar" style={{ flex: 1 }} onClick={closeDetailModal}>Batal</button>
+                <button className="btn btn-outline btn-whatsapp" style={{ flex: 2 }} onClick={contactAdmin}>
+                  <i className="fa-brands fa-whatsapp" style={{ marginRight: '8px' }}></i>Hubungi Admin
+                </button>
+              </div>
+              <button className="btn btn-primary" style={{ border: 'none', color: '#000', fontWeight: 600 }} onClick={confirmJoin}>Konfirmasi Ikut</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showCreateModal && (
+        <div className="modal-overlay-mabar" onClick={(e) => { if (e.target === e.currentTarget) closeCreateModal(); }}>
+          <div className="modal-content-mabar" style={{ maxWidth: '600px' }}>
+            <div className="modal-header-mabar">
+              <h3>Buat Jadwal <span className="text-highlight">Main Bareng.</span></h3>
+              <button className="close-modal-mabar" onClick={closeCreateModal}>&times;</button>
+            </div>
+            <form onSubmit={submitMabar}>
+              <div className="create-form-grid">
+                <div className="form-group-mabar">
+                  <label>Nama Venue</label>
+                  <input type="text" placeholder="Contoh: GOR Sudirman" required />
+                </div>
+                <div className="form-group-mabar">
+                  <label>Level Permainan</label>
+                  <select required>
+                    <option value="Bebas">Bebas / All Level</option>
+                    <option value="Beginner">Beginner</option>
+                    <option value="Intermediate">Intermediate</option>
+                    <option value="Advanced">Advanced</option>
+                  </select>
+                </div>
+                <div className="form-group-mabar">
+                  <label>Tanggal</label>
+                  <input type="date" required />
+                </div>
+                <div className="form-group-mabar">
+                  <label>Waktu (Jam)</label>
+                  <input type="text" placeholder="Contoh: 19:00 - 21:00" required />
+                </div>
+                <div className="form-group-mabar">
+                  <label>Maksimal Pemain</label>
+                  <input type="number" placeholder="8" required />
+                </div>
+                <div className="form-group-mabar">
+                  <label>Harga / Orang</label>
+                  <input type="text" placeholder="Contoh: 35.000 atau Free" required />
+                </div>
+              </div>
+              <div className="form-group-mabar" style={{ marginBottom: '24px' }}>
+                <label>Deskripsi & Aturan (Opsional)</label>
+                <textarea rows={3} placeholder="Contoh: Kok disediakan, iuran lapangan bagi rata." style={{ resize: 'none' }}></textarea>
+              </div>
+              <div className="modal-footer-mabar" style={{ flexDirection: 'row', gap: '12px' }}>
+                <button type="button" className="btn btn-outline btn-cancel-mabar" style={{ flex: 1 }} onClick={closeCreateModal}>Batal</button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 2, border: 'none', color: '#000', fontWeight: 600 }}>Publikasikan Jadwal</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 }

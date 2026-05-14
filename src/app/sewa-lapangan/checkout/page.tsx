@@ -1,6 +1,5 @@
-
 "use client";
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -15,16 +14,34 @@ function CheckoutContent() {
   const [venue, setVenue] = useState<any>(null);
   const [court, setCourt] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [selectedPayment, setSelectedPayment] = useState('qris');
-  const [userData, setUserData] = useState({ name: 'User Minton', email: '', phone: '+62 812 3456 7890' });
+  const [userData, setUserData] = useState({ name: 'Bagus Saputra', email: 'bagus123@gmail.com', phone: '+62 8432 5002 32' });
+
+  const [selectedPayment, setSelectedPayment] = useState('va');
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [countdown, setCountdown] = useState(900);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (venueId && courtId) {
-      fetchDetails();
-    }
+    if (venueId && courtId) fetchDetails();
   }, [venueId, courtId]);
+
+  useEffect(() => {
+    if (showPaymentModal) {
+      setCountdown(900);
+      intervalRef.current = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            if (intervalRef.current) clearInterval(intervalRef.current);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } else {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    }
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [showPaymentModal]);
 
   async function fetchDetails() {
     const cookies = document.cookie.split(';').reduce((acc, c) => {
@@ -39,7 +56,7 @@ function CheckoutContent() {
       const { data: cData } = await supabase.from('courts').select('*').eq('id', courtId).single();
       setVenue(vData);
       setCourt(cData);
-      setUserData(prev => ({ ...prev, email: decodeURIComponent(cookies['userEmail'] || '') }));
+      setUserData(prev => ({ ...prev, email: decodeURIComponent(cookies['userEmail'] || prev.email) }));
     } catch (error) {
       console.error('Error fetching checkout details:', error);
     } finally {
@@ -47,172 +64,391 @@ function CheckoutContent() {
     }
   }
 
-  const totalPrice = venue ? slots.length * venue.price_per_hour : 0;
+  const totalPrice = venue ? slots.length * venue.price_per_hour : 500000;
 
-  const handlePayment = async () => {
-    try {
-      setIsSubmitting(true);
-      
-      const sortedSlots = [...slots].sort();
-      const startTime = sortedSlots[0].split('-')[0] + ':00';
-      const lastSlot = sortedSlots[sortedSlots.length - 1];
-      const endTime = lastSlot.split('-')[1] + ':00';
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
 
-      const { error } = await supabase.from('bookings').insert({
-        user_email: userData.email,
-        venue_name: venue.name,
-        court_name: court.name,
-        booking_date: '2026-03-06',
-        start_time: startTime,
-        end_time: endTime,
-        total_price: totalPrice,
-        status: 'Lunas'
-      });
-
-      if (error) throw error;
-      
-      const slotStr = slots.join(',');
-      window.location.href = `/sewa-lapangan/success?venueId=${venueId}&courtId=${courtId}&slots=${slotStr}`;
-    } catch (err) {
-      console.error('Checkout failed:', err);
-      alert('Gagal memproses pembayaran.');
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleCopy = () => {
+    navigator.clipboard.writeText('12345 67890 12345');
   };
 
   if (loading) return <div style={{ background: '#000', color: '#fff', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Memuat Data Pembayaran...</div>;
 
   return (
-    <div className="checkout-container" style={{ display: 'flex', gap: '48px', padding: '120px 0 80px', width: '90%', maxWidth: '1600px', margin: 'auto' }}>
-      <style jsx>{`
+    <>
+      <Navbar />
+      <style>{`
+        .checkout-container {
+          display: flex;
+          gap: 48px;
+          padding: 60px 0;
+          width: 90%;
+          max-width: 1600px;
+          margin: auto;
+        }
+        .left { flex: 2; }
+        .right { flex: 1; }
+        .btn-back {
+          padding: 12px 28px;
+          border: 1px solid #ffffff;
+          border-radius: 15px;
+          background: none;
+          color: #ffffff;
+          font-size: 16px;
+          font-weight: 500;
+          margin-bottom: 32px;
+          cursor: pointer;
+          transition: 0.3s;
+          font-family: inherit;
+        }
+        .btn-back:hover {
+          background: #bdd124;
+          border-color: #bdd124;
+          color: black;
+        }
         .card {
-            background: #1c1c1c;
-            padding: 28px;
-            border-radius: 12px;
-            margin-bottom: 24px;
-            border: 1px solid #333;
+          background: #1c1c1c;
+          padding: 28px;
+          border-radius: 12px;
+          margin-bottom: 24px;
+          border: 1px solid #333;
         }
-        .card h3 { margin-bottom: 20px; font-size: 22px; font-weight: 600; }
-        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; font-size: 14px; color: #aaa; }
-        .info-item span { display: block; font-size: 16px; color: white; margin-top: 6px; }
-        
+        .card h3 {
+          margin-bottom: 8px;
+          font-size: 24px;
+          font-weight: 600;
+        }
+        .info-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 20px;
+          font-size: 14px;
+          color: #aaa;
+        }
+        .info-item span {
+          display: block;
+          font-size: 16px;
+          color: white;
+          margin-top: 6px;
+        }
         .payment-option {
-            background: #eaeaea;
-            color: #000;
-            padding: 20px 24px;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            transition: 0.3s;
-            border: 2px solid transparent;
+          background: #eaeaea;
+          color: #000;
+          padding: 20px 24px;
+          border-radius: 12px;
+          margin-bottom: 12px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          cursor: pointer;
+          transition: 0.3s;
+          border: 1px solid transparent;
         }
-        .payment-option.active { border-color: #bdd124; }
-        .payment-left { display: flex; align-items: center; gap: 16px; font-size: 16px; font-weight: 600; }
-        .payment-right { display: flex; align-items: center; gap: 12px; font-size: 16px; color: #555; font-weight: 600; }
-        
-        .summary-box { background: #1c1c1c; border-radius: 12px; overflow: hidden; border: 1px solid #333; }
-        .summary-header { background: #2a2a2a; padding: 20px; text-align: center; font-size: 16px; font-weight: 600; }
+        .payment-option:hover {
+          border: 1px solid #bdd124;
+        }
+        .payment-left {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          font-size: 16px;
+          font-weight: 600;
+        }
+        .payment-right {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          font-size: 16px;
+          color: #555;
+          font-weight: 600;
+        }
+        input.payment-radio {
+          width: 18px;
+          height: 18px;
+          accent-color: #bdd124;
+          cursor: pointer;
+        }
+        .summary-box {
+          background: #1c1c1c;
+          border-radius: 12px;
+          margin-bottom: 24px;
+          overflow: hidden;
+          border: 1px solid #333;
+        }
+        .summary-header {
+          background: #2a2a2a;
+          padding: 20px;
+          text-align: center;
+          font-size: 16px;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+        }
         .summary-body { padding: 28px; }
-        .summary-row { display: flex; justify-content: space-between; margin-bottom: 14px; font-size: 16px; }
+        .summary-row {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 14px;
+          font-size: 16px;
+        }
         .summary-row span:first-child { color: #ccc; }
-        
-        .total-box { background: #2a2a2a; padding: 20px 28px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 16px; margin-top: 24px; border: 1px solid #333; }
+        .summary-row span:last-child { color: #fff !important; }
+        .total-box {
+          background: #2a2a2a;
+          padding: 20px 28px;
+          border-radius: 12px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-weight: 600;
+          font-size: 16px;
+          margin-bottom: 20px;
+          border: 1px solid #333;
+        }
+        .total-box span { color: #fff !important; }
+        .total-box span:last-child { font-size: 18px; font-weight: 700; }
+        .btn-checkout {
+          width: 100%;
+          padding: 16px;
+          border-radius: 15px;
+          border: 1px solid #ffffff;
+          background: none;
+          color: #ffffff;
+          font-size: 16px;
+          font-weight: 500;
+          cursor: pointer;
+          transition: 0.3s;
+          font-family: inherit;
+        }
+        .btn-checkout:hover {
+          background: #bdd124;
+          border-color: #bdd124;
+          color: black;
+        }
+        .terms {
+          font-size: 11px;
+          color: #888;
+          margin-bottom: 16px;
+          line-height: 1.4;
+        }
+        .terms span {
+          color: #bdd124;
+          cursor: pointer;
+        }
+        .modal-overlay {
+          display: none;
+          position: fixed;
+          z-index: 1000;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.8);
+          justify-content: center;
+          align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+          background-color: #1f1f1f;
+          padding: 30px;
+          border-radius: 16px;
+          width: 90%;
+          max-width: 500px;
+          position: relative;
+          text-align: center;
+        }
+        .close-btn {
+          position: absolute;
+          top: 15px;
+          right: 25px;
+          color: #aaa;
+          font-size: 28px;
+          font-weight: bold;
+          cursor: pointer;
+        }
+        .close-btn:hover { color: #fff; }
       `}</style>
 
-      <div className="left" style={{ flex: 2 }}>
-        <button className="btn-outline" style={{ marginBottom: '32px', padding: '10px 24px' }} onClick={() => window.history.back()}>Lihat Keranjang</button>
-        
-        <div className="card">
-          <h3>Data Penyewa</h3>
-          <div style={{ fontSize: '14px', color: '#ccc', marginBottom: '24px' }}>{venue.city}, Indonesia</div>
-          <div className="info-grid">
-            <div className="info-item">Nama Lengkap <span>{userData.name}</span></div>
-            <div className="info-item">E-mail <span>{userData.email}</span></div>
-            <div className="info-item">Nomor Ponsel <span>{userData.phone}</span></div>
-          </div>
-        </div>
+      <div className="checkout-container">
+        <div className="left">
+          <button className="btn-back" onClick={() => window.history.back()}>Lihat Keranjang</button>
 
-        <div className="card">
-          <h3><i className="fa-solid fa-wallet" style={{ color: '#bdd124', marginRight: '12px' }}></i> Metode Pembayaran</h3>
-          
-          <div className={`payment-option ${selectedPayment === 'va' ? 'active' : ''}`} onClick={() => setSelectedPayment('va')}>
-            <div className="payment-left">
-              <img src="/asset/virtual-account.png" alt="VA" style={{ height: '36px', width: '50px', objectFit: 'contain' }} />
-              <div>
-                <div style={{ marginBottom: '8px' }}>Transfer Virtual Account</div>
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  <img src="/asset/bca.png" style={{ height: '14px' }} /><img src="/asset/bri.png" style={{ height: '14px' }} /><img src="/asset/bni.png" style={{ height: '14px' }} /><img src="/asset/mandiri.png" style={{ height: '14px' }} />
+          <div className="card">
+            <h3>Data Penyewa</h3>
+            <div style={{ fontSize: '14px', color: '#ccc', marginBottom: '24px' }}>
+              {venue?.city ? `Kota ${venue.city}, Jawa Tengah` : 'Kota Surakarta, Jawa Tengah'}
+            </div>
+            <div className="info-grid">
+              <div className="info-item">Nama Lengkap <span>{userData.name}</span></div>
+              <div className="info-item">E-mail <span>{userData.email}</span></div>
+              <div className="info-item">Nomor Ponsel <span>{userData.phone}</span></div>
+            </div>
+          </div>
+
+          <div className="card">
+            <h3 style={{ marginBottom: '24px' }}><i className="fa-solid fa-wallet" style={{ color: '#bdd124', marginRight: '12px', fontSize: '20px' }}></i> Metode Pembayaran</h3>
+
+            <label className="payment-option" onClick={() => setSelectedPayment('va')}>
+              <div className="payment-left">
+                <img src="/asset/virtual-account.png" alt="VA" style={{ height: '36px', width: '50px', objectFit: 'contain' }} />
+                <div>
+                  <div style={{ marginBottom: '8px' }}>Transfer Virtual Account</div>
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    <img src="/asset/bca.png" alt="BCA" style={{ height: '16px', objectFit: 'contain' }} />
+                    <img src="/asset/bri.png" alt="Bank BRI" style={{ height: '16px', objectFit: 'contain' }} />
+                    <img src="/asset/bni.png" alt="BNI" style={{ height: '16px', objectFit: 'contain' }} />
+                    <img src="/asset/mandiri.png" alt="Mandiri" style={{ height: '16px', objectFit: 'contain' }} />
+                  </div>
                 </div>
               </div>
+              <div className="payment-right">
+                <input type="radio" name="payment" className="payment-radio" checked={selectedPayment === 'va'} readOnly />
+              </div>
+            </label>
+
+            <label className="payment-option" onClick={() => setSelectedPayment('alfamart')}>
+              <div className="payment-left">
+                <img src="/asset/alfamart.png" alt="Alfamart" style={{ height: '36px', width: '50px', objectFit: 'contain' }} />
+                Alfamart
+              </div>
+              <div className="payment-right">
+                Rp6.500 <input type="radio" name="payment" className="payment-radio" checked={selectedPayment === 'alfamart'} readOnly />
+              </div>
+            </label>
+
+            <label className="payment-option" onClick={() => setSelectedPayment('gopay')}>
+              <div className="payment-left">
+                <img src="/asset/gopay.png" alt="GoPay" style={{ height: '36px', width: '50px', objectFit: 'contain' }} />
+                GoPay
+              </div>
+              <div className="payment-right">
+                Rp7.500 <input type="radio" name="payment" className="payment-radio" checked={selectedPayment === 'gopay'} readOnly />
+              </div>
+            </label>
+
+            <label className="payment-option" onClick={() => setSelectedPayment('shopeepay')}>
+              <div className="payment-left">
+                <img src="/asset/shopee-pay.png" alt="ShopeePay" style={{ height: '36px', width: '50px', objectFit: 'contain' }} />
+                ShopeePay
+              </div>
+              <div className="payment-right">
+                Rp7.500 <input type="radio" name="payment" className="payment-radio" checked={selectedPayment === 'shopeepay'} readOnly />
+              </div>
+            </label>
+
+            <label className="payment-option" onClick={() => setSelectedPayment('ovo')}>
+              <div className="payment-left">
+                <img src="/asset/ovo.png" alt="OVO" style={{ height: '36px', width: '50px', objectFit: 'contain' }} />
+                OVO
+              </div>
+              <div className="payment-right">
+                Rp6.250 <input type="radio" name="payment" className="payment-radio" checked={selectedPayment === 'ovo'} readOnly />
+              </div>
+            </label>
+
+            <label className="payment-option" onClick={() => setSelectedPayment('dana')}>
+              <div className="payment-left">
+                <img src="/asset/dana.png" alt="DANA" style={{ height: '36px', width: '50px', objectFit: 'contain' }} />
+                DANA
+              </div>
+              <div className="payment-right">
+                Rp6.250 <input type="radio" name="payment" className="payment-radio" checked={selectedPayment === 'dana'} readOnly />
+              </div>
+            </label>
+
+            <label className="payment-option" onClick={() => setSelectedPayment('qris')}>
+              <div className="payment-left">
+                <img src="/asset/qris.png" alt="QRIS" style={{ height: '36px', width: '50px', objectFit: 'contain' }} />
+                QRIS
+              </div>
+              <div className="payment-right">
+                Rp4.750 <input type="radio" name="payment" className="payment-radio" checked={selectedPayment === 'qris'} readOnly />
+              </div>
+            </label>
+
+            <label className="payment-option" onClick={() => setSelectedPayment('kartukredit')}>
+              <div className="payment-left">
+                <div style={{ background: 'white', width: '40px', height: '36px', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '12px' }}>
+                  <i className="fa-solid fa-credit-card" style={{ fontSize: '20px', color: '#000' }}></i>
+                </div>
+                <div>
+                  <div style={{ marginBottom: '8px' }}>Kartu Kredit</div>
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    <img src="/asset/mastercard.png" alt="Mastercard" style={{ height: '22px', objectFit: 'contain' }} />
+                    <img src="/asset/visa.png" alt="Visa" style={{ height: '22px', objectFit: 'contain' }} />
+                    <img src="/asset/jcb.png" alt="JCB" style={{ height: '22px', objectFit: 'contain' }} />
+                  </div>
+                </div>
+              </div>
+              <div className="payment-right">
+                Rp11.900 <input type="radio" name="payment" className="payment-radio" checked={selectedPayment === 'kartukredit'} readOnly />
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div className="right">
+          <div className="summary-box">
+            <div className="summary-header">Rincian Biaya</div>
+            <div className="summary-body">
+              <div className="summary-row"><span>Biaya Sewa</span><span>Rp{totalPrice.toLocaleString('id-ID')}</span></div>
+              <div className="summary-row"><span>Biaya Produk Tambahan</span><span>Rp0</span></div>
+              <div className="summary-row"><span>Total Biaya (Lunas)</span><span>Rp{totalPrice.toLocaleString('id-ID')}</span></div>
+              <div className="summary-row"><span>Convenience Fee</span><span>Rp0</span></div>
+              <div className="summary-row"><span>Biaya Transaksi</span><span>Rp0</span></div>
             </div>
-            <input type="radio" checked={selectedPayment === 'va'} readOnly style={{ accentColor: '#bdd124' }} />
           </div>
 
-          <div className={`payment-option ${selectedPayment === 'qris' ? 'active' : ''}`} onClick={() => setSelectedPayment('qris')}>
-            <div className="payment-left">
-              <img src="/asset/qris.png" alt="QRIS" style={{ height: '36px', width: '50px', objectFit: 'contain' }} />
-              QRIS
-            </div>
-            <div className="payment-right">Rp 4.750 <input type="radio" checked={selectedPayment === 'qris'} readOnly style={{ accentColor: '#bdd124' }} /></div>
+          <div className="total-box">
+            <span>Total Biaya</span>
+            <span>Rp.{totalPrice.toLocaleString('id-ID')}</span>
           </div>
 
-          <div className={`payment-option ${selectedPayment === 'gopay' ? 'active' : ''}`} onClick={() => setSelectedPayment('gopay')}>
-            <div className="payment-left">
-              <img src="/asset/gopay.png" alt="GoPay" style={{ height: '36px', width: '50px', objectFit: 'contain' }} />
-              GoPay
-            </div>
-            <div className="payment-right">Rp 7.500 <input type="radio" checked={selectedPayment === 'gopay'} readOnly style={{ accentColor: '#bdd124' }} /></div>
+          <div className="terms">
+            Dengan mengklik tombol berikut, anda menyetujui <span>Syarat dan Ketentuan</span> serta <span>Kebijakan Privasi</span>
           </div>
 
-          <div className={`payment-option ${selectedPayment === 'dana' ? 'active' : ''}`} onClick={() => setSelectedPayment('dana')}>
-            <div className="payment-left">
-              <img src="/asset/dana.png" alt="DANA" style={{ height: '36px', width: '50px', objectFit: 'contain' }} />
-              DANA
-            </div>
-            <div className="payment-right">Rp 6.250 <input type="radio" checked={selectedPayment === 'dana'} readOnly style={{ accentColor: '#bdd124' }} /></div>
-          </div>
+          <button className="btn-checkout" onClick={() => setShowPaymentModal(true)}>Lakukan Pembayaran</button>
         </div>
       </div>
 
-      <div className="right" style={{ flex: 1 }}>
-        <div className="summary-box">
-          <div className="summary-header">Rincian Biaya</div>
-          <div className="summary-body">
-            <div className="summary-row"><span>Biaya Sewa</span><span>Rp {totalPrice.toLocaleString('id-ID')}</span></div>
-            <div className="summary-row"><span>Biaya Layanan</span><span>Rp 0</span></div>
-            <div className="summary-row"><span>Total Biaya (Lunas)</span><span>Rp {totalPrice.toLocaleString('id-ID')}</span></div>
+      <div className={`modal-overlay ${showPaymentModal ? 'active' : ''}`} onClick={() => setShowPaymentModal(false)}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <span className="close-btn" onClick={() => setShowPaymentModal(false)}>&times;</span>
+          <h2 style={{ fontSize: '24px', marginBottom: '10px' }}>Menunggu Pembayaran</h2>
+          <p style={{ color: '#ccc', marginBottom: '20px', fontSize: '14px' }}>Selesaikan pembayaran Anda sebelum waktu habis.</p>
+
+          <div style={{ fontSize: '36px', fontWeight: 'bold', color: '#fff', marginBottom: '20px' }}>{formatTime(countdown)}</div>
+
+          <div style={{ background: '#2a2a2a', padding: '20px', borderRadius: '12px', marginBottom: '20px', textAlign: 'left' }}>
+            <div style={{ fontSize: '14px', color: '#aaa', marginBottom: '5px' }}>BCA Virtual Account</div>
+            <div style={{ fontSize: '20px', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              12345 67890 12345
+              <i className="fa-regular fa-copy" style={{ cursor: 'pointer', color: '#fff' }} title="Salin" onClick={handleCopy}></i>
+            </div>
+            <div style={{ marginTop: '15px', fontSize: '14px', color: '#aaa', marginBottom: '5px' }}>Total Tagihan</div>
+            <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#fff' }}>Rp{totalPrice.toLocaleString('id-ID')}</div>
           </div>
+
+          <button className="btn-checkout" onClick={() => { window.location.href = `/sewa-lapangan/success?venueId=${venueId}&courtId=${courtId}&slots=${slots.join(',')}`; }}>Cek Status Pembayaran</button>
         </div>
-
-        <div className="total-box">
-          <span>Total Biaya</span>
-          <span>Rp {totalPrice.toLocaleString('id-ID')}</span>
-        </div>
-
-        <p style={{ fontSize: '11px', color: '#888', marginTop: '16px', lineHeight: '1.4' }}>
-          Dengan mengklik tombol berikut, anda menyetujui <span style={{ color: '#bdd124' }}>Syarat dan Ketentuan</span> serta <span style={{ color: '#bdd124' }}>Kebijakan Privasi</span>
-        </p>
-
-        <button className="btn-primary" style={{ width: '100%', marginTop: '20px', padding: '16px' }} onClick={handlePayment} disabled={isSubmitting}>
-          {isSubmitting ? 'Memproses...' : 'Lakukan Pembayaran'}
-        </button>
       </div>
-    </div>
+
+      <Footer />
+    </>
   );
 }
 
 export default function CheckoutPage() {
   return (
-    <>
-      <Navbar />
-      <Suspense fallback={<div style={{ background: '#000', color: '#fff', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>}>
-        <CheckoutContent />
-      </Suspense>
-      <Footer />
-    </>
+    <Suspense fallback={<div style={{ background: '#000', color: '#fff', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>}>
+      <CheckoutContent />
+    </Suspense>
   );
 }

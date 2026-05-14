@@ -66,12 +66,15 @@ function KeranjangContent() {
   if (loading) return <div style={{ background: '#000', color: '#fff', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Memuat Keranjang...</div>;
 
   return (
-    <div className="sewa-container" style={{ display: 'flex', gap: '48px', padding: '120px 0 80px', width: '90%', maxWidth: '1600px', margin: 'auto' }}>
+    <>
       <style dangerouslySetInnerHTML={{__html: `
-        .sewa-container { color: #fff; }
+        .sewa-container { display: flex; gap: 48px; padding: 120px 0 80px; width: 90%; max-width: 1600px; margin: auto; color: #fff; }
+        .left { flex: 2; }
         .btn-tambah { padding: 12px 28px; border: 1px solid #ffffff; border-radius: 15px; background: none; color: #ffffff; font-size: 16px; font-weight: 500; margin-bottom: 32px; cursor: pointer; transition: 0.3s; }
         .btn-tambah:hover { background: #bdd124; border-color: #bdd124; color: black; }
-        .card { background: #1c1c1c; padding: 28px; border-radius: 12px; margin-bottom: 24px; border: 1px solid #333; }
+        .card { background: #1c1c1c; border-radius: 12px; margin-bottom: 24px; border: 1px solid #333; overflow: hidden; display: flex; gap: 24px; }
+        .card-img { width: 200px; height: 100%; object-fit: cover; flex-shrink: 0; min-height: 180px; }
+        .card-content { padding: 24px; flex: 1; }
         .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
         input[type="checkbox"].slot-checkbox { width: 22px; height: 22px; accent-color: #bdd124; cursor: pointer; margin-top: 4px; }
         .card h3 { margin-bottom: 8px; font-size: 24px; font-weight: 600; }
@@ -79,6 +82,7 @@ function KeranjangContent() {
         .badminton { font-weight: 600; font-size: 18px; margin-bottom: 16px; }
         .time-box { background: #2a2a2a; padding: 16px 20px; border-radius: 12px; font-size: 15px; position: relative; line-height: 1.6; }
         .time-box::before { content: ""; position: absolute; left: 0; top: 0; height: 100%; width: 6px; background: #bdd124; border-radius: 12px 0 0 12px; }
+        .right { flex: 1; }
         .summary-box { background: #1c1c1c; padding: 28px; border-radius: 12px; margin-bottom: 24px; border: 1px solid #333; }
         .summary-box h4 { margin-bottom: 20px; font-size: 16px; font-weight: 600; }
         .summary-row { display: flex; justify-content: space-between; margin-bottom: 14px; font-size: 16px; }
@@ -87,6 +91,8 @@ function KeranjangContent() {
         .total { display: flex; justify-content: space-between; font-weight: 600; font-size: 16px; margin-top: 20px; }
         .btn-sewa-primary { width: 100%; padding: 16px; border-radius: 15px; border: 1px solid #ffffff; background: none; color: #ffffff; font-size: 16px; font-weight: 500; cursor: pointer; margin-top: 16px; transition: 0.3s; }
         .btn-sewa-primary:hover { background: #bdd124; border-color: #bdd124; color: black; }
+        .btn-sewa-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn-sewa-primary:disabled:hover { background: none; border-color: #ffffff; color: #ffffff; }
         .small-box { background: #1c1c1c; padding: 16px; border-radius: 12px; margin-bottom: 16px; text-align: center; cursor: pointer; font-size: 16px; border: 1px solid #333; transition: 0.3s; }
         .small-box:hover { border-color: #bdd124; }
         .modal-overlay { position: fixed; z-index: 2000; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; }
@@ -97,81 +103,85 @@ function KeranjangContent() {
         .policy-list { list-style: none; margin-bottom: 30px; }
         .policy-list li { position: relative; padding-left: 28px; margin-bottom: 16px; font-size: 14px; color: #ccc; line-height: 1.6; }
         .policy-list li::before { content: "✓"; font-weight: 900; position: absolute; left: 0; color: #bdd124; }
+        @media (max-width: 992px) { .sewa-container { flex-direction: column; } .card { flex-direction: column; } .card-img { width: 100%; height: 180px; } }
       `}} />
 
-      <div className="left" style={{ flex: 2 }}>
-        <button className="btn-tambah" onClick={() => window.location.href = '/sewa-lapangan'}>Tambah Pesanan</button>
+      <div className="sewa-container">
+        <div className="left">
+          <button className="btn-tambah" onClick={() => window.location.href = '/sewa-lapangan'}>Tambah Pesanan</button>
 
-        {initialSlots.length > 0 && venue && court ? (
-          initialSlots.map((slot) => (
-            <div className="card" key={slot}>
-              <div className="card-header">
-                <div>
-                  <h3>{venue.name}</h3>
-                  <div className="rating">
-                    <i className="fa-solid fa-star" style={{ color: '#f59e0b', marginRight: '4px' }}></i> 4.9 
-                    <i className="fa-solid fa-location-dot" style={{ marginLeft: '10px', marginRight: '4px' }}></i> {venue.city}, Indonesia
+          {initialSlots.length > 0 && venue && court ? (
+            initialSlots.map((slot) => (
+              <div className="card" key={slot}>
+                <img src={venue.image_url || '/asset/kalam-kudus.png'} alt={venue.name} className="card-img" />
+                <div className="card-content">
+                  <div className="card-header">
+                    <div>
+                      <h3>{venue.name}</h3>
+                      <div className="rating">
+                        <i className="fa-solid fa-star" style={{ color: '#f59e0b', marginRight: '4px' }}></i> 4.9 
+                        <i className="fa-solid fa-location-dot" style={{ marginLeft: '10px', marginRight: '4px' }}></i> {venue.city}, Indonesia
+                      </div>
+                    </div>
+                    <input 
+                      type="checkbox" 
+                      className="slot-checkbox" 
+                      checked={activeSlots.includes(slot)} 
+                      onChange={() => toggleSlot(slot)} 
+                    />
+                  </div>
+                  <div className="badminton">{court.name}</div>
+                  <div className="time-box">
+                    Jumat, 6 Maret 2026 | {slot}
+                    <br />
+                    Rp {venue.price_per_hour.toLocaleString('id-ID')}
                   </div>
                 </div>
-                <input 
-                  type="checkbox" 
-                  className="slot-checkbox" 
-                  checked={activeSlots.includes(slot)} 
-                  onChange={() => toggleSlot(slot)} 
-                />
               </div>
+            ))
+          ) : (
+            <div style={{ color: '#aaa', marginTop: '20px' }}>Keranjang kosong. Silakan tambah pesanan dari halaman sewa lapangan.</div>
+          )}
+        </div>
 
-              <div className="badminton">{court.name}</div>
+        <div className="right">
+          <div className="small-box" onClick={() => setIsVoucherModalOpen(true)}>
+            <i className="fa-solid fa-ticket" style={{ color: '#bdd124', marginRight: '12px' }}></i> Gunakan Voucher
+          </div>
 
-              <div className="time-box">
-                Jumat, 6 Maret 2026 | {slot}
-                <br />
-                Rp {venue.price_per_hour.toLocaleString('id-ID')}
-              </div>
+          <div className="summary-box">
+            <h4>Rincian Biaya</h4>
+            <div className="summary-row">
+              <span>Biaya Sewa</span>
+              <span>Rp {totalPrice.toLocaleString('id-ID')}</span>
             </div>
-          ))
-        ) : (
-          <div style={{ color: '#aaa', marginTop: '20px' }}>Keranjang kosong. Silakan tambah pesanan dari halaman sewa lapangan.</div>
-        )}
-      </div>
-
-      <div className="right" style={{ flex: 1 }}>
-        <div className="small-box" onClick={() => setIsVoucherModalOpen(true)}>
-          <i className="fa-solid fa-ticket" style={{ color: '#bdd124', marginRight: '12px' }}></i> Gunakan Voucher
-        </div>
-
-        <div className="summary-box">
-          <h4>Rincian Biaya</h4>
-          <div className="summary-row">
-            <span>Biaya Sewa</span>
-            <span>Rp {totalPrice.toLocaleString('id-ID')}</span>
+            <div className="summary-row">
+              <span>Biaya Produk Tambahan</span>
+              <span>Rp 0</span>
+            </div>
+            <hr style={{ border: '1px solid #333', margin: '10px 0' }} />
+            <div className="total">
+              <p>Total Biaya</p>
+              <p>Rp {totalPrice.toLocaleString('id-ID')}</p>
+            </div>
           </div>
-          <div className="summary-row">
-            <span>Biaya Produk Tambahan</span>
-            <span>Rp 0</span>
-          </div>
-          <hr style={{ border: '1px solid #333', margin: '10px 0' }} />
-          <div className="total">
-            <p>Total Biaya</p>
-            <p>Rp {totalPrice.toLocaleString('id-ID')}</p>
-          </div>
-        </div>
 
-        <div className="summary-box">
-          <h4>Metode Pembayaran</h4>
-          <div className="summary-row">
-            <span>Bayar Lunas</span>
-            <span>Rp {totalPrice.toLocaleString('id-ID')}</span>
+          <div className="summary-box">
+            <h4>Metode Pembayaran</h4>
+            <div className="summary-row">
+              <span>Bayar Lunas</span>
+              <span>Rp {totalPrice.toLocaleString('id-ID')}</span>
+            </div>
           </div>
-        </div>
 
-        <div className="small-box" onClick={() => setIsRescheduleModalOpen(true)}>
-          <i className="fa-solid fa-circle-info" style={{ color: '#bdd124', marginRight: '12px' }}></i> Kebijakan Pembatalan & Reschedule
-        </div>
+          <div className="small-box" onClick={() => setIsRescheduleModalOpen(true)}>
+            <i className="fa-solid fa-circle-info" style={{ color: '#bdd124', marginRight: '12px' }}></i> Kebijakan Pembatalan & Reschedule
+          </div>
 
-        <button className="btn-sewa-primary" onClick={handleCheckout} disabled={activeSlots.length === 0}>
-          Lanjutkan ke Pembayaran
-        </button>
+          <button className="btn-sewa-primary" onClick={handleCheckout} disabled={activeSlots.length === 0}>
+            Lanjutkan ke Pembayaran
+          </button>
+        </div>
       </div>
 
       {isRescheduleModalOpen && (
@@ -206,7 +216,7 @@ function KeranjangContent() {
                   placeholder="Masukkan kode voucher"
                   value={voucherCode}
                   onChange={(e) => setVoucherCode(e.target.value)}
-                  style={{ flex: 1, background: '#000', border: '1px solid #333', color: '#fff', padding: '12px', borderRadius: '10px', outline: 'none' }}
+                  style={{ flex: 1, background: '#000', border: '1px solid #333', color: '#fff', padding: '12px', borderRadius: '10px', outline: 'none', fontFamily: 'inherit' }}
                 />
                 <button className="btn-tambah" style={{ marginBottom: 0, padding: '10px 20px' }}>Gunakan</button>
               </div>
@@ -229,7 +239,7 @@ function KeranjangContent() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
 

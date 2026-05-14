@@ -1,177 +1,295 @@
-
-"use client";
-import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
 export default function KomunitasPage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [selectedKlub, setSelectedKlub] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedLocation, setSelectedLocation] = useState('');
-
-  const klubs = [
-    { name: 'PB Djarum Surabaya', city: 'Surabaya', users: 124, level: 'Campuran', schedule: 'Sabtu & Minggu', price: 'Rp 50K / bln', img: '/asset/card-komunitas1.png' },
-    { name: 'Smash Hunter SBY', city: 'Surabaya', users: 86, level: 'Menengah - Pro', schedule: 'Rabu & Jumat', price: 'Rp 75K / bln', img: '/asset/card-komunitas2.png' },
-    { name: 'Badminton Lovers Sidoarjo', city: 'Sidoarjo', users: 210, level: 'Pemula - Menengah', schedule: 'Minggu Pagi', price: 'Patungan Harian', img: '/asset/card-komunitas3.png' },
-    { name: 'Kok Terbang Club', city: 'Malang', users: 45, level: 'Campuran', schedule: 'Selasa Malam', price: 'Rp 40K / bln', img: '/asset/card-komunitas4.png' },
-  ];
-
-  useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) entry.target.classList.add('visible');
-      });
-    }, { threshold: 0.15 });
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-  }, []);
-
-  const handleJoin = (klubName: string) => {
-    setSelectedKlub(klubName);
-    setIsModalOpen(true);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSuccess(true);
-      setTimeout(() => { setIsSuccess(false); setIsModalOpen(false); }, 3000);
-    }, 1500);
-  };
-
-  const filteredKlubs = klubs.filter(klub => {
-    const matchSearch = klub.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchLocation = selectedLocation === '' || klub.city.toLowerCase() === selectedLocation.toLowerCase();
-    return matchSearch && matchLocation;
-  });
-
   return (
     <>
       <Navbar />
-      <style dangerouslySetInnerHTML={{__html: `
-        .section-title { text-align: center; margin-bottom: 40px; }
-        .section-title h2 { font-size: 48px; font-weight: 700; }
-        .section-title p { color: #aaa; font-size: 16px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
-        .text-highlight { color: #bdd124; }
-
-        .podium-container { display: flex; justify-content: center; align-items: flex-end; gap: 20px; margin-top: 40px; }
-        .podium-card { position: relative; border-radius: 16px; overflow: hidden; text-align: center; display: flex; flex-direction: column; justify-content: flex-end; padding: 20px; border: 2px solid transparent; }
-        .podium-card::before { content: ''; position: absolute; inset: 0; background-size: cover; background-position: center; z-index: 0; opacity: 0.8; }
-        .podium-card::after { content: ''; position: absolute; inset: 0; z-index: 1; }
-        .podium-content { position: relative; z-index: 2; }
-        .podium-rank { position: absolute; top: 15px; right: 20px; font-size: 40px; font-weight: 800; z-index: 2; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); }
-        .podium-name { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
-        .podium-points { font-size: 32px; font-weight: 800; }
-        .podium-label { font-size: 14px; opacity: 0.8; }
-
-        .rank-2 { width: 300px; height: 500px; border-color: #C0C0C0; }
-        .rank-2::before { background-image: url('/asset/peringkat-2.png'); }
-        .rank-2::after { background: linear-gradient(to top, #F8B505, rgba(192, 192, 192, 0) 60%); }
-        .rank-2 .podium-rank, .rank-2 .podium-points { color: #C0C0C0; }
-
-        .rank-1 { width: 350px; height: 600px; border-color: #bdd124; }
-        .rank-1::before { background-image: url('/asset/peringkat-1.png'); }
-        .rank-1::after { background: linear-gradient(to top, #bdd124, rgba(255, 215, 0, 0) 60%); }
-        .rank-1 .podium-rank, .rank-1 .podium-points { color: #FFD700; font-size: 56px; }
-        .rank-1 .podium-points { font-size: 40px; }
-
-        .rank-3 { width: 300px; height: 500px; border-color: #CD7F32; }
-        .rank-3::before { background-image: url('/asset/peringkat-3.png'); }
-        .rank-3::after { background: linear-gradient(to top, rgba(205, 127, 50, 0.9) 0%, rgba(205, 127, 50, 0) 60%); }
-        .rank-3 .podium-rank, .rank-3 .podium-points { color: #CD7F32; }
-
-        .leaderboard-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; margin-bottom: 24px; }
-        .lb-tabs { display: flex; gap: 32px; }
-        .lb-tab { padding: 12px 0; color: #aaa; cursor: pointer; font-size: 16px; font-weight: 500; border-bottom: 2px solid transparent; transition: 0.3s; }
-        .lb-tab.active { color: #bdd124; border-bottom-color: #bdd124; }
-        .leaderboard-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px; }
-        .lb-list { display: flex; flex-direction: column; gap: 12px; }
-        .lb-row { display: flex; align-items: center; padding: 12px; background: #1c1c1c; border-radius: 8px; font-size: 16px; border: 1px solid transparent; transition: 0.3s; }
-        .lb-row:hover { border-color: #333; }
-        .lb-rank { width: 30px; color: #bdd124; font-weight: 700; }
-        .lb-user { display: flex; align-items: center; gap: 10px; flex: 1; }
-        .lb-avatar { width: 24px; height: 24px; border-radius: 50%; background: #333; }
-        .lb-score { font-weight: 600; }
-
-        .klub-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
-        .klub-card { background: #1c1c1c; border-radius: 12px; overflow: hidden; border: 1px solid #333; }
-        .klub-img { width: 100%; height: 200px; object-fit: cover; }
-        .klub-info { padding: 20px; }
-        .klub-header { display: flex; justify-content: space-between; margin-bottom: 16px; }
-        .klub-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; font-size: 13px; }
-        .stat-label { color: #aaa; display: block; margin-bottom: 4px; }
-        .stat-val { font-weight: 600; }
-
-        .feed-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
-        .feed-card { background: #1c1c1c; border-radius: 12px; overflow: hidden; border: 1px solid #333; }
-        .feed-img { width: 100%; height: 180px; object-fit: cover; }
-        .feed-info { padding: 20px; }
-        .feed-footer { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #aaa; border-top: 1px solid #333; padding-top: 12px; margin-top: 16px; }
-
-        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
-        .reveal.visible { opacity: 1; transform: translateY(0); }
-      `}} />
-
-      <div className="container" style={{ width: '90%', maxWidth: '1600px', margin: 'auto', padding: '100px 0' }}>
+      <div className="container">
         <section>
-          <div className="section-title"><p>The <span>Hall of Fame</span></p><h2>Jajaran Para <span className="text-highlight">Jagoan.</span></h2></div>
+          <div className="section-title">
+            <p>The <span>Hall of Fame</span></p>
+            <h2>Jajaran Para <span className="text-highlight">Jagoan.</span></h2>
+          </div>
           <div className="podium-container">
-            <div className="podium-card rank-2"><div className="podium-rank">2</div><div className="podium-content"><div className="podium-name">Siti Aminah</div><div className="podium-points">2.890</div><div className="podium-label">Poin</div></div></div>
-            <div className="podium-card rank-1"><div className="podium-rank">1</div><div className="podium-content"><div className="podium-name">Bagus Saputra</div><div className="podium-points">3.150</div><div className="podium-label">Poin</div></div></div>
-            <div className="podium-card rank-3"><div className="podium-rank">3</div><div className="podium-content"><div className="podium-name">Kevin Sanjaya</div><div className="podium-points">2.540</div><div className="podium-label">Poin</div></div></div>
+            <div className="podium-card rank-2">
+              <div className="podium-rank">2</div>
+              <div className="podium-content">
+                <div className="podium-name">Siti Aminah</div>
+                <div className="podium-points">2.890</div>
+                <div className="podium-label">Poin</div>
+              </div>
+            </div>
+            <div className="podium-card rank-1">
+              <div className="podium-rank">1</div>
+              <div className="podium-content">
+                <div className="podium-name">Bagus Saputra</div>
+                <div className="podium-points">3.150</div>
+                <div className="podium-label">Poin</div>
+              </div>
+            </div>
+            <div className="podium-card rank-3">
+              <div className="podium-rank">3</div>
+              <div className="podium-content">
+                <div className="podium-name">Kevin Sanjaya</div>
+                <div className="podium-points">2.540</div>
+                <div className="podium-label">Poin</div>
+              </div>
+            </div>
           </div>
         </section>
 
         <section>
-          <div className="section-title"><h2>Minton <span className="text-highlight">Leaderboard</span></h2></div>
-          <div className="leaderboard-header"><div className="lb-tabs"><div className="lb-tab active">Pria</div><div className="lb-tab">Wanita</div><div className="lb-tab">Klub/Grup</div></div><button className="btn btn-primary" style={{ padding: '8px 16px', fontSize: '12px' }}>Lihat Peringkat Saya</button></div>
+          <div className="section-title">
+            <h2>Minton <span className="text-highlight">Leaderboard</span></h2>
+          </div>
+          <div className="leaderboard-header">
+            <div className="lb-tabs">
+              <div className="lb-tab active">Pria</div>
+              <div className="lb-tab">Wanita</div>
+              <div className="lb-tab">Klub/Grup</div>
+            </div>
+            <button className="btn btn-primary">Lihat Peringkat Saya</button>
+          </div>
           <div className="leaderboard-grid">
             <div className="lb-list">
-              {[1, 2, 3, 4, 5].map(r => (
-                <div key={r} className="lb-row"><span className="lb-rank">{r}</span><div className="lb-user"><div className="lb-avatar"></div>User {r}</div><span className="lb-score">{(3200 - r * 100)} pts</span></div>
-              ))}
+              <div className="lb-row"><span className="lb-rank">1</span><div className="lb-user"><div className="lb-avatar"><img src="/asset/peringkat-1.png" alt="User 1" /></div>Bagus Saputra</div><span className="lb-score">3.150 pts</span></div>
+              <div className="lb-row"><span className="lb-rank">2</span><div className="lb-user"><div className="lb-avatar"><img src="/asset/testimoni-rina.png" alt="User 2" /></div>Siti Aminah</div><span className="lb-score">2.890 pts</span></div>
+              <div className="lb-row"><span className="lb-rank">3</span><div className="lb-user"><div className="lb-avatar"><img src="/asset/peringkat-2.png" alt="User 3" /></div>Kevin Sanjaya</div><span className="lb-score">2.540 pts</span></div>
+              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>4</span><div className="lb-user"><div className="lb-avatar"><img src="/asset/testimoni-budi.png" alt="User 4" /></div>Ahmad F.</div><span className="lb-score">2.400 pts</span></div>
+              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>5</span><div className="lb-user"><div className="lb-avatar"><img src="/asset/testimoni-sari.png" alt="User 5" /></div>Rina M.</div><span className="lb-score">2.350 pts</span></div>
+              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>6</span><div className="lb-user"><div className="lb-avatar"></div>Joko S.</div><span className="lb-score">2.210 pts</span></div>
+              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>7</span><div className="lb-user"><div className="lb-avatar"></div>Dedi T.</div><span className="lb-score">2.100 pts</span></div>
+              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>8</span><div className="lb-user"><div className="lb-avatar"></div>Fajar A.</div><span className="lb-score">2.050 pts</span></div>
+              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>9</span><div className="lb-user"><div className="lb-avatar"></div>Rian A.</div><span className="lb-score">1.980 pts</span></div>
+              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>10</span><div className="lb-user"><div className="lb-avatar"></div>Hendra S.</div><span className="lb-score">1.890 pts</span></div>
             </div>
             <div className="lb-list">
-              {[6, 7, 8, 9, 10].map(r => (
-                <div key={r} className="lb-row"><span className="lb-rank" style={{ color: '#aaa' }}>{r}</span><div className="lb-user"><div className="lb-avatar"></div>User {r}</div><span className="lb-score">{(3200 - r * 100)} pts</span></div>
-              ))}
+              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>11</span><div className="lb-user"><div className="lb-avatar"></div>Ahsan S.</div><span className="lb-score">1.850 pts</span></div>
+              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>12</span><div className="lb-user"><div className="lb-avatar"></div>Tontowi A.</div><span className="lb-score">1.800 pts</span></div>
+              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>13</span><div className="lb-user"><div className="lb-avatar"></div>Liliyana N.</div><span className="lb-score">1.750 pts</span></div>
+              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>14</span><div className="lb-user"><div className="lb-avatar"></div>Praveen J.</div><span className="lb-score">1.700 pts</span></div>
+              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>15</span><div className="lb-user"><div className="lb-avatar"></div>Melati D.</div><span className="lb-score">1.650 pts</span></div>
+              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>16</span><div className="lb-user"><div className="lb-avatar"></div>Apriyani R.</div><span className="lb-score">1.600 pts</span></div>
+              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>17</span><div className="lb-user"><div className="lb-avatar"></div>Greysia P.</div><span className="lb-score">1.550 pts</span></div>
+              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>18</span><div className="lb-user"><div className="lb-avatar"></div>Jonatan C.</div><span className="lb-score">1.500 pts</span></div>
+              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>19</span><div className="lb-user"><div className="lb-avatar"></div>Anthony G.</div><span className="lb-score">1.450 pts</span></div>
+              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>20</span><div className="lb-user"><div className="lb-avatar"></div>Chico A.</div><span className="lb-score">1.400 pts</span></div>
+            </div>
+            <div className="lb-list">
+              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>21</span><div className="lb-user"><div className="lb-avatar"></div>Shesar H.</div><span className="lb-score">1.350 pts</span></div>
+              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>22</span><div className="lb-user"><div className="lb-avatar"></div>Gregoria M.</div><span className="lb-score">1.300 pts</span></div>
+              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>23</span><div className="lb-user"><div className="lb-avatar"></div>Putri K.</div><span className="lb-score">1.250 pts</span></div>
+              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>24</span><div className="lb-user"><div className="lb-avatar"></div>Rinov R.</div><span className="lb-score">1.200 pts</span></div>
+              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>25</span><div className="lb-user"><div className="lb-avatar"></div>Pitha H.</div><span className="lb-score">1.150 pts</span></div>
+              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>26</span><div className="lb-user"><div className="lb-avatar"></div>Rehan N.</div><span className="lb-score">1.100 pts</span></div>
+              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>27</span><div className="lb-user"><div className="lb-avatar"></div>Lisa A.</div><span className="lb-score">1.050 pts</span></div>
+              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>28</span><div className="lb-user"><div className="lb-avatar"></div>Dejan F.</div><span className="lb-score">1.000 pts</span></div>
+              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>29</span><div className="lb-user"><div className="lb-avatar"></div>Gloria E.</div><span className="lb-score">950 pts</span></div>
+              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>30</span><div className="lb-user"><div className="lb-avatar"></div>Zachariah J.</div><span className="lb-score">900 pts</span></div>
             </div>
           </div>
         </section>
 
         <section>
-          <div className="section-title"><h2>Klub & <span className="text-highlight">Komunitas</span></h2></div>
+          <div className="section-title">
+            <h2>Klub & <span className="text-highlight">Komunitas</span></h2>
+          </div>
+          <div className="filter-bar">
+            <div className="filter-input">
+              <i className="fa-solid fa-magnifying-glass"></i>
+              <input type="text" placeholder="Cari nama klub/komunitas" />
+            </div>
+            <div className="filter-input">
+              <i className="fa-solid fa-location-dot"></i>
+              <select defaultValue="">
+                <option value="" disabled>Lokasi</option>
+                <option value="surabaya">Surabaya</option>
+                <option value="jakarta">Jakarta</option>
+              </select>
+            </div>
+            <div className="filter-input">
+              <i className="fa-regular fa-calendar"></i>
+              <select defaultValue="">
+                <option value="" disabled>Jadwal Rutin</option>
+                <option value="weekend">Weekend</option>
+                <option value="weekday">Weekday</option>
+              </select>
+            </div>
+            <button className="btn btn-primary">Terapkan Filter</button>
+          </div>
           <div className="klub-grid">
-            {klubs.map((klub, i) => (
-              <div key={i} className="klub-card reveal">
-                <img src={klub.img} className="klub-img" alt={klub.name} />
-                <div className="klub-info">
-                  <div className="klub-header"><div><h3>{klub.name}</h3><p>Kota {klub.city}</p></div><div className="text-highlight"><i className="fa-solid fa-users"></i> {klub.users}</div></div>
-                  <div className="klub-stats">
-                    <div><span className="stat-label">Level</span><span className="stat-val">{klub.level}</span></div>
-                    <div><span className="stat-label">Jadwal</span><span className="stat-val">{klub.schedule}</span></div>
-                    <div><span className="stat-label">Iuran</span><span className="stat-val">{klub.price}</span></div>
+            <div className="klub-card">
+              <img src="/asset/card-komunitas1.png" className="klub-img" alt="Klub 1" />
+              <div className="klub-info">
+                <div className="klub-header">
+                  <div>
+                    <h3>PB Djarum Surabaya</h3>
+                    <p>Kota Surabaya</p>
                   </div>
-                  <div className="klub-actions">
-                    <button className="btn btn-outline" style={{ width: '100%' }} onClick={() => handleJoin(klub.name)}>Join Komunitas</button>
-                    <button className="btn btn-outline" style={{ width: '100%' }} onClick={() => window.location.href='/main-bareng'}>Mabar</button>
-                  </div>
+                  <div className="text-highlight"><i className="fa-solid fa-users"></i> 124</div>
+                </div>
+                <div className="klub-stats">
+                  <div><span className="stat-label">Level</span><span className="stat-val">Campuran</span></div>
+                  <div><span className="stat-label">Jadwal Rutin</span><span className="stat-val">Sabtu & Minggu</span></div>
+                  <div><span className="stat-label">Iuran</span><span className="stat-val">Rp 50K / bln</span></div>
+                </div>
+                <div className="klub-actions">
+                  <button className="btn btn-outline">Join Komunitas</button>
+                  <button className="btn btn-outline">Mabar Bareng</button>
                 </div>
               </div>
-            ))}
+            </div>
+            <div className="klub-card">
+              <img src="/asset/card-komunitas2.png" className="klub-img" alt="Klub 2" />
+              <div className="klub-info">
+                <div className="klub-header">
+                  <div>
+                    <h3>Smash Hunter SBY</h3>
+                    <p>Kota Surabaya</p>
+                  </div>
+                  <div className="text-highlight"><i className="fa-solid fa-users"></i> 86</div>
+                </div>
+                <div className="klub-stats">
+                  <div><span className="stat-label">Level</span><span className="stat-val">Menengah - Pro</span></div>
+                  <div><span className="stat-label">Jadwal Rutin</span><span className="stat-val">Rabu & Jumat</span></div>
+                  <div><span className="stat-label">Iuran</span><span className="stat-val">Rp 75K / bln</span></div>
+                </div>
+                <div className="klub-actions">
+                  <button className="btn btn-outline">Join Komunitas</button>
+                  <button className="btn btn-outline">Mabar Bareng</button>
+                </div>
+              </div>
+            </div>
+            <div className="klub-card">
+              <img src="/asset/card-komunitas3.png" className="klub-img" alt="Klub 3" />
+              <div className="klub-info">
+                <div className="klub-header">
+                  <div>
+                    <h3>Badminton Lovers Sidoarjo</h3>
+                    <p>Sidoarjo</p>
+                  </div>
+                  <div className="text-highlight"><i className="fa-solid fa-users"></i> 210</div>
+                </div>
+                <div className="klub-stats">
+                  <div><span className="stat-label">Level</span><span className="stat-val">Pemula - Menengah</span></div>
+                  <div><span className="stat-label">Jadwal Rutin</span><span className="stat-val">Minggu Pagi</span></div>
+                  <div><span className="stat-label">Iuran</span><span className="stat-val">Patungan Harian</span></div>
+                </div>
+                <div className="klub-actions">
+                  <button className="btn btn-outline">Join Komunitas</button>
+                  <button className="btn btn-outline">Mabar Bareng</button>
+                </div>
+              </div>
+            </div>
+            <div className="klub-card">
+              <img src="/asset/card-komunitas4.png" className="klub-img" alt="Klub 4" />
+              <div className="klub-info">
+                <div className="klub-header">
+                  <div>
+                    <h3>Kok Terbang Club</h3>
+                    <p>Kota Malang</p>
+                  </div>
+                  <div className="text-highlight"><i className="fa-solid fa-users"></i> 45</div>
+                </div>
+                <div className="klub-stats">
+                  <div><span className="stat-label">Level</span><span className="stat-val">Campuran</span></div>
+                  <div><span className="stat-label">Jadwal Rutin</span><span className="stat-val">Selasa Malam</span></div>
+                  <div><span className="stat-label">Iuran</span><span className="stat-val">Rp 40K / bln</span></div>
+                </div>
+                <div className="klub-actions">
+                  <button className="btn btn-outline">Join Komunitas</button>
+                  <button className="btn btn-outline">Mabar Bareng</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style={{ textAlign: 'right', marginTop: '24px' }}>
+            <button className="btn btn-outline" style={{ borderColor: '#bdd124', color: '#bdd124' }}>
+              <i className="fa-solid fa-plus"></i> Muat Lebih Banyak
+            </button>
           </div>
         </section>
 
         <section>
-          <div className="section-title"><h2>Community <span className="text-highlight">Feed & Tips</span></h2></div>
-          <div className="feed-grid">
-            <div className="feed-card"><img src="/asset/card-artikel1.png" className="feed-img" /><div className="feed-info"><h3>Tips Grip Raket yang Benar</h3><p style={{ color: '#aaa', fontSize: '14px', marginTop: '10px' }}>Simak teknik dasar memegang raket ala atlet pro.</p><div className="feed-footer"><span>Coach Hendra</span><span>2 Hari yang lalu</span></div></div></div>
-            <div className="feed-card"><img src="/asset/card-artikel2.png" className="feed-img" /><div className="feed-info"><h3>Review Sepatu Badminton 2026</h3><p style={{ color: '#aaa', fontSize: '14px', marginTop: '10px' }}>Komparasi top 5 sepatu badminton rilis terbaru.</p><div className="feed-footer"><span>Budi Santoso</span><span>4 Hari yang lalu</span></div></div></div>
+          <div className="section-title">
+            <h2>Community <span className="text-highlight">Feed & Tips</span></h2>
           </div>
+          <div className="feed-grid">
+            <div className="feed-card">
+              <img src="/asset/card-artikel1.png" className="feed-img" alt="Artikel 1" />
+              <div className="feed-info">
+                <h3 className="feed-title">Tips Grip Raket yang Benar</h3>
+                <p className="feed-desc">Genggaman raket sangat menentukan kekuatan pukulan smash dan backhand kamu. Simak teknik dasar memegang raket ala atlet pro.</p>
+                <div className="feed-footer">
+                  <span><i className="fa-regular fa-user"></i> Coach Hendra</span>
+                  <span>2 Hari yang lalu</span>
+                </div>
+              </div>
+            </div>
+            <div className="feed-card">
+              <img src="/asset/card-artikel2.png" className="feed-img" alt="Artikel 2" />
+              <div className="feed-info">
+                <h3 className="feed-title">Review Sepatu Badminton 2026</h3>
+                <p className="feed-desc">Mencari sepatu yang ringan namun empuk di pergelangan kaki? Berikut adalah komparasi top 5 sepatu badminton rilis terbaru.</p>
+                <div className="feed-footer">
+                  <span><i className="fa-regular fa-user"></i> Budi Santoso</span>
+                  <span>4 Hari yang lalu</span>
+                </div>
+              </div>
+            </div>
+            <div className="feed-card">
+              <img src="/asset/card-artikel3.png" className="feed-img" alt="Artikel 3" />
+              <div className="feed-info">
+                <h3 className="feed-title">Aturan Poin Baru BWF</h3>
+                <p className="feed-desc">BWF merilis wacana sistem poin 5x11 menggantikan 3x21. Bagaimana pengaruhnya terhadap stamina pemain dan durasi laga?</p>
+                <div className="feed-footer">
+                  <span><i className="fa-regular fa-user"></i> Minton News</span>
+                  <span>1 Minggu yang lalu</span>
+                </div>
+              </div>
+            </div>
+            <div className="feed-card">
+              <img src="/asset/card-artikel4.png" className="feed-img" alt="Artikel 4" />
+              <div className="feed-info">
+                <h3 className="feed-title">Turnamen Tarkam Surabaya</h3>
+                <p className="feed-desc">Persiapkan tim kamu! Turnamen tahunan antar kecamatan se-Surabaya kembali digelar bulan depan. Daftarkan tim di GOR terdekat.</p>
+                <div className="feed-footer">
+                  <span><i className="fa-regular fa-user"></i> PBSI Surabaya</span>
+                  <span>2 Minggu yang lalu</span>
+                </div>
+              </div>
+            </div>
+            <div className="feed-card">
+              <img src="/asset/card-artikel5.png" className="feed-img" alt="Artikel 5" />
+              <div className="feed-info">
+                <h3 className="feed-title">Pemanasan Wajib Sebelum Main</h3>
+                <p className="feed-desc">Jangan anggap remeh cedera engkel dan lutut. Berikut 5 gerakan dinamis untuk memanaskan otot bagian bawah sebelum turun lapang.</p>
+                <div className="feed-footer">
+                  <span><i className="fa-regular fa-user"></i> Dr. Andi Sport</span>
+                  <span>3 Minggu yang lalu</span>
+                </div>
+              </div>
+            </div>
+            <div className="feed-card">
+              <img src="/asset/card-artikel6.png" className="feed-img" alt="Artikel 6" />
+              <div className="feed-info">
+                <h3 className="feed-title">Mitos vs Fakta Senar Raket</h3>
+                <p className="feed-desc">Apakah tarikan senar yang lebih kencang selalu berarti smash lebih kuat? Mari bedah fisika di balik pantulan senar raket badminton.</p>
+                <div className="feed-footer">
+                  <span><i className="fa-regular fa-user"></i> Stringer Pro ID</span>
+                  <span>1 Bulan yang lalu</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <div className="section-title">
+            <h2>Upcoming <span className="text-highlight">Tournament</span></h2>
+          </div>
+          <img src="/asset/turnamen.png" alt="Badminton Tournament Banner" className="tournament-banner" />
         </section>
       </div>
       <Footer />

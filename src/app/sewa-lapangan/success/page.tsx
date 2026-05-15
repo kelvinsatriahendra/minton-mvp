@@ -56,7 +56,7 @@ function SuccessContent() {
         <div className="container" style={{ width: '90%', maxWidth: '1600px', margin: 'auto', paddingTop: '120px', textAlign: 'center' }}>
           <h1 style={{ color: '#fff', marginBottom: 16 }}>Booking Tidak Ditemukan</h1>
           <p style={{ color: '#aaa', marginBottom: 24 }}>Data booking tidak valid atau sudah dihapus.</p>
-          <a href="/" className="btn-back" style={{ padding: '12px 28px', border: '1px solid #fff', borderRadius: '12px', color: '#fff', textDecoration: 'none', display: 'inline-block' }}>← Kembali ke Beranda</a>
+          <a href="/" className="btn-back" style={{ padding: '12px 28px', border: '1px solid #fff', borderRadius: '12px', color: '#fff', textDecoration: 'none', display: 'inline-block' }}><i className="fa-solid fa-arrow-left" style={{ marginRight: '8px' }}></i> Kembali ke Beranda</a>
         </div>
         <Footer />
       </>
@@ -119,7 +119,7 @@ function SuccessContent() {
       <Navbar />
 
       <div className="container" style={{ width: '90%', maxWidth: '1600px', margin: 'auto', paddingTop: '60px' }}>
-        <a href="/" className="btn-back">← Kembali ke Beranda</a>
+        <a href="/" className="btn-back"><i className="fa-solid fa-arrow-left" style={{ marginRight: '8px' }}></i> Kembali ke Beranda</a>
       </div>
       
       <div className="status-container" style={{ paddingTop: '0' }}>

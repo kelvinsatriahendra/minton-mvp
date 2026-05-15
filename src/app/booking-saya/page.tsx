@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import DashboardSidebar from '@/components/DashboardSidebar';
-import { getBookings, payBooking } from './actions';
+import { getBookings, payBooking, cancelBooking } from './actions';
 
 interface BookingItem {
   id: string; venue: string; venueShort: string; img: string; location: string;
@@ -25,6 +25,7 @@ export default function BookingSayaPage() {
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
   const [isPaymentSuccess, setIsPaymentSuccess] = useState(false);
   const [paying, setPaying] = useState(false);
+  const [cancelling, setCancelling] = useState<string | null>(null);
 
   useEffect(() => {
     document.title = 'Booking Saya - Minton';
@@ -51,9 +52,23 @@ export default function BookingSayaPage() {
     setPaying(false);
   }
 
+  async function handleCancel(bookingId: string) {
+    if (!confirm('Apakah Anda yakin ingin membatalkan pesanan ini?')) return;
+    setCancelling(bookingId);
+    const result = await cancelBooking(bookingId);
+    if (result.success) {
+      await loadBookings();
+    } else {
+      alert('Gagal membatalkan: ' + result.error);
+    }
+    setCancelling(null);
+  }
+
   const filteredBookings = bookings.filter(b => {
     if (activeTab === 0) return b.status === 'Terkonfirmasi';
     if (activeTab === 1) return b.status === 'Menunggu Pembayaran';
+    if (activeTab === 2) return b.status === 'Selesai';
+    if (activeTab === 3) return b.status === 'Dibatalkan';
     return false;
   });
 
@@ -140,7 +155,14 @@ export default function BookingSayaPage() {
                 </div>
                 <div className="booking-actions">
                   {b.pending ? (
-                    <button className="btn-primary-dash" style={{ padding: '8px 24px' }} onClick={() => { setPaymentData({ venue: b.venue, amount: b.price, id: b.id }); setIsPaymentOpen(true); setIsPaymentSuccess(false); }}>Bayar Sekarang</button>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                      <button className="btn-secondary-dash" style={{ padding: '8px 16px', borderColor: '#f44336', color: '#f44336', opacity: cancelling === b.id ? 0.5 : 1 }} onClick={() => handleCancel(b.id)} disabled={cancelling === b.id}>
+                        {cancelling === b.id ? 'Memproses...' : 'Batalkan'}
+                      </button>
+                      <button className="btn-primary-dash" style={{ padding: '8px 24px' }} onClick={() => { setPaymentData({ venue: b.venue, amount: b.price, id: b.id }); setIsPaymentOpen(true); setIsPaymentSuccess(false); }}>Bayar Sekarang</button>
+                    </div>
+                  ) : b.status === 'Dibatalkan' ? (
+                    <button className="btn-secondary-dash" style={{ padding: '8px 16px', opacity: 0.5 }} disabled>Dibatalkan</button>
                   ) : (
                     <>
                       <button className="btn-secondary-dash" style={{ padding: '8px 16px' }} onClick={() => { setDetailData({ venue: b.venue, img: b.img, id: b.id, status: b.status, date: b.date, time: b.time, court: b.court, price: b.price }); setIsDetailOpen(true); }}>Detail</button>

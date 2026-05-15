@@ -1,0 +1,60 @@
+'use server'
+
+import { z } from 'zod';
+import { cookies } from 'next/headers';
+import { supabase } from '@/utils/supabase';
+
+const loginMitraSchema = z.object({
+  email: z.string().email({ message: "Email tidak valid" }),
+  password: z.string().min(1, { message: "Kata sandi wajib diisi" }),
+});
+
+export async function loginMitraAction(prevState: any, formData: FormData) {
+  const email = formData.get('email') as string;
+  const password = formData.get('password') as string;
+
+  const validatedFields = loginMitraSchema.safeParse({ email, password });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: "Gagal login, periksa kembali input Anda.",
+    };
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('partners')
+      .select('*')
+      .eq('email', email)
+      .eq('password', password);
+
+    if (error) throw error;
+
+    if (data && data.length > 0) {
+      const partner = data[0];
+      
+      const cookieStore = await cookies();
+      cookieStore.set('mitraSession', 'supabase-mitra-token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 60 * 24 * 7,
+        path: '/',
+      });
+      
+      // Store partner details in cookies for UI
+      cookieStore.set('mitraName', partner.owner_name, { path: '/' });
+      cookieStore.set('mitraEmail', partner.email, { path: '/' });
+      cookieStore.set('mitraGorName', partner.gor_name, { path: '/' });
+      cookieStore.set('mitraId', partner.id.toString(), { path: '/' });
+      cookieStore.set('isMitraLoggedIn', 'true', { path: '/' });
+
+      return { success: true, mitraName: partner.owner_name };
+    } else {
+      return { message: 'Maaf, Email atau Kata Sandi Anda salah.' };
+    }
+  } catch (err) {
+    console.error('Error Login Mitra:', err);
+    return { message: 'Terjadi kesalahan pada server saat login.' };
+  }
+}

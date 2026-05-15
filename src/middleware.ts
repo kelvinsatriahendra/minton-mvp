@@ -2,19 +2,27 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  // Simulasi mengecek session (bisa dari cookies)
-  const session = request.cookies.get('session')?.value;
-
-  // Jika tidak ada session dan user mencoba akses rute dashboard atau admin
-  if (!session) {
-    return NextResponse.redirect(new URL('/login', request.url));
+  const url = request.nextUrl.pathname;
+  
+  // Cek untuk Dashboard User
+  if (url.startsWith('/dashboard') || url.startsWith('/admin')) {
+    const session = request.cookies.get('session')?.value;
+    if (!session) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
   }
 
-  // Jika ada session, izinkan lanjut
+  // Cek untuk Dashboard Mitra
+  if (url.startsWith('/kemitraan/dashboard-mitra')) {
+    const mitraSession = request.cookies.get('mitraSession')?.value;
+    if (!mitraSession) {
+      return NextResponse.redirect(new URL('/kemitraan/login-mitra', request.url));
+    }
+  }
+
   return NextResponse.next();
 }
 
-// Menentukan rute mana saja yang dikunci
 export const config = {
-  matcher: ['/dashboard/:path*', '/admin/:path*'],
+  matcher: ['/dashboard/:path*', '/admin/:path*', '/kemitraan/dashboard-mitra/:path*'],
 };

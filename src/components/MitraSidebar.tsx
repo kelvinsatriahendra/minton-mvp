@@ -1,5 +1,7 @@
 "use client";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useRouter } from 'next/navigation';
 
 const navItems = [
   { href: "/kemitraan/dashboard-mitra", icon: "fa-solid fa-calendar-check", label: "Booking" },
@@ -11,10 +13,44 @@ const navItems = [
 const bottomItems = [
   { href: "/kemitraan/member", icon: "fa-solid fa-users", label: "Members" },
   { href: "/kemitraan/pengaturan", icon: "fa-solid fa-gear", label: "Settings" },
-  { href: "/kemitraan/login-mitra", icon: "fa-solid fa-right-from-bracket", label: "Keluar" },
 ];
 
 export default function MitraSidebar({ active }: { active: string }) {
+  const router = useRouter();
+  const [gorName, setGorName] = useState("GOR Mitra");
+
+  useEffect(() => {
+    // Read cookie for mitraGorName
+    const cookies = document.cookie.split(';');
+    const gorNameCookie = cookies.find(c => c.trim().startsWith('mitraGorName='));
+    if (gorNameCookie) {
+      setGorName(decodeURIComponent(gorNameCookie.split('=')[1]));
+    }
+  }, []);
+
+  const handleLogout = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Menghapus cookies dengan mengatur expiry date ke masa lalu
+    document.cookie = "mitraSession=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    document.cookie = "mitraName=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    document.cookie = "mitraEmail=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    document.cookie = "mitraGorName=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    document.cookie = "mitraId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    document.cookie = "isMitraLoggedIn=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    
+    router.push('/kemitraan/login-mitra');
+    router.refresh();
+  };
+
+  const getInitials = (name: string) => {
+    if (!name) return "GM";
+    const words = name.trim().split(" ");
+    if (words.length >= 2) {
+      return (words[0][0] + words[1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
+
   return (
     <aside className="mitra-sidebar">
       <div className="logo-section">
@@ -35,17 +71,21 @@ export default function MitraSidebar({ active }: { active: string }) {
           <Link
             key={item.href}
             href={item.href}
-            className={`nav-item ${item.label === "Keluar" ? "logout" : ""} ${active === item.label ? "active" : ""}`}
+            className={`nav-item ${active === item.label ? "active" : ""}`}
           >
             <i className={item.icon}></i> {item.label}
           </Link>
         ))}
+        {/* Logout Button */}
+        <a href="#" onClick={handleLogout} className="nav-item logout">
+          <i className="fa-solid fa-right-from-bracket"></i> Keluar
+        </a>
       </nav>
       <div className="sidebar-footer">
         <Link href="#" className="user-profile">
-          <div className="avatar">GS</div>
+          <div className="avatar">{getInitials(gorName)}</div>
           <div>
-            <p className="user-name">GOR Sudirman</p>
+            <p className="user-name">{gorName}</p>
             <p className="user-role">Pengelola</p>
           </div>
         </Link>

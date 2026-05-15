@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { supabase } from '@/utils/supabase';
+import { joinMatch, createMatch } from './actions';
 
 interface Match {
   id: number;
@@ -48,6 +49,9 @@ export default function MainBarengPage() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
+  const [processing, setProcessing] = useState(false);
+
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => { document.title = 'Main Bareng - Minton'; }, []);
 
@@ -58,7 +62,7 @@ export default function MainBarengPage() {
   async function fetchMatches() {
     try {
       setLoading(true);
-      const { data, error } = await supabase.from('matches').select('*');
+      const { data, error } = await supabase.from('matches').select('*').order('created_at', { ascending: false });
       if (error) throw error;
       setMatches(data || []);
       setFilteredMatches(data || []);
@@ -106,9 +110,19 @@ export default function MainBarengPage() {
     document.body.style.overflow = 'auto';
   };
 
-  const confirmJoin = () => {
-    alert('Selamat! Anda berhasil bergabung ke pertandingan ini. Silakan cek menu Jadwal Saya atau hubungi Host.');
-    closeDetailModal();
+  const confirmJoin = async () => {
+    if (!selectedMatch) return;
+    setProcessing(true);
+    const res = await joinMatch(selectedMatch.id);
+    setProcessing(false);
+    
+    if (res.error) {
+      alert('Gagal bergabung: ' + res.error);
+    } else {
+      alert('Selamat! Anda berhasil bergabung ke pertandingan ini. Silakan cek menu Jadwal Saya atau hubungi Host.');
+      fetchMatches();
+      closeDetailModal();
+    }
   };
 
   const contactAdmin = () => {
@@ -134,10 +148,22 @@ export default function MainBarengPage() {
     document.body.style.overflow = 'auto';
   };
 
-  const submitMabar = (e: React.FormEvent) => {
+  const submitMabar = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Jadwal Main Bareng Anda telah berhasil dibuat dan dipublikasikan!');
-    closeCreateModal();
+    if (!formRef.current) return;
+    
+    setProcessing(true);
+    const formData = new FormData(formRef.current);
+    const res = await createMatch(formData);
+    setProcessing(false);
+
+    if (res.error) {
+      alert('Gagal membuat jadwal: ' + res.error);
+    } else {
+      alert('Jadwal Main Bareng Anda telah berhasil dibuat dan dipublikasikan!');
+      fetchMatches();
+      closeCreateModal();
+    }
   };
 
   useEffect(() => {
@@ -334,7 +360,9 @@ export default function MainBarengPage() {
                   <i className="fa-brands fa-whatsapp" style={{ marginRight: '8px' }}></i>Hubungi Admin
                 </button>
               </div>
-              <button className="btn btn-primary" style={{ border: 'none', color: '#000', fontWeight: 600 }} onClick={confirmJoin}>Konfirmasi Ikut</button>
+              <button className="btn btn-primary" style={{ border: 'none', color: '#000', fontWeight: 600 }} onClick={confirmJoin} disabled={processing}>
+                {processing ? 'Memproses...' : 'Konfirmasi Ikut'}
+              </button>
             </div>
           </div>
         </div>
@@ -347,15 +375,15 @@ export default function MainBarengPage() {
               <h3>Buat Jadwal <span className="text-highlight">Main Bareng.</span></h3>
               <button className="close-modal-mabar" onClick={closeCreateModal}>&times;</button>
             </div>
-            <form onSubmit={submitMabar}>
+            <form ref={formRef} onSubmit={submitMabar}>
               <div className="create-form-grid">
                 <div className="form-group-mabar">
                   <label>Nama Venue</label>
-                  <input type="text" placeholder="Contoh: GOR Sudirman" required />
+                  <input type="text" name="venueName" placeholder="Contoh: GOR Sudirman" required />
                 </div>
                 <div className="form-group-mabar">
                   <label>Level Permainan</label>
-                  <select required>
+                  <select name="skillLevel" required>
                     <option value="Bebas">Bebas / All Level</option>
                     <option value="Beginner">Beginner</option>
                     <option value="Intermediate">Intermediate</option>
@@ -364,19 +392,19 @@ export default function MainBarengPage() {
                 </div>
                 <div className="form-group-mabar">
                   <label>Tanggal</label>
-                  <input type="date" required />
+                  <input type="date" name="date" required />
                 </div>
                 <div className="form-group-mabar">
                   <label>Waktu (Jam)</label>
-                  <input type="text" placeholder="Contoh: 19:00 - 21:00" required />
+                  <input type="text" name="time" placeholder="Contoh: 19:00 - 21:00" required />
                 </div>
                 <div className="form-group-mabar">
                   <label>Maksimal Pemain</label>
-                  <input type="number" placeholder="8" required />
+                  <input type="number" name="totalSlots" placeholder="8" required />
                 </div>
                 <div className="form-group-mabar">
                   <label>Harga / Orang</label>
-                  <input type="text" placeholder="Contoh: 35.000 atau Free" required />
+                  <input type="text" name="price" placeholder="Contoh: 35.000 atau Free" required />
                 </div>
               </div>
               <div className="form-group-mabar" style={{ marginBottom: '24px' }}>
@@ -385,7 +413,9 @@ export default function MainBarengPage() {
               </div>
               <div className="modal-footer-mabar" style={{ flexDirection: 'row', gap: '12px' }}>
                 <button type="button" className="btn btn-outline btn-cancel-mabar" style={{ flex: 1 }} onClick={closeCreateModal}>Batal</button>
-                <button type="submit" className="btn btn-primary" style={{ flex: 2, border: 'none', color: '#000', fontWeight: 600 }}>Publikasikan Jadwal</button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 2, border: 'none', color: '#000', fontWeight: 600 }} disabled={processing}>
+                  {processing ? 'Memproses...' : 'Publikasikan Jadwal'}
+                </button>
               </div>
             </form>
           </div>

@@ -1,9 +1,34 @@
 "use client";
-import { useEffect } from 'react';
+import { useEffect, useActionState, useState } from 'react';
 import Link from "next/link";
+import { useRouter } from 'next/navigation';
+import { registerMitraAction } from './actions';
+
+const FACILITIES_LIST = [
+  { id: "wifi", label: "WiFi", icon: "wifi" },
+  { id: "parkir", label: "Parkir Luas", icon: "car" },
+  { id: "ruang_ganti", label: "Ruang Ganti", icon: "faucet-detergent" },
+  { id: "kantin", label: "Kantin", icon: "utensils" },
+  { id: "mushola", label: "Mushola", icon: "mosque" },
+  { id: "shower", label: "Shower Area", icon: "shower" }
+];
 
 export default function RegistrasiPage() {
-  useEffect(() => { document.title = 'Registrasi Mitra - Minton'; }, []);
+  const router = useRouter();
+  const [state, formAction, isPending] = useActionState(registerMitraAction, null);
+  const [passwordVisible, setPasswordVisible] = useState(false);
+
+  useEffect(() => { 
+    document.title = 'Registrasi Mitra - Minton'; 
+  }, []);
+
+  useEffect(() => {
+    if (state?.success) {
+      router.push('/kemitraan/dashboard-mitra');
+      router.refresh();
+    }
+  }, [state?.success, router]);
+
   return (
     <>
       <header className="navbar">
@@ -24,27 +49,66 @@ export default function RegistrasiPage() {
         </div>
 
         <div className="reg-body">
-          <form onSubmit={(e) => { e.preventDefault(); window.location.href = "/kemitraan/dashboard-mitra"; }}>
+          {state?.message && !state.success && (
+            <div style={{ padding: '15px', backgroundColor: '#ffebee', color: '#c62828', borderRadius: '8px', marginBottom: '20px', fontWeight: '500' }}>
+              {state.message}
+            </div>
+          )}
+
+          <form action={formAction}>
             <div className="form-section">
               <div className="section-title">
-                <i className="fa-solid fa-building"></i> Informasi GOR
+                <i className="fa-solid fa-building"></i> Informasi GOR & Akun
               </div>
               <div className="grid-inputs">
                 <div className="form-group">
                   <label>Nama GOR / Lapangan</label>
-                  <input type="text" placeholder="Contoh: GOR Sudirman Jaya" required />
+                  <input type="text" name="gor_name" placeholder="Contoh: GOR Sudirman Jaya" required />
+                  {state?.errors?.gor_name && <span style={{ color: 'red', fontSize: '12px' }}>{state.errors.gor_name[0]}</span>}
                 </div>
                 <div className="form-group">
                   <label>Nama Pemilik / Pengelola</label>
-                  <input type="text" placeholder="Nama Lengkap" required />
+                  <input type="text" name="owner_name" placeholder="Nama Lengkap" required />
+                  {state?.errors?.owner_name && <span style={{ color: 'red', fontSize: '12px' }}>{state.errors.owner_name[0]}</span>}
                 </div>
                 <div className="form-group">
                   <label>Nomor WhatsApp</label>
-                  <input type="tel" placeholder="08123456789" required />
+                  <input type="tel" name="whatsapp" placeholder="08123456789" required />
+                  {state?.errors?.whatsapp && <span style={{ color: 'red', fontSize: '12px' }}>{state.errors.whatsapp[0]}</span>}
                 </div>
                 <div className="form-group">
-                  <label>Email Bisnis</label>
-                  <input type="email" placeholder="gor@email.com" required />
+                  <label>Email Bisnis (Untuk Login)</label>
+                  <input type="email" name="email" placeholder="gor@email.com" required />
+                  {state?.errors?.email && <span style={{ color: 'red', fontSize: '12px' }}>{state.errors.email[0]}</span>}
+                </div>
+                <div className="form-group full" style={{ position: 'relative' }}>
+                  <label>Kata Sandi (Untuk Login Dashboard)</label>
+                  <div style={{ position: 'relative' }}>
+                    <input 
+                      type={passwordVisible ? "text" : "password"} 
+                      name="password"
+                      placeholder="Minimal 6 karakter" 
+                      required 
+                      style={{ width: '100%', paddingRight: '40px' }}
+                    />
+                    <button 
+                      type="button"
+                      onClick={() => setPasswordVisible(!passwordVisible)}
+                      style={{
+                        position: 'absolute',
+                        right: '12px',
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        color: '#666'
+                      }}
+                    >
+                      <i className={`fa-regular ${passwordVisible ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                    </button>
+                  </div>
+                  {state?.errors?.password && <span style={{ color: 'red', fontSize: '12px' }}>{state.errors.password[0]}</span>}
                 </div>
               </div>
             </div>
@@ -56,15 +120,17 @@ export default function RegistrasiPage() {
               <div className="grid-inputs">
                 <div className="form-group full">
                   <label>Alamat Lengkap GOR</label>
-                  <textarea rows={3} placeholder="Jl. Raya Utama No. 123..."></textarea>
+                  <textarea name="address" rows={3} placeholder="Jl. Raya Utama No. 123..." required></textarea>
+                  {state?.errors?.address && <span style={{ color: 'red', fontSize: '12px' }}>{state.errors.address[0]}</span>}
                 </div>
                 <div className="form-group">
                   <label>Kota / Kabupaten</label>
-                  <input type="text" placeholder="Contoh: Surabaya" />
+                  <input type="text" name="city" placeholder="Contoh: Surabaya" required />
+                  {state?.errors?.city && <span style={{ color: 'red', fontSize: '12px' }}>{state.errors.city[0]}</span>}
                 </div>
                 <div className="form-group">
                   <label>Link Google Maps (Opsional)</label>
-                  <input type="url" placeholder="https://maps.google.com/..." />
+                  <input type="url" name="maps_url" placeholder="https://maps.google.com/..." />
                 </div>
               </div>
             </div>
@@ -76,35 +142,36 @@ export default function RegistrasiPage() {
               <div className="grid-inputs" style={{ marginBottom: "20px" }}>
                 <div className="form-group">
                   <label>Jumlah Lapangan</label>
-                  <input type="number" min={1} placeholder="0" />
+                  <input type="number" name="court_count" min={1} placeholder="1" required />
+                  {state?.errors?.court_count && <span style={{ color: 'red', fontSize: '12px' }}>{state.errors.court_count[0]}</span>}
                 </div>
                 <div className="form-group">
                   <label>Jenis Lantai</label>
-                  <select>
-                    <option>Vinyl (Standard BWF)</option>
-                    <option>Parquet / Kayu</option>
-                    <option>Semen / Beton</option>
-                    <option>Karpet Biasa</option>
+                  <select name="floor_type">
+                    <option value="Vinyl (Standard BWF)">Vinyl (Standard BWF)</option>
+                    <option value="Parquet / Kayu">Parquet / Kayu</option>
+                    <option value="Semen / Beton">Semen / Beton</option>
+                    <option value="Karpet Biasa">Karpet Biasa</option>
                   </select>
                 </div>
               </div>
 
               <label style={{ marginBottom: "15px", display: "block" }}>Fasilitas Tersedia:</label>
               <div className="facility-grid">
-                {["wifi", "car", "faucet-detergent", "utensils", "mosque", "shower"].map((icon, i) => (
+                {FACILITIES_LIST.map((fac, i) => (
                   <div className="facility-item" key={i}>
-                    <input type="checkbox" id={`f${i}`} />
+                    <input type="checkbox" name={`facility_${fac.id}`} value={fac.label} id={`f${i}`} />
                     <label htmlFor={`f${i}`} className="facility-label">
-                      <i className={`fa-solid fa-${icon}`}></i>{" "}
-                      {["WiFi", "Parkir Luas", "Ruang Ganti", "Kantin", "Mushola", "Shower Area"][i]}
+                      <i className={`fa-solid fa-${fac.icon}`}></i>{" "}
+                      {fac.label}
                     </label>
                   </div>
                 ))}
               </div>
             </div>
 
-            <button type="submit" className="btn-submit-reg">
-              Daftarkan Sekarang <i className="fa-solid fa-paper-plane"></i>
+            <button type="submit" className="btn-submit-reg" disabled={isPending} style={{ opacity: isPending ? 0.7 : 1 }}>
+              {isPending ? 'Memproses Pendaftaran...' : 'Daftarkan Sekarang'} <i className="fa-solid fa-paper-plane"></i>
             </button>
           </form>
         </div>

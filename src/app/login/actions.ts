@@ -50,6 +50,7 @@ export async function loginAction(prevState: any, formData: FormData) {
       
       // Simpan user nama di cookie untuk UI (optional)
       cookieStore.set('userName', user.nama_lengkap, { path: '/' });
+      cookieStore.set('userEmail', user.email, { path: '/' });
       cookieStore.set('isLoggedIn', 'true', { path: '/' });
 
       // Return sukses, UI yang akan redirect

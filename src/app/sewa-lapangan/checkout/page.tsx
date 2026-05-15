@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { supabase } from '@/utils/supabase';
+import { createBooking } from './actions';
 
 function CheckoutContent() {
   const searchParams = useSearchParams();
@@ -14,12 +15,15 @@ function CheckoutContent() {
   const [venue, setVenue] = useState<any>(null);
   const [court, setCourt] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [userData, setUserData] = useState({ name: 'Bagus Saputra', email: 'bagus123@gmail.com', phone: '+62 8432 5002 32' });
+  const [creating, setCreating] = useState(false);
+  const [userData, setUserData] = useState({ name: '', email: '', phone: '' });
 
   const [selectedPayment, setSelectedPayment] = useState('va');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [countdown, setCountdown] = useState(900);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [bookingResult, setBookingResult] = useState<{ bookingId: string; date: string } | null>(null);
+  const [bookingError, setBookingError] = useState<string | null>(null);
 
   useEffect(() => {
     if (venueId && courtId) fetchDetails();
@@ -46,7 +50,7 @@ function CheckoutContent() {
   async function fetchDetails() {
     const cookies = document.cookie.split(';').reduce((acc, c) => {
       const [key, val] = c.trim().split('=');
-      acc[key] = val;
+      acc[decodeURIComponent(key)] = decodeURIComponent(val || '');
       return acc;
     }, {} as Record<string, string>);
 
@@ -56,7 +60,17 @@ function CheckoutContent() {
       const { data: cData } = await supabase.from('courts').select('*').eq('id', courtId).single();
       setVenue(vData);
       setCourt(cData);
-      setUserData(prev => ({ ...prev, email: decodeURIComponent(cookies['userEmail'] || prev.email) }));
+
+      const email = cookies['userEmail'] || '';
+      const name = cookies['userName'] || '';
+      setUserData({ name, email, phone: '' });
+
+      if (email) {
+        const { data: userData } = await supabase.from('users').select('whatsapp').eq('email', email).single();
+        if (userData) {
+          setUserData(prev => ({ ...prev, phone: userData.whatsapp || '' }));
+        }
+      }
     } catch (error) {
       console.error('Error fetching checkout details:', error);
     } finally {
@@ -64,7 +78,7 @@ function CheckoutContent() {
     }
   }
 
-  const totalPrice = venue ? slots.length * venue.price_per_hour : 500000;
+  const totalPrice = venue ? slots.length * venue.price_per_hour : 0;
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -72,8 +86,37 @@ function CheckoutContent() {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
+  async function handlePay() {
+    setCreating(true);
+    setBookingError(null);
+
+    const fd = new FormData();
+    fd.set('venueId', venueId || '');
+    fd.set('courtId', courtId || '');
+    fd.set('slots', slots.join(','));
+    fd.set('venueName', venue?.name || '');
+    fd.set('venueShort', venue?.name || '');
+    fd.set('venueImg', venue?.image || '');
+    fd.set('venueLocation', venue?.location || '');
+    fd.set('totalPrice', String(totalPrice));
+    fd.set('courtName', court?.name || '');
+
+    const result = await createBooking(fd);
+
+    if (result.error) {
+      setBookingError(result.error);
+      setCreating(false);
+    } else if (result.success && result.bookingId) {
+      setBookingResult({ bookingId: result.bookingId, date: result.date || '' });
+      setShowPaymentModal(true);
+      setCreating(false);
+    }
+  }
+
   const handleCopy = () => {
-    navigator.clipboard.writeText('12345 67890 12345');
+    if (bookingResult) {
+      navigator.clipboard.writeText(bookingResult.bookingId);
+    }
   };
 
   if (loading) return <div style={{ background: '#000', color: '#fff', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Memuat Data Pembayaran...</div>;
@@ -421,7 +464,12 @@ function CheckoutContent() {
             Dengan mengklik tombol berikut, anda menyetujui <span>Syarat dan Ketentuan</span> serta <span>Kebijakan Privasi</span>
           </div>
 
-          <button className="btn-checkout" onClick={() => setShowPaymentModal(true)}>Lakukan Pembayaran</button>
+          {bookingError && (
+            <div style={{ color: '#ef4444', fontSize: '13px', marginBottom: '12px', textAlign: 'center', padding: '8px', background: 'rgba(239,68,68,0.1)', borderRadius: '8px' }}>{bookingError}</div>
+          )}
+          <button className="btn-checkout" onClick={handlePay} disabled={creating}>
+            {creating ? 'Memproses Pembayaran...' : 'Lakukan Pembayaran'}
+          </button>
         </div>
       </div>
 
@@ -434,16 +482,16 @@ function CheckoutContent() {
           <div style={{ fontSize: '36px', fontWeight: 'bold', color: '#fff', marginBottom: '20px' }}>{formatTime(countdown)}</div>
 
           <div style={{ background: '#2a2a2a', padding: '20px', borderRadius: '12px', marginBottom: '20px', textAlign: 'left' }}>
-            <div style={{ fontSize: '14px', color: '#aaa', marginBottom: '5px' }}>BCA Virtual Account</div>
+            <div style={{ fontSize: '14px', color: '#aaa', marginBottom: '5px' }}>ID Booking</div>
             <div style={{ fontSize: '20px', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              12345 67890 12345
+              {bookingResult?.bookingId || '-'}
               <i className="fa-regular fa-copy" style={{ cursor: 'pointer', color: '#fff' }} title="Salin" onClick={handleCopy}></i>
             </div>
             <div style={{ marginTop: '15px', fontSize: '14px', color: '#aaa', marginBottom: '5px' }}>Total Tagihan</div>
             <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#fff' }}>Rp{totalPrice.toLocaleString('id-ID')}</div>
           </div>
 
-          <button className="btn-checkout" onClick={() => { window.location.href = `/sewa-lapangan/success?venueId=${venueId}&courtId=${courtId}&slots=${slots.join(',')}`; }}>Cek Status Pembayaran</button>
+          <button className="btn-checkout" onClick={() => { window.location.href = `/sewa-lapangan/success?bookingId=${bookingResult?.bookingId}`; }}>Cek Status Pembayaran</button>
         </div>
       </div>
 

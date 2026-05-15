@@ -4,57 +4,73 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { supabase } from '@/utils/supabase';
+import { getBooking, cancelBooking } from '../checkout/actions';
 
 function SuccessContent() {
   const searchParams = useSearchParams();
-  const venueId = searchParams.get('venueId');
-  const courtId = searchParams.get('courtId');
-  const slotsParam = searchParams.get('slots');
-  const slots = slotsParam ? slotsParam.split(',') : [];
+  const bookingId = searchParams.get('bookingId');
 
-  const [venue, setVenue] = useState<any>(null);
-  const [court, setCourt] = useState<any>(null);
+  const [booking, setBooking] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
-    if (venueId && courtId) {
-      fetchDetails();
+    if (bookingId) {
+      loadBooking();
     } else {
       setLoading(false);
     }
-  }, [venueId, courtId]);
+  }, [bookingId]);
 
-  async function fetchDetails() {
-    try {
-      setLoading(true);
-      const { data: vData } = await supabase.from('venues').select('*').eq('id', venueId).single();
-      const { data: cData } = await supabase.from('courts').select('*').eq('id', courtId).single();
-      setVenue(vData);
-      setCourt(cData);
-    } catch (error) {
-      console.error('Error fetching success details:', error);
-    } finally {
-      setLoading(false);
+  async function loadBooking() {
+    setLoading(true);
+    const data = await getBooking(bookingId!);
+    setBooking(data);
+    setLoading(false);
+  }
+
+  async function handleCancel() {
+    if (!bookingId) return;
+    if (!confirm('Yakin ingin membatalkan booking ini?')) return;
+
+    setCancelling(true);
+    const result = await cancelBooking(bookingId);
+    if (result.success) {
+      await loadBooking();
     }
+    setCancelling(false);
   }
 
-  const totalPrice = venue ? slots.length * venue.price_per_hour : 0;
-  
-  // Format the time properly
-  let timeDisplay = '';
-  if (slots.length > 0) {
-    const sortedSlots = [...slots].sort();
-    const startTime = sortedSlots[0].split('-')[0];
-    const endTime = sortedSlots[sortedSlots.length - 1].split('-')[1];
-    timeDisplay = `${startTime} - ${endTime}`;
-  }
+  const totalPriceNum = booking?.price
+    ? parseInt(booking.price.replace(/[^0-9]/g, ''))
+    : 0;
+
+  const priceFormatted = totalPriceNum.toLocaleString('id-ID');
 
   if (loading) return <div style={{ background: '#000', color: '#fff', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Memuat Tiket...</div>;
 
+  if (!booking) {
+    return (
+      <>
+        <Navbar />
+        <div className="container" style={{ width: '90%', maxWidth: '1600px', margin: 'auto', paddingTop: '120px', textAlign: 'center' }}>
+          <h1 style={{ color: '#fff', marginBottom: 16 }}>Booking Tidak Ditemukan</h1>
+          <p style={{ color: '#aaa', marginBottom: 24 }}>Data booking tidak valid atau sudah dihapus.</p>
+          <a href="/" className="btn-back" style={{ padding: '12px 28px', border: '1px solid #fff', borderRadius: '12px', color: '#fff', textDecoration: 'none', display: 'inline-block' }}>← Kembali ke Beranda</a>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  const isCancelled = booking.status === 'Dibatalkan';
+
+  const timeParts = booking.time ? booking.time.split(' ') : [];
+  const duration = booking.duration || '';
+
   return (
     <>
-      <style dangerouslySetInnerHTML={{__html: `
+      <style>{`
         .status-container { display: flex; gap: 48px; padding: 60px 0 160px; width: 90%; max-width: 1600px; margin: auto; color: white; }
         .left { flex: 2; }
         .right { flex: 1; }
@@ -97,7 +113,10 @@ function SuccessContent() {
         .summary-total span:first-child { color: #fff; }
         .summary-total span:last-child { color: #fff; }
         .terms { font-size: 12px; color: #888; line-height: 1.5; }
-      `}} />
+        .cancelled-banner { background: rgba(244, 67, 54, 0.1); border: 1px solid #f44336; color: #f44336; padding: 16px 24px; border-radius: 12px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; font-weight: 600; }
+      `}</style>
+
+      <Navbar />
 
       <div className="container" style={{ width: '90%', maxWidth: '1600px', margin: 'auto', paddingTop: '60px' }}>
         <a href="/" className="btn-back">← Kembali ke Beranda</a>
@@ -105,11 +124,25 @@ function SuccessContent() {
       
       <div className="status-container" style={{ paddingTop: '0' }}>
         <div className="left">
+          {isCancelled && (
+            <div className="cancelled-banner">
+              <i className="fa-solid fa-circle-exclamation"></i> Booking ini telah dibatalkan
+            </div>
+          )}
+
           <div className="success-header">
-            <div className="success-icon"><i className="fa-solid fa-check"></i></div>
+            {isCancelled ? (
+              <div style={{ width: 72, height: 72, borderRadius: '50%', border: '4px solid #f44336', background: '#0f0f0f', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: 36 }}>
+                <i className="fa-solid fa-xmark" style={{ color: '#f44336' }}></i>
+              </div>
+            ) : (
+              <div className="success-icon"><i className="fa-solid fa-check"></i></div>
+            )}
             <div>
-              <h1 className="success-title">Pemesanan Lapangan Berhasil!</h1>
-              <div className="success-id">ID #MKM{Math.floor(Math.random() * 100000) + 100000}</div>
+              <h1 className="success-title">
+                {isCancelled ? 'Booking Dibatalkan' : 'Pemesanan Lapangan Berhasil!'}
+              </h1>
+              <div className="success-id">ID {booking.id}</div>
             </div>
           </div>
 
@@ -118,35 +151,39 @@ function SuccessContent() {
               <div style={{ marginBottom: '32px' }}>
                 <div className="ticket-label">Venue Lapangan</div>
                 <div className="ticket-val" style={{ fontSize: '20px', marginBottom: '4px' }}>
-                  {venue?.name || 'Venue Name'}
+                  {booking.venue}
                 </div>
                 <div style={{ fontSize: '13px', color: '#aaa' }}>
                   <i className="fa-solid fa-location-dot" style={{ color: 'var(--primary-lime)', marginRight: '6px' }}></i> 
-                  {venue?.location || 'Location Address'}
+                  {booking.location}
                 </div>
               </div>
               <div>
                 <div className="ticket-label">Tanggal Sewa</div>
-                <div className="ticket-val" style={{ color: '#ffffff' }}>06 Maret 2026</div>
+                <div className="ticket-val" style={{ color: '#ffffff' }}>{booking.date}</div>
               </div>
             </div>
             <div className="ticket-right">
               <div>
                 <div className="ticket-label">Waktu</div>
                 <div className="ticket-val">
-                  {timeDisplay} <span className="ticket-badge"><i className="fa-regular fa-hourglass-half"></i> {slots.length} Jam</span>
+                  {booking.time} {duration && <span className="ticket-badge"><i className="fa-regular fa-hourglass-half"></i> {duration}</span>}
                 </div>
               </div>
               <div>
                 <div className="ticket-label">Court ID</div>
-                <div className="ticket-val">{court?.name || 'Court Name'}</div>
+                <div className="ticket-val">{booking.court}</div>
               </div>
             </div>
           </div>
 
           <div className="btn-group">
-            <button className="btn-cancel">Batalkan Booking</button>
-            <button className="btn-contact">Hubungi Pengelola</button>
+            {!isCancelled && (
+              <button className="btn-cancel" onClick={handleCancel} disabled={cancelling}>
+                {cancelling ? 'Membatalkan...' : 'Batalkan Booking'}
+              </button>
+            )}
+            <button className="btn-contact" onClick={() => window.location.href = '/booking-saya'}>Lihat Booking Saya</button>
           </div>
         </div>
 
@@ -154,7 +191,7 @@ function SuccessContent() {
           <div className="summary-box">
             <div className="summary-row">
               <span>Biaya Sewa</span>
-              <span>Rp {totalPrice.toLocaleString('id-ID')}</span>
+              <span>Rp {priceFormatted}</span>
             </div>
             <div className="summary-row">
               <span>Biaya Produk Tambahan</span>
@@ -174,7 +211,7 @@ function SuccessContent() {
             </div>
             <div className="summary-total">
               <span>Total Biaya</span>
-              <span>Rp {totalPrice.toLocaleString('id-ID')}</span>
+              <span>Rp {priceFormatted}</span>
             </div>
           </div>
 
@@ -183,6 +220,8 @@ function SuccessContent() {
           </div>
         </div>
       </div>
+
+      <Footer />
     </>
   );
 }
@@ -190,12 +229,8 @@ function SuccessContent() {
 export default function SuccessPage() {
   useEffect(() => { document.title = 'Pembayaran Berhasil - Minton'; }, []);
   return (
-    <>
-      <Navbar />
-      <Suspense fallback={<div style={{ background: '#000', color: '#fff', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>}>
-        <SuccessContent />
-      </Suspense>
-      <Footer />
-    </>
+    <Suspense fallback={<div style={{ background: '#000', color: '#fff', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>}>
+      <SuccessContent />
+    </Suspense>
   );
 }

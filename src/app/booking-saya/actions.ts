@@ -48,3 +48,18 @@ export async function payBooking(bookingId: string) {
   if (error) return { error: error.message };
   return { success: true };
 }
+
+export async function cancelBooking(bookingId: string) {
+  const cookieStore = await cookies();
+  const email = cookieStore.get('userEmail')?.value;
+  if (!email) return { error: 'Sesi tidak ditemukan' };
+
+  const { error } = await supabase
+    .from('bookings')
+    .update({ status: 'Dibatalkan' })
+    .eq('booking_id', bookingId)
+    .eq('user_email', email);
+
+  if (error) return { error: error.message };
+  return { success: true };
+}

@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -10,6 +10,7 @@ export default function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState('');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -34,10 +35,23 @@ export default function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
   // Close menu when pathname changes
   useEffect(() => {
     setIsMenuOpen(false);
   }, [pathname]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <>
@@ -70,13 +84,13 @@ export default function Navbar() {
 
           <div className="nav-btn">
             {isLoggedIn ? (
-              <div className="user-dropdown">
-                <div className="user-profile-btn">
+              <div className={`user-dropdown ${isDropdownOpen ? 'open' : ''}`} ref={dropdownRef}>
+                <div className="user-profile-btn" onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
                   <div className="user-avatar">{userName.charAt(0).toUpperCase()}</div>
                   <span>{userName}</span>
                   <i className="fa-solid fa-chevron-down" style={{ fontSize: '12px', marginLeft: '4px' }}></i>
                 </div>
-                <div className="dropdown-menu">
+                <div className="dropdown-menu" onClick={() => setIsDropdownOpen(false)}>
                   <Link href="/dashboard" className="dropdown-item">
                     <i className="fa-solid fa-gauge"></i> Dashboard
                   </Link>

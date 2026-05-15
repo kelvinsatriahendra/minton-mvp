@@ -21,6 +21,6 @@ CREATE TABLE IF NOT EXISTS bookings (
 
 -- Seed data (ganti emailkamu@gmail.com dengan email akun kamu)
 INSERT INTO bookings (booking_id, user_email, venue, venue_short, img, location, status, date, time, duration, court, price) VALUES
-('BS-00192', 'emailkamu@gmail.com', 'GOR Sudirman - Lapangan 3', 'GOR Sudirman', '/asset/surabaya-badminton.png', 'Surabaya, Jawa Timur', 'Terkonfirmasi', 'Jumat, 10 Mei 2024', '19:00 - 21:00', '2 Jam', 'Lapangan 3', 'Rp 140.000'),
-('BS-00210', 'emailkamu@gmail.com', 'Kalam Kudus - Lapangan 1', 'Kalam Kudus', '/asset/kalam-kudus.png', 'Surakarta, Jawa Tengah', 'Terkonfirmasi', 'Minggu, 12 Mei 2024', '08:00 - 10:00', '2 Jam', 'Lapangan 1', 'Rp 100.000'),
-('BS-00215', 'emailkamu@gmail.com', 'Supermash Hall - Lapangan 5', 'Supermash Hall', '/asset/supersmash-badminton-hall.png', 'Surabaya, Jawa Timur', 'Menunggu Pembayaran', 'Selasa, 14 Mei 2024', '20:00 - 21:00', '1 Jam', 'Lapangan 5', 'Rp 60.000');
+('BS-00192', 'kelvintut304@gmail.com', 'GOR Sudirman - Lapangan 3', 'GOR Sudirman', '/asset/surabaya-badminton.png', 'Surabaya, Jawa Timur', 'Terkonfirmasi', 'Jumat, 10 Mei 2024', '19:00 - 21:00', '2 Jam', 'Lapangan 3', 'Rp 140.000'),
+('BS-00210', 'kelvintut304@gmail.com', 'Kalam Kudus - Lapangan 1', 'Kalam Kudus', '/asset/kalam-kudus.png', 'Surakarta, Jawa Tengah', 'Terkonfirmasi', 'Minggu, 12 Mei 2024', '08:00 - 10:00', '2 Jam', 'Lapangan 1', 'Rp 100.000'),
+('BS-00215', 'kelvintut304@gmail.com', 'Supermash Hall - Lapangan 5', 'Supermash Hall', '/asset/supersmash-badminton-hall.png', 'Surabaya, Jawa Timur', 'Menunggu Pembayaran', 'Selasa, 14 Mei 2024', '20:00 - 21:00', '1 Jam', 'Lapangan 5', 'Rp 60.000');

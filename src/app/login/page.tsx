@@ -108,10 +108,6 @@ export default function LoginPage() {
                 </svg>
                 Masuk dengan Google
               </button>
-              <button className="btn-social">
-                <i className="fa-brands fa-apple" style={{ fontSize: '20px' }}></i>
-                Masuk dengan Apple ID
-              </button>
             </div>
             
             {error && (

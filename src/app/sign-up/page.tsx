@@ -106,10 +106,6 @@ export default function SignUpPage() {
                 </svg>
                 Daftar dengan Google
               </button>
-              <button className="btn-social">
-                <i className="fa-brands fa-apple" style={{ fontSize: '20px' }}></i>
-                Daftar dengan Apple ID
-              </button>
             </div>
 
             {error && (

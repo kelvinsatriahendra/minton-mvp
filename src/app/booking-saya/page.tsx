@@ -2,31 +2,66 @@
 
 import { useState, useEffect } from 'react';
 import DashboardSidebar from '@/components/DashboardSidebar';
+import { getBookings, payBooking } from './actions';
 
+interface BookingItem {
+  id: string; venue: string; venueShort: string; img: string; location: string;
+  status: string; statusClass: string; date: string; time: string;
+  duration: string; court: string; price: string; pending?: boolean;
+}
 interface DetailData { venue: string; img: string; id: string; status: string; date: string; time: string; court: string; price: string; }
 interface TicketData { id: string; venue: string; date: string; time: string; court: string; }
-interface PaymentData { venue: string; amount: string; }
-
-const bookings = [
-  { id: 'BS-00192', venue: 'GOR Sudirman - Lapangan 3', venueShort: 'GOR Sudirman', img: '/asset/surabaya-badminton.png', location: 'Surabaya, Jawa Timur', status: 'Terkonfirmasi', statusClass: 'badge-booked', date: 'Jumat, 10 Mei 2024', time: '19:00 - 21:00', duration: '2 Jam', court: 'Lapangan 3', price: 'Rp 140.000' },
-  { id: 'BS-00210', venue: 'Kalam Kudus - Lapangan 1', venueShort: 'Kalam Kudus', img: '/asset/kalam-kudus.png', location: 'Surakarta, Jawa Tengah', status: 'Terkonfirmasi', statusClass: 'badge-booked', date: 'Minggu, 12 Mei 2024', time: '08:00 - 10:00', duration: '2 Jam', court: 'Lapangan 1', price: 'Rp 100.000' },
-  { id: 'BS-00215', venue: 'Supermash Hall - Lapangan 5', venueShort: 'Supermash Hall', img: '/asset/supersmash-badminton-hall.png', location: 'Surabaya, Jawa Timur', status: 'Menunggu Pembayaran', statusClass: 'badge-pending', date: 'Selasa, 14 Mei 2024', time: '20:00 - 21:00', duration: '1 Jam', court: 'Lapangan 5', price: 'Rp 60.000', pending: true },
-];
-
-const tabs = ['Aktif (2)', 'Menunggu Pembayaran (1)', 'Riwayat', 'Dibatalkan'];
+interface PaymentData { venue: string; amount: string; id: string; }
 
 export default function BookingSayaPage() {
   const [activeTab, setActiveTab] = useState(0);
+  const [bookings, setBookings] = useState<BookingItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [detailData, setDetailData] = useState<DetailData | null>(null);
-  useEffect(() => { document.title = 'Booking Saya - Minton'; }, []);
   const [isTicketOpen, setIsTicketOpen] = useState(false);
   const [ticketData, setTicketData] = useState<TicketData | null>(null);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
   const [isPaymentSuccess, setIsPaymentSuccess] = useState(false);
+  const [paying, setPaying] = useState(false);
+
+  useEffect(() => {
+    document.title = 'Booking Saya - Minton';
+    loadBookings();
+  }, []);
+
+  async function loadBookings() {
+    setLoading(true);
+    const data = await getBookings();
+    setBookings(data);
+    setLoading(false);
+  }
 
   const closeAll = () => { setIsDetailOpen(false); setIsTicketOpen(false); setIsPaymentOpen(false); setIsPaymentSuccess(false); };
+
+  async function handlePay() {
+    if (!paymentData) return;
+    setPaying(true);
+    const result = await payBooking(paymentData.id);
+    if (result.success) {
+      setIsPaymentSuccess(true);
+      await loadBookings();
+    }
+    setPaying(false);
+  }
+
+  const filteredBookings = bookings.filter(b => {
+    if (activeTab === 0) return b.status === 'Terkonfirmasi';
+    if (activeTab === 1) return b.status === 'Menunggu Pembayaran';
+    return false;
+  });
+
+  const tabLabels = [
+    `Aktif (${bookings.filter(b => b.status === 'Terkonfirmasi').length})`,
+    `Menunggu Pembayaran (${bookings.filter(b => b.status === 'Menunggu Pembayaran').length})`,
+    'Riwayat', 'Dibatalkan',
+  ];
 
   return (
     <DashboardSidebar>
@@ -58,6 +93,8 @@ export default function BookingSayaPage() {
           @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
           .btn-cancel-modal { transition: all 0.3s ease; }
           .btn-cancel-modal:hover { background: #f44336 !important; border-color: #f44336 !important; color: #fff !important; }
+          .empty-state { text-align: center; padding: 60px 20px; color: var(--text-gray); }
+          .empty-state i { font-size: 48px; margin-bottom: 16px; opacity: 0.3; }
           @media (max-width: 768px) {
             .booking-card-item { grid-template-columns: 1fr; text-align: center; }
             .booking-time, .booking-actions { text-align: center; justify-content: center; }
@@ -65,46 +102,56 @@ export default function BookingSayaPage() {
           }
         `}</style>
         <div className="booking-tabs">
-          {tabs.map((tab, i) => (
-            <div key={i} className={`tab-item ${activeTab === i ? 'active' : ''}`} onClick={() => setActiveTab(i)}>{tab}</div>
+          {tabLabels.map((label, i) => (
+            <div key={i} className={`tab-item ${activeTab === i ? 'active' : ''}`} onClick={() => setActiveTab(i)}>{label}</div>
           ))}
         </div>
-        <div className="booking-card-list">
-          {bookings.filter(b => {
-            if (activeTab === 0) return b.status === 'Terkonfirmasi';
-            if (activeTab === 1) return b.status === 'Menunggu Pembayaran';
-            return false;
-          }).map((b, i) => (
-            <div key={i} className="booking-card-item" style={b.pending ? { borderLeft: '4px solid #ffc107' } : {}}>
-              <img src={b.img} alt="Venue" className="venue-img" />
-              <div className="venue-info">
-                <h4>{b.venue}</h4>
-                <p><i className="fa-solid fa-location-dot"></i> {b.location}</p>
-                <p style={{ marginTop: 8 }}>
-                  {b.pending ? (
-                    <span className="badge" style={{ background: 'rgba(255, 193, 7, 0.1)', color: '#ffc107' }}>{b.status}</span>
-                  ) : (
+
+        {loading ? (
+          <div className="empty-state">
+            <div style={{ width: 40, height: 40, border: '3px solid var(--primary-lime)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 20px' }}></div>
+            <p style={{ color: '#aaa' }}>Memuat booking...</p>
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          </div>
+        ) : filteredBookings.length === 0 ? (
+          <div className="empty-state">
+            <i className="fa-solid fa-calendar-xmark"></i>
+            <h3 style={{ color: '#fff', marginBottom: 8 }}>Belum Ada Booking</h3>
+            <p>{activeTab === 0 ? 'Belum ada booking aktif.' : activeTab === 1 ? 'Tidak ada booking yang menunggu pembayaran.' : 'Belum ada riwayat booking.'}</p>
+            <button className="btn-primary-dash" style={{ marginTop: 20 }} onClick={() => window.location.href = '/sewa-lapangan'}>
+              Booking Lapangan Sekarang
+            </button>
+          </div>
+        ) : (
+          <div className="booking-card-list">
+            {filteredBookings.map((b, i) => (
+              <div key={b.id || i} className="booking-card-item" style={b.pending ? { borderLeft: '4px solid #ffc107' } : {}}>
+                <img src={b.img} alt="Venue" className="venue-img" />
+                <div className="venue-info">
+                  <h4>{b.venue}</h4>
+                  <p><i className="fa-solid fa-location-dot"></i> {b.location}</p>
+                  <p style={{ marginTop: 8 }}>
                     <span className={`badge ${b.statusClass}`}>{b.status}</span>
+                  </p>
+                </div>
+                <div className="booking-time">
+                  <p>{b.date}</p>
+                  <p>{b.time} ({b.duration})</p>
+                </div>
+                <div className="booking-actions">
+                  {b.pending ? (
+                    <button className="btn-primary-dash" style={{ padding: '8px 24px' }} onClick={() => { setPaymentData({ venue: b.venue, amount: b.price, id: b.id }); setIsPaymentOpen(true); setIsPaymentSuccess(false); }}>Bayar Sekarang</button>
+                  ) : (
+                    <>
+                      <button className="btn-secondary-dash" style={{ padding: '8px 16px' }} onClick={() => { setDetailData({ venue: b.venue, img: b.img, id: b.id, status: b.status, date: b.date, time: b.time, court: b.court, price: b.price }); setIsDetailOpen(true); }}>Detail</button>
+                      <button className="btn-secondary-dash" style={{ padding: '8px 16px' }} onClick={() => { setTicketData({ id: b.id, venue: b.venueShort, date: b.date, time: b.time, court: b.court }); setIsTicketOpen(true); }}><i className="fa-solid fa-qrcode"></i> Tiket</button>
+                    </>
                   )}
-                </p>
+                </div>
               </div>
-              <div className="booking-time">
-                <p>{b.date}</p>
-                <p>{b.time} ({b.duration})</p>
-              </div>
-              <div className="booking-actions">
-                {b.pending ? (
-                  <button className="btn-primary-dash" style={{ padding: '8px 24px' }} onClick={() => { setPaymentData({ venue: b.venue, amount: b.price }); setIsPaymentOpen(true); setIsPaymentSuccess(false); }}>Bayar Sekarang</button>
-                ) : (
-                  <>
-                    <button className="btn-secondary-dash" style={{ padding: '8px 16px' }} onClick={() => { setDetailData({ venue: b.venue, img: b.img, id: b.id, status: b.status, date: b.date, time: b.time, court: b.court, price: b.price }); setIsDetailOpen(true); }}>Detail</button>
-                    <button className="btn-secondary-dash" style={{ padding: '8px 16px' }} onClick={() => { setTicketData({ id: b.id, venue: b.venueShort, date: b.date, time: b.time, court: b.court }); setIsTicketOpen(true); }}><i className="fa-solid fa-qrcode"></i> Tiket</button>
-                  </>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Detail Modal */}
@@ -220,7 +267,9 @@ export default function BookingSayaPage() {
                 </div>
                 <div style={{ display: 'flex', gap: '12px' }}>
                   <button onClick={closeAll} className="btn-cancel-modal" style={{ flex: 1, padding: '14px', borderRadius: '12px', border: '1px solid #333', background: 'transparent', color: '#fff', fontWeight: 600, cursor: 'pointer' }}>Batal</button>
-                  <button onClick={() => setIsPaymentSuccess(true)} style={{ flex: 2, padding: '14px', borderRadius: '12px', border: 'none', background: 'var(--primary-lime)', color: '#000', fontWeight: 700, cursor: 'pointer' }}>Bayar Sekarang</button>
+                  <button onClick={handlePay} disabled={paying} style={{ flex: 2, padding: '14px', borderRadius: '12px', border: 'none', background: 'var(--primary-lime)', color: '#000', fontWeight: 700, cursor: 'pointer', opacity: paying ? 0.6 : 1 }}>
+                    {paying ? 'Memproses...' : 'Bayar Sekarang'}
+                  </button>
                 </div>
               </div>
             </div>
@@ -232,7 +281,7 @@ export default function BookingSayaPage() {
                 </div>
                 <h2 style={{ fontSize: '24px', fontWeight: 700, color: '#fff', marginBottom: '12px' }}>Pembayaran Berhasil!</h2>
                 <p style={{ color: '#aaa', fontSize: '14px', lineHeight: 1.6, marginBottom: '32px' }}>Transaksi Anda telah kami terima. Lapangan telah berhasil dipesan dan siap digunakan.</p>
-                <button onClick={() => location.reload()} style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: 'var(--primary-lime)', color: '#000', fontWeight: 700, cursor: 'pointer' }}>Selesai</button>
+                <button onClick={closeAll} style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: 'var(--primary-lime)', color: '#000', fontWeight: 700, cursor: 'pointer' }}>Selesai</button>
               </div>
             </div>
           )}

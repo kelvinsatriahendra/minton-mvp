@@ -25,23 +25,6 @@ function CheckoutContent() {
   const [bookingResult, setBookingResult] = useState<{ bookingId: string; date: string } | null>(null);
   const [bookingError, setBookingError] = useState<string | null>(null);
 
-  const [voucherCode, setVoucherCode] = useState('');
-  const [discount, setDiscount] = useState(0);
-  const [voucherMsg, setVoucherMsg] = useState('');
-
-  const handleApplyVoucher = () => {
-    if (voucherCode.toUpperCase() === 'MINTON10') {
-      setDiscount(10000);
-      setVoucherMsg('Voucher berhasil digunakan! Diskon Rp10.000');
-    } else if (voucherCode.toUpperCase() === 'MINTON50') {
-      setDiscount(50000);
-      setVoucherMsg('Voucher berhasil digunakan! Diskon Rp50.000');
-    } else {
-      setDiscount(0);
-      setVoucherMsg('Voucher tidak valid atau sudah kadaluarsa.');
-    }
-  };
-
   useEffect(() => {
     if (venueId && courtId) fetchDetails();
   }, [venueId, courtId]);
@@ -115,7 +98,7 @@ function CheckoutContent() {
     fd.set('venueShort', venue?.name || '');
     fd.set('venueImg', venue?.image || '');
     fd.set('venueLocation', venue?.location || '');
-    fd.set('totalPrice', String(totalPrice - discount));
+    fd.set('totalPrice', String(totalPrice));
     fd.set('courtName', court?.name || '');
 
     const result = await createBooking(fd);
@@ -326,10 +309,9 @@ function CheckoutContent() {
           position: relative;
           transform: translateY(20px);
           transition: transform 0.3s;
-        }
-        .modal-overlay.active .modal-content { transform: translateY(0); }
           text-align: center;
         }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
         .close-btn {
           position: absolute;
           top: 15px;
@@ -461,26 +443,12 @@ function CheckoutContent() {
         </div>
 
         <div className="right">
-          <div className="card">
-            <h3 style={{ marginBottom: '16px' }}><i className="fa-solid fa-ticket" style={{ color: 'var(--primary-lime)', marginRight: '12px', fontSize: '20px' }}></i> Kode Voucher</h3>
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <input type="text" placeholder="Masukkan kode voucher (misal: MINTON10)" value={voucherCode} onChange={e => setVoucherCode(e.target.value)} style={{ flex: 1, padding: '12px 16px', borderRadius: '8px', background: '#121212', border: '1px solid #333', color: '#fff', fontSize: '14px', outline: 'none' }} />
-              <button onClick={handleApplyVoucher} style={{ padding: '12px 24px', borderRadius: '8px', background: 'var(--primary-lime)', color: '#000', fontWeight: 'bold', border: 'none', cursor: 'pointer' }}>Gunakan</button>
-            </div>
-            {voucherMsg && (
-              <p style={{ marginTop: '12px', fontSize: '13px', color: discount > 0 ? 'var(--primary-lime)' : '#f44336' }}>
-                {voucherMsg}
-              </p>
-            )}
-          </div>
-
           <div className="summary-box">
             <div className="summary-header">Rincian Biaya</div>
             <div className="summary-body">
               <div className="summary-row"><span>Biaya Sewa</span><span>Rp{totalPrice.toLocaleString('id-ID')}</span></div>
               <div className="summary-row"><span>Biaya Produk Tambahan</span><span>Rp0</span></div>
-              {discount > 0 && <div className="summary-row"><span style={{ color: 'var(--primary-lime)' }}>Diskon Voucher ({voucherCode})</span><span style={{ color: 'var(--primary-lime)' }}>-Rp{discount.toLocaleString('id-ID')}</span></div>}
-              <div className="summary-row"><span>Total Biaya (Lunas)</span><span>Rp{(totalPrice - discount).toLocaleString('id-ID')}</span></div>
+              <div className="summary-row"><span>Total Biaya (Lunas)</span><span>Rp{totalPrice.toLocaleString('id-ID')}</span></div>
               <div className="summary-row"><span>Convenience Fee</span><span>Rp0</span></div>
               <div className="summary-row"><span>Biaya Transaksi</span><span>Rp0</span></div>
             </div>
@@ -488,7 +456,7 @@ function CheckoutContent() {
 
           <div className="total-box">
             <span>Total Biaya</span>
-            <span>Rp.{(totalPrice - discount).toLocaleString('id-ID')}</span>
+            <span>Rp.{totalPrice.toLocaleString('id-ID')}</span>
           </div>
 
           <div className="terms">

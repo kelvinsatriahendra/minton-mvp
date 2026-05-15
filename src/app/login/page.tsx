@@ -129,7 +129,7 @@ export default function LoginPage() {
                 <label>Kata Sandi</label>
                 <input type="password" name="password" required />
                 <div className="forgot-password">
-                  <a href="#">Lupa kata sandi?</a>
+                  <Link href="/lupa-password">Lupa kata sandi?</Link>
                 </div>
               </div>
               <div className="checkbox-group">

@@ -17,7 +17,6 @@ export default function AuthCallbackPage() {
         const user = session.user;
         const userName = user.user_metadata.full_name || user.email?.split('@')[0] || 'Jagoan';
 
-        // Panggil API helper untuk pasang cookie
         await fetch('/api/auth/set-session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -28,8 +27,12 @@ export default function AuthCallbackPage() {
           }),
         });
 
-        // Redirect ke home
-        router.push('/');
+        const hash = window.location.hash;
+        if (hash.includes('type=recovery')) {
+          router.push('/reset-password');
+        } else {
+          router.push('/');
+        }
         router.refresh();
       } else if (error) {
         console.error('Auth Error:', error.message);

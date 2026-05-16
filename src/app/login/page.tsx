@@ -118,8 +118,8 @@ export default function LoginPage() {
 
             <form onSubmit={handleSubmit}>
               <div className="form-group">
-                <label>Email atau Whatsapp</label>
-                <input type="text" name="loginId" required />
+                <label>Email</label>
+                <input type="email" name="email" required />
               </div>
               <div className="form-group">
                 <label>Kata Sandi</label>

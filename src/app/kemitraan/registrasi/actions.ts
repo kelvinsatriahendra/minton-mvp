@@ -7,7 +7,6 @@ import { cookies } from 'next/headers';
 const registerMitraSchema = z.object({
   gor_name: z.string().min(3, { message: "Nama GOR minimal 3 karakter" }),
   owner_name: z.string().min(3, { message: "Nama Pemilik minimal 3 karakter" }),
-  whatsapp: z.string().min(10, { message: "Nomor WhatsApp tidak valid" }),
   email: z.string().email({ message: "Format email tidak valid" }),
   address: z.string().min(5, { message: "Alamat wajib diisi" }),
   city: z.string().min(3, { message: "Kota wajib diisi" }),
@@ -31,7 +30,6 @@ export async function registerMitraAction(prevState: any, formData: FormData) {
   const rawData = {
     gor_name: formData.get('gor_name') as string,
     owner_name: formData.get('owner_name') as string,
-    whatsapp: formData.get('whatsapp') as string,
     email: formData.get('email') as string,
     address: formData.get('address') as string,
     city: formData.get('city') as string,
@@ -52,7 +50,7 @@ export async function registerMitraAction(prevState: any, formData: FormData) {
   }
 
   try {
-    const { gor_name, owner_name, whatsapp, email, password } = validatedFields.data;
+    const { gor_name, owner_name, email, password } = validatedFields.data;
 
     // Cek apakah email sudah terdaftar
     const { data: existingData } = await supabase
@@ -72,7 +70,6 @@ export async function registerMitraAction(prevState: any, formData: FormData) {
         {
           gor_name,
           owner_name,
-          whatsapp,
           email,
           password // Simpan plaintext sesuai skema MVP
         }

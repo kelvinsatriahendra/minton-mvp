@@ -6,15 +6,15 @@ import { redirect } from 'next/navigation';
 import { supabase } from '@/utils/supabase';
 
 const loginSchema = z.object({
-  loginId: z.string().min(1, { message: "Email atau Whatsapp wajib diisi" }),
+  email: z.string().email({ message: "Email wajib diisi" }),
   password: z.string().min(8, { message: "Kata sandi minimal 8 karakter" }),
 });
 
 export async function loginAction(prevState: any, formData: FormData) {
-  const loginId = formData.get('loginId') as string;
+  const email = formData.get('email') as string;
   const password = formData.get('password') as string;
 
-  const validatedFields = loginSchema.safeParse({ loginId, password });
+  const validatedFields = loginSchema.safeParse({ email, password });
 
   if (!validatedFields.success) {
     return {
@@ -24,14 +24,10 @@ export async function loginAction(prevState: any, formData: FormData) {
   }
 
   try {
-    const isEmail = loginId.includes('@');
-    const columnToCheck = isEmail ? 'email' : 'whatsapp';
-    
-    // Supabase Query persis seperti auth.js
     const { data, error } = await supabase
       .from('users')
       .select('*')
-      .eq(columnToCheck, loginId)
+      .eq('email', email)
       .eq('password', password);
 
     if (error) throw error;
@@ -56,7 +52,7 @@ export async function loginAction(prevState: any, formData: FormData) {
       // Return sukses, UI yang akan redirect
       return { success: true, userName: user.nama_lengkap };
     } else {
-      return { message: 'Maaf, Email/Whatsapp atau Kata Sandi Anda salah.' };
+      return { message: 'Maaf, Email atau Kata Sandi Anda salah.' };
     }
   } catch (err) {
     console.error('Error Login:', err);

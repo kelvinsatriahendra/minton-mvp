@@ -125,13 +125,6 @@ export default function MainBarengPage() {
     }
   };
 
-  const contactAdmin = () => {
-    if (!selectedMatch) return;
-    const message = `Halo Admin Minton, saya ingin bertanya tentang main bareng di ${selectedMatch.venue_name} jam ${selectedMatch.start_time.substring(0,5)} - ${selectedMatch.end_time.substring(0,5)}. Apakah masih ada slot?`;
-    const whatsappUrl = `https://wa.me/6281234567890?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
-  };
-
   const openCreateModal = () => {
     const cookies = document.cookie.split(';').some(c => c.trim().startsWith('isLoggedIn=true'));
     if (!cookies) {
@@ -225,8 +218,6 @@ export default function MainBarengPage() {
         .modal-footer-mabar { display: flex; flex-direction: column; gap: 12px; }
         .modal-footer-mabar .footer-top { display: flex; gap: 12px; }
         .modal-footer-mabar button { padding: 14px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.3s; }
-        .btn-whatsapp { border-color: #25D366 !important; color: #25D366 !important; }
-        .btn-whatsapp:hover { background-color: rgba(37,211,102,0.1); }
         .btn-cancel-mabar:hover { background-color: #ff4444 !important; border-color: #ff4444 !important; color: #fff !important; }
         .create-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
         .form-group-mabar label { display: block; color: var(--text-gray); font-size: 12px; margin-bottom: 8px; }
@@ -356,9 +347,6 @@ export default function MainBarengPage() {
             <div className="modal-footer-mabar">
               <div className="footer-top">
                 <button className="btn btn-outline btn-cancel-mabar" style={{ flex: 1 }} onClick={closeDetailModal}>Batal</button>
-                <button className="btn btn-outline btn-whatsapp" style={{ flex: 2 }} onClick={contactAdmin}>
-                  <i className="fa-brands fa-whatsapp" style={{ marginRight: '8px' }}></i>Hubungi Admin
-                </button>
               </div>
               <button className="btn btn-primary" style={{ border: 'none', color: '#000', fontWeight: 600 }} onClick={confirmJoin} disabled={processing}>
                 {processing ? 'Memproses...' : 'Konfirmasi Ikut'}

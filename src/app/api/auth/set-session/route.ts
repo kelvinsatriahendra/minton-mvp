@@ -11,7 +11,6 @@ export async function POST(request: Request) {
   await supabase.from('users').upsert({
     email: email,
     nama_lengkap: userName,
-    whatsapp: `google-${userId.substring(0, 8)}`,
     password: 'oauth-user'
   }, { onConflict: 'email' });
 

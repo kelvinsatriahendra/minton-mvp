@@ -121,10 +121,6 @@ export default function SignUpPage() {
               </div>
               <div className="form-row">
                 <div className="form-group">
-                  <label>Nomor Whatsapp</label>
-                  <input type="text" name="whatsapp" required />
-                </div>
-                <div className="form-group">
                   <label>E-mail</label>
                   <input type="email" name="email" required />
                 </div>

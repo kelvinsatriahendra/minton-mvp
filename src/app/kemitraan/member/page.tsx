@@ -3,10 +3,10 @@ import { useEffect } from 'react';
 import MitraSidebar from "@/components/MitraSidebar";
 
 const members = [
-  { avatar: "BA", name: "Budi Anderson", phone: "081234567890", badge: "badge-pro", badgeText: "PRO Member", since: "Jan 2025", lastPlay: "Hari ini", total: "42 kali" },
-  { avatar: "RS", name: "Rina Septiani", phone: "087711223344", badge: "badge-regular", badgeText: "Reguler", since: "Mar 2025", lastPlay: "2 hari lalu", total: "15 kali" },
-  { avatar: "AW", name: "Andi Wijaya", phone: "082299887766", badge: "badge-pro", badgeText: "PRO Member", since: "Feb 2025", lastPlay: "Kemarin", total: "31 kali" },
-  { avatar: "DP", name: "Dewi Permata", phone: "081555444333", badge: "badge-regular", badgeText: "Reguler", since: "Apr 2025", lastPlay: "5 hari lalu", total: "8 kali" },
+  { avatar: "BA", name: "Budi Anderson", badge: "badge-pro", badgeText: "PRO Member", since: "Jan 2025", lastPlay: "Hari ini", total: "42 kali" },
+  { avatar: "RS", name: "Rina Septiani", badge: "badge-regular", badgeText: "Reguler", since: "Mar 2025", lastPlay: "2 hari lalu", total: "15 kali" },
+  { avatar: "AW", name: "Andi Wijaya", badge: "badge-pro", badgeText: "PRO Member", since: "Feb 2025", lastPlay: "Kemarin", total: "31 kali" },
+  { avatar: "DP", name: "Dewi Permata", badge: "badge-regular", badgeText: "Reguler", since: "Apr 2025", lastPlay: "5 hari lalu", total: "8 kali" },
 ];
 
 export default function MemberPage() {
@@ -47,7 +47,7 @@ export default function MemberPage() {
                         <div className="member-avatar-sm">{m.avatar}</div>
                         <div>
                           <p className="member-name">{m.name}</p>
-                          <p className="member-phone">{m.phone}</p>
+                          
                         </div>
                       </div>
                     </td>

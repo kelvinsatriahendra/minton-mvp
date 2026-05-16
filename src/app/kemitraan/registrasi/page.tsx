@@ -72,11 +72,6 @@ export default function RegistrasiPage() {
                   {state?.errors?.owner_name && <span style={{ color: 'red', fontSize: '12px' }}>{state.errors.owner_name[0]}</span>}
                 </div>
                 <div className="form-group">
-                  <label>Nomor WhatsApp</label>
-                  <input type="tel" name="whatsapp" placeholder="08123456789" required />
-                  {state?.errors?.whatsapp && <span style={{ color: 'red', fontSize: '12px' }}>{state.errors.whatsapp[0]}</span>}
-                </div>
-                <div className="form-group">
                   <label>Email Bisnis (Untuk Login)</label>
                   <input type="email" name="email" placeholder="gor@email.com" required />
                   {state?.errors?.email && <span style={{ color: 'red', fontSize: '12px' }}>{state.errors.email[0]}</span>}

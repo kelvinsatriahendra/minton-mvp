@@ -377,7 +377,7 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
               <span style={{ fontSize: '14px', fontWeight: 'normal', color: '#aaa' }}>/Jam</span>
             </div>
             <button className="btn-chat">
-              <i className="fa-brands fa-whatsapp" style={{ marginRight: '8px', fontSize: '16px' }}></i> Chat CS
+              Chat CS
             </button>
           </div>
         </div>

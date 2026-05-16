@@ -16,7 +16,7 @@ function CheckoutContent() {
   const [court, setCourt] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
-  const [userData, setUserData] = useState({ name: '', email: '', phone: '' });
+  const [userData, setUserData] = useState({ name: '', email: '' });
 
   const [selectedPayment, setSelectedPayment] = useState('va');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -63,7 +63,7 @@ function CheckoutContent() {
 
       const email = cookies['userEmail'] || '';
       const name = cookies['userName'] || '';
-      setUserData({ name, email, phone: '' });
+      setUserData({ name, email });
 
       if (email) {
         const { data: userData } = await supabase

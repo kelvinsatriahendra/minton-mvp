@@ -10,19 +10,11 @@ function OtpContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get('email') || '';
 
-  const [code, setCode] = useState(['', '', '', '', '', '']);
+  const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
-
-  const inputRefs = [
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-  ];
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { document.title = 'Verifikasi OTP - Minton'; }, []);
 
@@ -37,24 +29,10 @@ function OtpContent() {
     if (!email) router.replace('/login');
   }, [email, router]);
 
-  const handleChange = (index: number, value: string) => {
-    if (!/^\d?$/.test(value)) return;
-    const next = [...code];
-    next[index] = value;
-    setCode(next);
-    if (value && index < 5) inputRefs[index + 1].current?.focus();
-  };
-
-  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Backspace' && !code[index] && index > 0) {
-      inputRefs[index - 1].current?.focus();
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const otp = code.join('');
-    if (otp.length !== 6) return setError('Masukkan 6 digit kode OTP.');
+    const otp = code.trim();
+    if (otp.length < 4 || otp.length > 10) return setError('Masukkan kode OTP yang valid.');
 
     setLoading(true);
     setError(null);
@@ -67,8 +45,8 @@ function OtpContent() {
     if (result.error) {
       setError(result.error);
       setLoading(false);
-      setCode(['', '', '', '', '', '']);
-      inputRefs[0].current?.focus();
+      setCode('');
+      inputRef.current?.focus();
     } else {
       router.push('/');
       router.refresh();
@@ -84,9 +62,9 @@ function OtpContent() {
     if (result.error) {
       setError(result.error);
     } else {
-      setCode(['', '', '', '', '', '']);
+      setCode('');
       setResendTimer(60);
-      inputRefs[0].current?.focus();
+      inputRef.current?.focus();
     }
   };
 
@@ -112,9 +90,8 @@ function OtpContent() {
         .form-card h2 { font-size: 26px; font-weight: 600; margin-bottom: 10px; }
         .highlight { color: var(--primary-lime); }
         .form-card p { color: var(--text-gray); font-size: 14px; margin-bottom: 32px; line-height: 1.6; }
-        .otp-container { display: flex; gap: 10px; justify-content: center; margin-bottom: 32px; }
-        .otp-input { width: 48px; height: 60px; border: 1px solid #333; border-radius: 12px; background-color: var(--input-bg); color: var(--text-white); font-size: 22px; font-weight: 700; text-align: center; outline: none; transition: 0.3s; }
-        .otp-input:focus { box-shadow: 0 0 0 2px var(--primary-lime); }
+        .otp-input-single { width: 100%; padding: 14px; border: 1px solid #333; border-radius: 12px; background-color: var(--input-bg); color: var(--text-white); font-size: 20px; font-weight: 600; text-align: center; outline: none; transition: 0.3s; letter-spacing: 6px; margin-bottom: 24px; }
+        .otp-input-single:focus { box-shadow: 0 0 0 2px var(--primary-lime); }
         .btn-submit { width: 100%; padding: 14px; background-color: var(--primary-lime); color: #000; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-bottom: 18px; }
         .btn-submit:hover { background-color: #a7bc1d; box-shadow: 0 4px 12px rgba(189, 209, 36, 0.4); }
         .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
@@ -124,7 +101,7 @@ function OtpContent() {
         .resend-link button:disabled { color: #666; cursor: not-allowed; text-decoration: none; }
         .error-box { background: rgba(239,68,68,0.1); border: 1px solid #ef4444; color: #ef4444; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; }
         @media (max-width: 992px) { .form-card { padding: 30px; } }
-        @media (max-width: 768px) { .left-side { display: none; } .right-side { padding: 20px; } .otp-input { width: 42px; height: 50px; font-size: 18px; } }
+        @media (max-width: 768px) { .left-side { display: none; } .right-side { padding: 20px; } }
       `}</style>
 
       <div className="header-overlay">
@@ -138,28 +115,22 @@ function OtpContent() {
         <div className="right-side">
           <div className="form-card">
             <h2>Verifikasi <span className="highlight">OTP</span></h2>
-            <p>Kami telah mengirimkan kode 6 digit ke <strong style={{ color: '#fff' }}>{email}</strong>. Masukkan kode di bawah untuk memverifikasi akun kamu.</p>
+            <p>Kami telah mengirimkan kode verifikasi ke <strong style={{ color: '#fff' }}>{email}</strong>. Masukkan kode di bawah untuk memverifikasi akun kamu.</p>
 
             {error && <div className="error-box">{error}</div>}
 
             <form onSubmit={handleSubmit}>
-              <div className="otp-container">
-                {code.map((digit, i) => (
-                  <input
-                    key={i}
-                    type="text"
-                    className="otp-input"
-                    maxLength={1}
-                    value={digit}
-                    ref={inputRefs[i]}
-                    onChange={(e) => handleChange(i, e.target.value)}
-                    onKeyDown={(e) => handleKeyDown(i, e)}
-                    autoFocus={i === 0}
-                  />
-                ))}
-              </div>
+              <input
+                type="text"
+                className="otp-input-single"
+                placeholder="Masukkan kode verifikasi"
+                value={code}
+                ref={inputRef}
+                onChange={(e) => setCode(e.target.value.replace(/[^0-9a-zA-Z]/g, ''))}
+                autoFocus
+              />
 
-              <button type="submit" className="btn-submit" disabled={loading || code.join('').length !== 6}>
+              <button type="submit" className="btn-submit" disabled={loading || code.trim().length < 4}>
                 {loading ? 'Memverifikasi...' : 'Verifikasi & Lanjutkan'}
               </button>
             </form>

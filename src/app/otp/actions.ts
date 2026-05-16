@@ -30,13 +30,19 @@ export async function verifyOtpAction(prevState: any, formData: FormData) {
   if (!email || !code) return { error: 'Email dan kode OTP wajib diisi.' };
 
   try {
-    const { error } = await supabase.auth.verifyOtp({
-      email,
-      token: code,
-      type: 'email',
-    });
+    const types = ['email', 'signup'] as const;
+    let verified = false;
 
-    if (error) throw error;
+    for (const type of types) {
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token: code,
+        type,
+      });
+      if (!error) { verified = true; break; }
+    }
+
+    if (!verified) throw new Error('Kode OTP tidak valid.');
 
     await supabase.from('users').update({ email_verified: true }).eq('email', email);
 

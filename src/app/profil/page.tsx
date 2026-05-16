@@ -14,7 +14,6 @@ export default function ProfilPage() {
   const [namaDepan, setNamaDepan] = useState('');
   const [namaBelakang, setNamaBelakang] = useState('');
   const [email, setEmail] = useState('');
-  const [whatsapp, setWhatsapp] = useState('');
   const [kota, setKota] = useState('Surabaya');
 
   const initial = (namaDepan.charAt(0) + namaBelakang.charAt(0)).toUpperCase() || 'U';
@@ -32,7 +31,6 @@ export default function ProfilPage() {
       setNamaDepan(names[0] || '');
       setNamaBelakang(names.slice(1).join(' ') || '');
       setEmail(data.email);
-      setWhatsapp(data.whatsapp);
       setKota(data.kota || 'Surabaya');
     }
     setLoading(false);
@@ -46,7 +44,6 @@ export default function ProfilPage() {
     const formData = new FormData();
     formData.set('namaDepan', namaDepan);
     formData.set('namaBelakang', namaBelakang);
-    formData.set('whatsapp', whatsapp);
     formData.set('kota', kota);
 
     const result = await updateProfileData(formData);
@@ -226,10 +223,9 @@ export default function ProfilPage() {
               </div>
               <div className="profile-meta">
                 <h2>{namaDepan} {namaBelakang}</h2>
-                <p>
-                  <span><i className="fa-solid fa-envelope"></i> {email}</span>
-                  <span><i className="fa-solid fa-phone"></i> {whatsapp}</span>
-                </p>
+                  <p>
+                    <span><i className="fa-solid fa-envelope"></i> {email}</span>
+                  </p>
                 <div style={{ display: 'flex', gap: 10 }}>
                   <span className="badge badge-gold">Member Gold</span>
                   <span className="badge badge-pro">Semi-Pro</span>
@@ -268,10 +264,6 @@ export default function ProfilPage() {
                       <div className="form-group">
                         <label className="form-label">Alamat Email</label>
                         <input type="email" className="form-input" value={email} disabled style={{ opacity: 0.6 }} />
-                      </div>
-                      <div className="form-group">
-                        <label className="form-label">Nomor Telepon</label>
-                        <input type="tel" className="form-input" value={whatsapp} onChange={e => setWhatsapp(e.target.value)} />
                       </div>
                     </div>
 

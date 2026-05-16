@@ -68,12 +68,9 @@ function CheckoutContent() {
       if (email) {
         const { data: userData } = await supabase
           .from('users')
-          .select('whatsapp')
+          .select('id')
           .eq('email', email)
           .maybeSingle();
-        if (userData) {
-          setUserData(prev => ({ ...prev, phone: userData.whatsapp || '' }));
-        }
       }
     } catch (error) {
       console.error('Error fetching checkout details:', error);
@@ -337,11 +334,10 @@ function CheckoutContent() {
             <div style={{ fontSize: '14px', color: '#ccc', marginBottom: '24px' }}>
               {venue?.city ? `Kota ${venue.city}, Jawa Tengah` : 'Kota Surakarta, Jawa Tengah'}
             </div>
-            <div className="info-grid">
-              <div className="info-item">Nama Lengkap <span>{userData.name}</span></div>
-              <div className="info-item">E-mail <span>{userData.email}</span></div>
-              <div className="info-item">Nomor Ponsel <span>{userData.phone}</span></div>
-            </div>
+              <div className="info-grid">
+                <div className="info-item">Nama Lengkap <span>{userData.name}</span></div>
+                <div className="info-item">E-mail <span>{userData.email}</span></div>
+              </div>
           </div>
 
           <div className="card">

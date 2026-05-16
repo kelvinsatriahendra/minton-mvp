@@ -1,4 +1,5 @@
 'use server'
+import nodemailer from 'nodemailer';
 
 import { supabase } from '@/utils/supabase';
 import { cookies } from 'next/headers';
@@ -24,7 +25,7 @@ export async function sendOtpAction(prevState: any, formData: FormData) {
 
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT, 10),
+      port: parseInt(process.env.SMTP_PORT || '587', 10),
       secure: process.env.SMTP_SECURE === 'true',
       auth: {
         user: process.env.SMTP_USER,
@@ -44,9 +45,10 @@ export async function sendOtpAction(prevState: any, formData: FormData) {
             <p style="color: #888; font-size: 12px;">Kode berlaku selama 10 menit. Abaikan email ini jika kamu tidak mendaftar.</p>
           </div>
       `,
-    }); else {
-      console.log('=== OTP for', email, '===', code);
-    }
+    });
+
+    // Log OTP for development and debugging purposes
+    console.log('=== OTP for', email, '===', code);
 
     return { success: true, email };
   } catch (err) {

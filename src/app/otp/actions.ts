@@ -22,24 +22,29 @@ export async function sendOtpAction(prevState: any, formData: FormData) {
       expires_at: expiresAt,
     });
 
-    const apiKey = process.env.RESEND_API_KEY;
-    if (apiKey) {
-      const { Resend } = await import('resend');
-      const resend = new Resend(apiKey);
-      await resend.emails.send({
-        from: 'Minton <noreply@mintondev.my.id>',
-        to: email,
-        subject: 'Kode OTP - Minton',
-        html: `
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT, 10),
+      secure: process.env.SMTP_SECURE === 'true',
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASSWORD,
+      },
+    });
+
+    await transporter.sendMail({
+      from: `Minton <${process.env.SMTP_USER}>`,
+      to: email,
+      subject: 'Kode OTP - Minton',
+      html: `
           <div style="font-family: Arial, sans-serif; max-width: 480px; margin: auto; padding: 32px 24px; background: #111; color: #fff; border-radius: 16px;">
             <h2 style="color: #c6e400; margin-bottom: 8px;">Minton</h2>
             <p style="color: #ccc; font-size: 14px;">Gunakan kode OTP berikut untuk memverifikasi akun kamu.</p>
             <div style="font-size: 36px; font-weight: 700; letter-spacing: 8px; text-align: center; padding: 24px; background: #1c1c1c; border-radius: 12px; margin: 24px 0;">${code}</div>
             <p style="color: #888; font-size: 12px;">Kode berlaku selama 10 menit. Abaikan email ini jika kamu tidak mendaftar.</p>
           </div>
-        `,
-      });
-    } else {
+      `,
+    }); else {
       console.log('=== OTP for', email, '===', code);
     }
 

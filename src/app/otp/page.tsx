@@ -14,9 +14,15 @@ function OtpContent() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
-  const otpLength = 8;
 
-  const inputRefs = Array.from({ length: otpLength }, () => useRef<HTMLInputElement>(null));
+  const inputRefs = [
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+  ];
 
   useEffect(() => { document.title = 'Verifikasi OTP - Minton'; }, []);
 
@@ -36,7 +42,7 @@ function OtpContent() {
     const next = [...code];
     next[index] = value;
     setCode(next);
-    if (value && index < otpLength - 1) inputRefs[index + 1].current?.focus();
+    if (value && index < 5) inputRefs[index + 1].current?.focus();
   };
 
   const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -48,7 +54,7 @@ function OtpContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const otp = code.join('');
-    if (otp.length < 6 || otp.length > 8) return setError('Masukkan kode OTP yang valid (6-8 digit).');
+    if (otp.length !== 6) return setError('Masukkan 6 digit kode OTP.');
 
     setLoading(true);
     setError(null);
@@ -153,7 +159,7 @@ function OtpContent() {
                 ))}
               </div>
 
-              <button type="submit" className="btn-submit" disabled={loading || code.join('').length < 6}>
+              <button type="submit" className="btn-submit" disabled={loading || code.join('').length !== 6}>
                 {loading ? 'Memverifikasi...' : 'Verifikasi & Lanjutkan'}
               </button>
             </form>

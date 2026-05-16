@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import DashboardSidebar from '@/components/DashboardSidebar';
-import { supabase } from '@/utils/supabase';
+import { getDashboardStats, getRecentBookings } from './actions';
 
 interface BookingItem {
   id: string;
@@ -13,8 +13,16 @@ interface BookingItem {
   status: string;
 }
 
+interface DashboardStats {
+  totalBookings: number;
+  confirmedBookings: number;
+  winRate: number;
+  level: string;
+}
+
 export default function DashboardPage() {
   const [userName, setUserName] = useState('User');
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentBookings, setRecentBookings] = useState<BookingItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -24,32 +32,16 @@ export default function DashboardPage() {
     if (nameCookie) {
       setUserName(decodeURIComponent(nameCookie.split('=')[1]));
     }
-    loadRecentBookings();
+    loadData();
   }, []);
 
-  async function loadRecentBookings() {
-    const cookies = document.cookie.split(';');
-    const emailCookie = cookies.find(c => c.trim().startsWith('userEmail='));
-    const email = emailCookie?.split('=')[1];
-    if (!email) { setLoading(false); return; }
-
-    const { data } = await supabase
-      .from('bookings')
-      .select('*')
-      .eq('user_email', email)
-      .order('created_at', { ascending: false })
-      .limit(3);
-
-    if (data) {
-      setRecentBookings(data.map((b: any) => ({
-        id: b.booking_id,
-        venue: b.venue,
-        img: b.img,
-        date: b.date,
-        time: b.time,
-        status: b.status,
-      })));
-    }
+  async function loadData() {
+    const [statsData, bookingsData] = await Promise.all([
+      getDashboardStats(),
+      getRecentBookings(),
+    ]);
+    setStats(statsData);
+    setRecentBookings(bookingsData);
     setLoading(false);
   }
 
@@ -92,20 +84,20 @@ export default function DashboardPage() {
 
         <div className="stats-row">
           <div className="stat-card">
-            <div className="stat-icon"><i className="fa-solid fa-shuttlecock"></i></div>
-            <div className="stat-info"><h4>Main Bareng</h4><p>24 Sesi</p></div>
+            <div className="stat-icon"><i className="fa-solid fa-calendar-check"></i></div>
+            <div className="stat-info"><h4>Total Booking</h4><p>{loading ? '-' : stats?.totalBookings || 0}</p></div>
           </div>
           <div className="stat-card">
-            <div className="stat-icon"><i className="fa-solid fa-calendar-check"></i></div>
-            <div className="stat-info"><h4>Booking</h4><p>{recentBookings.length} Kali</p></div>
+            <div className="stat-icon"><i className="fa-solid fa-check-circle"></i></div>
+            <div className="stat-info"><h4>Terkonfirmasi</h4><p>{loading ? '-' : stats?.confirmedBookings || 0}</p></div>
           </div>
           <div className="stat-card">
             <div className="stat-icon"><i className="fa-solid fa-medal"></i></div>
-            <div className="stat-info"><h4>Win Rate</h4><p>68%</p></div>
+            <div className="stat-info"><h4>Win Rate</h4><p>{loading ? '-' : `${stats?.winRate || 0}%`}</p></div>
           </div>
           <div className="stat-card">
             <div className="stat-icon"><i className="fa-solid fa-ranking-star"></i></div>
-            <div className="stat-info"><h4>Level</h4><p>Semi-Pro</p></div>
+            <div className="stat-info"><h4>Level</h4><p>{loading ? '-' : stats?.level || 'Pemula'}</p></div>
           </div>
         </div>
 
@@ -123,7 +115,7 @@ export default function DashboardPage() {
                 <button className="btn-primary-dash" style={{ marginTop: 12 }} onClick={() => window.location.href = '/sewa-lapangan'}>Booking Sekarang</button>
               </div>
             ) : (
-              recentBookings.map((b, i) => {
+              recentBookings.slice(0, 3).map((b, i) => {
                 const badge = statusBadge(b.status);
                 return (
                   <div key={b.id || i} className="activity-item">
@@ -141,34 +133,24 @@ export default function DashboardPage() {
 
           <div className="content-card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <span className="content-card-title" style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Teman Aktif</span>
+              <span className="content-card-title" style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>Ringkasan</span>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div className="avatar-sm" style={{ width: 32, height: 32, fontSize: 11 }}>AW</div>
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>Andi Wijaya</p>
-                  <p style={{ fontSize: 11, color: 'var(--text-gray)' }}>Online</p>
+            {stats && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div style={{ padding: '16px', background: 'rgba(255,255,255,0.02)', borderRadius: 12 }}>
+                  <p style={{ fontSize: 13, color: 'var(--text-gray)', marginBottom: 8 }}>Total Booking</p>
+                  <p style={{ fontSize: 28, fontWeight: 800, color: '#fff' }}>{stats.totalBookings}</p>
                 </div>
-                <div style={{ width: 8, height: 8, background: '#4caf50', borderRadius: '50%' }}></div>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div className="avatar-sm" style={{ width: 32, height: 32, fontSize: 11, background: '#555' }}>BP</div>
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>Budi Pratama</p>
-                  <p style={{ fontSize: 11, color: 'var(--text-gray)' }}>Offline</p>
+                <div style={{ padding: '16px', background: 'rgba(255,255,255,0.02)', borderRadius: 12 }}>
+                  <p style={{ fontSize: 13, color: 'var(--text-gray)', marginBottom: 8 }}>Booking Terkonfirmasi</p>
+                  <p style={{ fontSize: 28, fontWeight: 800, color: 'var(--primary-lime)' }}>{stats.confirmedBookings}</p>
+                </div>
+                <div style={{ padding: '16px', background: 'rgba(255,255,255,0.02)', borderRadius: 12 }}>
+                  <p style={{ fontSize: 13, color: 'var(--text-gray)', marginBottom: 8 }}>Level Saat Ini</p>
+                  <p style={{ fontSize: 18, fontWeight: 700, color: '#fff' }}>{stats.level}</p>
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div className="avatar-sm" style={{ width: 32, height: 32, fontSize: 11 }}>CP</div>
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>Citra Putri</p>
-                  <p style={{ fontSize: 11, color: 'var(--text-gray)' }}>Online</p>
-                </div>
-                <div style={{ width: 8, height: 8, background: '#4caf50', borderRadius: '50%' }}></div>
-              </div>
-            </div>
-            <button className="btn-secondary-dash" style={{ width: '100%', marginTop: 24, padding: 8 }}>Cari Teman Baru</button>
+            )}
           </div>
         </div>
 

@@ -46,7 +46,7 @@ export async function signUpAction(prevState: any, formData: FormData) {
       return { message: otpResult.error };
     }
 
-    return { success: true, email, devOtp: (otpResult as any).devOtp };
+    return { success: true, email };
   } catch (err: any) {
     console.error('Error:', err);
     return { message: 'Gagal Mendaftar: ' + (err.message || 'Terjadi kesalahan jaringan.') };

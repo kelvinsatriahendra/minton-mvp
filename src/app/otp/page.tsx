@@ -14,13 +14,6 @@ function OtpContent() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
-  const [devOtp, setDevOtp] = useState<string | null>(searchParams.get('otp'));
-
-  useEffect(() => {
-    if (devOtp && devOtp.length === 6) {
-      setCode(devOtp.split(''));
-    }
-  }, [devOtp]);
 
   const inputRefs = [
     useRef<HTMLInputElement>(null),
@@ -94,9 +87,6 @@ function OtpContent() {
       setCode(['', '', '', '', '', '']);
       setResendTimer(60);
       inputRefs[0].current?.focus();
-      if ((result as any).devOtp) {
-        setDevOtp((result as any).devOtp);
-      }
     }
   };
 
@@ -151,12 +141,6 @@ function OtpContent() {
             <p>Kami telah mengirimkan kode 6 digit ke <strong style={{ color: '#fff' }}>{email}</strong>. Masukkan kode di bawah untuk memverifikasi akun kamu.</p>
 
             {error && <div className="error-box">{error}</div>}
-
-            {devOtp && (
-              <div style={{ background: '#1a2e1a', border: '1px solid #4ade80', color: '#4ade80', padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '14px' }}>
-                Kode OTP Anda (DEV): <strong style={{ fontSize: '18px', letterSpacing: '4px' }}>{devOtp}</strong>
-              </div>
-            )}
 
             <form onSubmit={handleSubmit}>
               <div className="otp-container">

@@ -5,8 +5,11 @@ import { supabase } from '@/utils/supabase';
 
 export async function createBooking(formData: FormData) {
   const cookieStore = await cookies();
-  const email = cookieStore.get('userEmail')?.value;
+  let email = cookieStore.get('userEmail')?.value;
   const userName = cookieStore.get('userName')?.value;
+
+  // Fallback: ambil dari formData jika cookie tidak tersedia
+  if (!email) email = formData.get('userEmail') as string;
 
   if (!email) return { error: 'Sesi tidak ditemukan. Silakan login ulang.' };
 

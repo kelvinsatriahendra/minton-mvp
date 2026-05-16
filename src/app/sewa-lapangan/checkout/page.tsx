@@ -101,6 +101,7 @@ function CheckoutContent() {
     fd.set('venueLocation', venue?.location || '');
     fd.set('totalPrice', String(totalPrice));
     fd.set('courtName', court?.name || '');
+    fd.set('userEmail', userData.email);
 
     const result = await createBooking(fd);
 

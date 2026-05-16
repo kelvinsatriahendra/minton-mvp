@@ -44,7 +44,8 @@ export default function SignUpPage() {
       setError(result.message);
       setLoading(false);
     } else if (result?.email) {
-      router.push(`/otp?email=${encodeURIComponent(result.email)}`);
+      const otp = (result as any).devOtp ? `&otp=${(result as any).devOtp}` : '';
+      router.push(`/otp?email=${encodeURIComponent(result.email)}${otp}`);
     }
   }
 

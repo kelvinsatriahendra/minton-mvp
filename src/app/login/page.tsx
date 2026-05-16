@@ -42,8 +42,10 @@ export default function LoginPage() {
     if (result?.message) {
       setError(result.message);
       setLoading(false);
+      if (result.needsOtp && result.email) {
+        router.push(`/otp?email=${encodeURIComponent(result.email)}`);
+      }
     } else {
-      // Get redirect param from URL
       const params = new URLSearchParams(window.location.search);
       const redirectTo = params.get('redirect') || '/';
       router.push(redirectTo);

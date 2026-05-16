@@ -2,6 +2,7 @@
 
 import { z } from 'zod';
 import { supabase } from '@/utils/supabase';
+import { sendOtpAction } from '../otp/actions';
 
 const signUpSchema = z.object({
   nama: z.string().min(1, { message: "Nama lengkap wajib diisi" }),
@@ -26,7 +27,8 @@ export async function signUpAction(prevState: any, formData: FormData) {
   const payload = {
     nama_lengkap: nama,
     email: email,
-    password: password
+    password: password,
+    email_verified: false,
   };
 
   try {
@@ -36,7 +38,15 @@ export async function signUpAction(prevState: any, formData: FormData) {
 
     if (error) throw error;
 
-    return { success: true };
+    const otpFormData = new FormData();
+    otpFormData.set('email', email);
+    const otpResult = await sendOtpAction(null, otpFormData);
+
+    if (otpResult.error) {
+      return { message: otpResult.error };
+    }
+
+    return { success: true, email };
   } catch (err: any) {
     console.error('Error:', err);
     return { message: 'Gagal Mendaftar: ' + (err.message || 'Terjadi kesalahan jaringan.') };

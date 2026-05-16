@@ -1,40 +1,104 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import React, { useEffect, useRef } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useEffect, useRef, useState, Suspense } from 'react';
+import { verifyOtpAction, sendOtpAction } from './actions';
 
-export default function OTPPage() {
+function OtpContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const email = searchParams.get('email') || '';
+
+  const [code, setCode] = useState(['', '', '', '', '', '']);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0);
+
   const inputRefs = [
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
     useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null)
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
   ];
 
   useEffect(() => { document.title = 'Verifikasi OTP - Minton'; }, []);
-  const handleKeyUp = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    const current = inputRefs[index].current;
-    if (!current) return;
 
-    if (current.value.length === 1 && index < 3) {
-      inputRefs[index + 1].current?.focus();
+  useEffect(() => {
+    if (resendTimer > 0) {
+      const t = setInterval(() => setResendTimer(p => p - 1), 1000);
+      return () => clearInterval(t);
     }
-    if (e.key === 'Backspace' && current.value.length === 0 && index > 0) {
+  }, [resendTimer]);
+
+  useEffect(() => {
+    if (!email) router.replace('/login');
+  }, [email, router]);
+
+  const handleChange = (index: number, value: string) => {
+    if (!/^\d?$/.test(value)) return;
+    const next = [...code];
+    next[index] = value;
+    setCode(next);
+    if (value && index < 5) inputRefs[index + 1].current?.focus();
+  };
+
+  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !code[index] && index > 0) {
       inputRefs[index - 1].current?.focus();
     }
   };
 
-  const handleVerify = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate successful OTP validation and redirect to home
-    router.push('/');
+    const otp = code.join('');
+    if (otp.length !== 6) return setError('Masukkan 6 digit kode OTP.');
+
+    setLoading(true);
+    setError(null);
+
+    const fd = new FormData();
+    fd.set('email', email);
+    fd.set('code', otp);
+    const result = await verifyOtpAction(null, fd);
+
+    if (result.error) {
+      setError(result.error);
+      setLoading(false);
+      setCode(['', '', '', '', '', '']);
+      inputRefs[0].current?.focus();
+    } else {
+      router.push('/');
+      router.refresh();
+    }
+  };
+
+  const handleResend = async () => {
+    if (resendTimer > 0) return;
+    setError(null);
+    const fd = new FormData();
+    fd.set('email', email);
+    const result = await sendOtpAction(null, fd);
+    if (result.error) {
+      setError(result.error);
+    } else {
+      setCode(['', '', '', '', '', '']);
+      setResendTimer(60);
+      inputRefs[0].current?.focus();
+    }
+  };
+
+  const formatTimer = (s: number) => {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `(${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')})`;
   };
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{__html: `
+      <style>{`
         :root { --bg-dark: #000000; --bg-card: #1D1D1D; --text-white: #ffffff; --text-gray: #aaaaaa; --input-bg: #111111; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background-color: var(--bg-dark); color: var(--text-white); display: flex; min-height: 100vh; }
@@ -48,17 +112,20 @@ export default function OTPPage() {
         .form-card h2 { font-size: 26px; font-weight: 600; margin-bottom: 10px; }
         .highlight { color: var(--primary-lime); }
         .form-card p { color: var(--text-gray); font-size: 14px; margin-bottom: 32px; line-height: 1.6; }
-        .otp-container { display: flex; gap: 12px; justify-content: center; margin-bottom: 32px; }
-        .otp-input { width: 56px; height: 64px; border: 1px solid #333; border-radius: 12px; background-color: var(--input-bg); color: var(--text-white); font-size: 24px; font-weight: 700; text-align: center; outline: none; transition: 0.3s; }
+        .otp-container { display: flex; gap: 10px; justify-content: center; margin-bottom: 32px; }
+        .otp-input { width: 48px; height: 60px; border: 1px solid #333; border-radius: 12px; background-color: var(--input-bg); color: var(--text-white); font-size: 22px; font-weight: 700; text-align: center; outline: none; transition: 0.3s; }
         .otp-input:focus { box-shadow: 0 0 0 2px var(--primary-lime); }
         .btn-submit { width: 100%; padding: 14px; background-color: var(--primary-lime); color: #000; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-bottom: 18px; }
         .btn-submit:hover { background-color: #a7bc1d; box-shadow: 0 4px 12px rgba(189, 209, 36, 0.4); }
+        .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
         .resend-link { font-size: 14px; color: var(--text-gray); }
-        .resend-link a { color: var(--primary-lime); text-decoration: none; font-weight: 500; margin-left: 5px; }
-        .resend-link a:hover { text-decoration: underline; }
+        .resend-link button { background: none; border: none; color: var(--primary-lime); font-weight: 500; cursor: pointer; font-size: 14px; font-family: inherit; text-decoration: none; }
+        .resend-link button:hover { text-decoration: underline; }
+        .resend-link button:disabled { color: #666; cursor: not-allowed; text-decoration: none; }
+        .error-box { background: rgba(239,68,68,0.1); border: 1px solid #ef4444; color: #ef4444; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; }
         @media (max-width: 992px) { .form-card { padding: 30px; } }
-        @media (max-width: 768px) { .left-side { display: none; } .right-side { padding: 20px; } .otp-input { width: 48px; height: 56px; font-size: 20px; } }
-      `}} />
+        @media (max-width: 768px) { .left-side { display: none; } .right-side { padding: 20px; } .otp-input { width: 42px; height: 50px; font-size: 18px; } }
+      `}</style>
 
       <div className="header-overlay">
         <div className="container-overlay">
@@ -71,25 +138,50 @@ export default function OTPPage() {
         <div className="right-side">
           <div className="form-card">
             <h2>Verifikasi <span className="highlight">OTP</span></h2>
-            <p>Kami telah mengirimkan 4 digit kode OTP ke email dan nomor WhatsApp Anda yang terdaftar.</p>
+            <p>Kami telah mengirimkan kode 6 digit ke <strong style={{ color: '#fff' }}>{email}</strong>. Masukkan kode di bawah untuk memverifikasi akun kamu.</p>
 
-            <form onSubmit={handleVerify}>
+            {error && <div className="error-box">{error}</div>}
+
+            <form onSubmit={handleSubmit}>
               <div className="otp-container">
-                <input type="text" className="otp-input" maxLength={1} required ref={inputRefs[0]} onKeyUp={(e) => handleKeyUp(0, e)} />
-                <input type="text" className="otp-input" maxLength={1} required ref={inputRefs[1]} onKeyUp={(e) => handleKeyUp(1, e)} />
-                <input type="text" className="otp-input" maxLength={1} required ref={inputRefs[2]} onKeyUp={(e) => handleKeyUp(2, e)} />
-                <input type="text" className="otp-input" maxLength={1} required ref={inputRefs[3]} onKeyUp={(e) => handleKeyUp(3, e)} />
+                {code.map((digit, i) => (
+                  <input
+                    key={i}
+                    type="text"
+                    className="otp-input"
+                    maxLength={1}
+                    value={digit}
+                    ref={inputRefs[i]}
+                    onChange={(e) => handleChange(i, e.target.value)}
+                    onKeyDown={(e) => handleKeyDown(i, e)}
+                    autoFocus={i === 0}
+                  />
+                ))}
               </div>
 
-              <button type="submit" className="btn-submit">Verifikasi & Lanjutkan</button>
+              <button type="submit" className="btn-submit" disabled={loading || code.join('').length !== 6}>
+                {loading ? 'Memverifikasi...' : 'Verifikasi & Lanjutkan'}
+              </button>
             </form>
 
             <div className="resend-link">
-              Belum menerima kode? <Link href="#">Kirim Ulang</Link> <span id="timer">(00:59)</span>
+              Belum menerima kode?{' '}
+              <button onClick={handleResend} disabled={resendTimer > 0}>
+                Kirim Ulang
+              </button>{' '}
+              {resendTimer > 0 && <span>{formatTimer(resendTimer)}</span>}
             </div>
           </div>
         </div>
       </div>
     </>
+  );
+}
+
+export default function OTPPage() {
+  return (
+    <Suspense fallback={<div style={{ background: '#000', color: '#fff', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>}>
+      <OtpContent />
+    </Suspense>
   );
 }

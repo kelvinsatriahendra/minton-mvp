@@ -34,9 +34,12 @@ export async function loginAction(prevState: any, formData: FormData) {
 
     if (data && data.length > 0) {
       const user = data[0];
+
+      if (!user.email_verified) {
+        return { message: 'Email belum terverifikasi. Silakan cek OTP yang dikirim ke email Anda.', needsOtp: true, email: user.email };
+      }
       
       const cookieStore = await cookies();
-      // Set session agar bisa masuk /dashboard (Task 1 Middleware)
       cookieStore.set('session', 'supabase-session-token', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -44,12 +47,10 @@ export async function loginAction(prevState: any, formData: FormData) {
         path: '/',
       });
       
-      // Simpan user nama di cookie untuk UI (optional)
       cookieStore.set('userName', user.nama_lengkap, { path: '/' });
       cookieStore.set('userEmail', user.email, { path: '/' });
       cookieStore.set('isLoggedIn', 'true', { path: '/' });
 
-      // Return sukses, UI yang akan redirect
       return { success: true, userName: user.nama_lengkap };
     } else {
       return { message: 'Maaf, Email atau Kata Sandi Anda salah.' };

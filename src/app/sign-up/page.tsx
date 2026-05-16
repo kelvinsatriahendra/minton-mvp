@@ -43,8 +43,8 @@ export default function SignUpPage() {
     if (result?.message) {
       setError(result.message);
       setLoading(false);
-    } else {
-      router.push('/otp');
+    } else if (result?.email) {
+      router.push(`/otp?email=${encodeURIComponent(result.email)}`);
     }
   }
 

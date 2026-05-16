@@ -5,24 +5,19 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import React, { useEffect, useRef, useState, Suspense } from 'react';
 import { verifyOtpAction, sendOtpAction } from './actions';
 
+const OTP_LENGTH = 8;
+
 function OtpContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get('email') || '';
 
-  const [code, setCode] = useState(['', '', '', '', '', '']);
+  const [code, setCode] = useState(Array(OTP_LENGTH).fill(''));
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
 
-  const inputRefs = [
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-  ];
+  const inputRefs = Array.from({ length: OTP_LENGTH }, () => useRef<HTMLInputElement>(null));
 
   useEffect(() => { document.title = 'Verifikasi OTP - Minton'; }, []);
 
@@ -42,7 +37,7 @@ function OtpContent() {
     const next = [...code];
     next[index] = value;
     setCode(next);
-    if (value && index < 5) inputRefs[index + 1].current?.focus();
+    if (value && index < OTP_LENGTH - 1) inputRefs[index + 1].current?.focus();
   };
 
   const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -51,10 +46,20 @@ function OtpContent() {
     }
   };
 
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const paste = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, OTP_LENGTH);
+    const next = [...code];
+    for (let i = 0; i < paste.length; i++) next[i] = paste[i];
+    setCode(next);
+    const focusIdx = paste.length < OTP_LENGTH ? paste.length : OTP_LENGTH - 1;
+    inputRefs[focusIdx].current?.focus();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const otp = code.join('');
-    if (otp.length !== 6) return setError('Masukkan 6 digit kode OTP.');
+    if (otp.length < 6 || otp.length > 8) return setError('Masukkan kode OTP yang valid.');
 
     setLoading(true);
     setError(null);
@@ -67,7 +72,7 @@ function OtpContent() {
     if (result.error) {
       setError(result.error);
       setLoading(false);
-      setCode(['', '', '', '', '', '']);
+      setCode(Array(OTP_LENGTH).fill(''));
       inputRefs[0].current?.focus();
     } else {
       router.push('/');
@@ -84,7 +89,7 @@ function OtpContent() {
     if (result.error) {
       setError(result.error);
     } else {
-      setCode(['', '', '', '', '', '']);
+      setCode(Array(OTP_LENGTH).fill(''));
       setResendTimer(60);
       inputRefs[0].current?.focus();
     }
@@ -112,8 +117,8 @@ function OtpContent() {
         .form-card h2 { font-size: 26px; font-weight: 600; margin-bottom: 10px; }
         .highlight { color: var(--primary-lime); }
         .form-card p { color: var(--text-gray); font-size: 14px; margin-bottom: 32px; line-height: 1.6; }
-        .otp-container { display: flex; gap: 10px; justify-content: center; margin-bottom: 32px; }
-        .otp-input { width: 48px; height: 60px; border: 1px solid #333; border-radius: 12px; background-color: var(--input-bg); color: var(--text-white); font-size: 22px; font-weight: 700; text-align: center; outline: none; transition: 0.3s; }
+        .otp-container { display: flex; gap: 8px; justify-content: center; margin-bottom: 32px; }
+        .otp-input { width: 42px; height: 56px; border: 1px solid #333; border-radius: 12px; background-color: var(--input-bg); color: var(--text-white); font-size: 20px; font-weight: 700; text-align: center; outline: none; transition: 0.3s; }
         .otp-input:focus { box-shadow: 0 0 0 2px var(--primary-lime); }
         .btn-submit { width: 100%; padding: 14px; background-color: var(--primary-lime); color: #000; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-bottom: 18px; }
         .btn-submit:hover { background-color: #a7bc1d; box-shadow: 0 4px 12px rgba(189, 209, 36, 0.4); }
@@ -124,7 +129,7 @@ function OtpContent() {
         .resend-link button:disabled { color: #666; cursor: not-allowed; text-decoration: none; }
         .error-box { background: rgba(239,68,68,0.1); border: 1px solid #ef4444; color: #ef4444; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; }
         @media (max-width: 992px) { .form-card { padding: 30px; } }
-        @media (max-width: 768px) { .left-side { display: none; } .right-side { padding: 20px; } .otp-input { width: 42px; height: 50px; font-size: 18px; } }
+        @media (max-width: 768px) { .left-side { display: none; } .right-side { padding: 20px; } .otp-input { width: 36px; height: 48px; font-size: 18px; } }
       `}</style>
 
       <div className="header-overlay">
@@ -138,7 +143,7 @@ function OtpContent() {
         <div className="right-side">
           <div className="form-card">
             <h2>Verifikasi <span className="highlight">OTP</span></h2>
-            <p>Kami telah mengirimkan kode 6 digit ke <strong style={{ color: '#fff' }}>{email}</strong>. Masukkan kode di bawah untuk memverifikasi akun kamu.</p>
+            <p>Kami telah mengirimkan kode verifikasi ke <strong style={{ color: '#fff' }}>{email}</strong>. Masukkan kode di bawah untuk memverifikasi akun kamu.</p>
 
             {error && <div className="error-box">{error}</div>}
 
@@ -154,12 +159,13 @@ function OtpContent() {
                     ref={inputRefs[i]}
                     onChange={(e) => handleChange(i, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(i, e)}
+                    onPaste={i === 0 ? handlePaste : undefined}
                     autoFocus={i === 0}
                   />
                 ))}
               </div>
 
-              <button type="submit" className="btn-submit" disabled={loading || code.join('').length !== 6}>
+              <button type="submit" className="btn-submit" disabled={loading || code.join('').length < 6}>
                 {loading ? 'Memverifikasi...' : 'Verifikasi & Lanjutkan'}
               </button>
             </form>

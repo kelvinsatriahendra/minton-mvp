@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import DashboardSidebar from '@/components/DashboardSidebar';
-import { getProfileData, updateProfileData } from './actions';
+import { getProfileData, updateProfileData, updatePasswordAction, updateNotificationPrefs } from './actions';
 
 export default function ProfilPage() {
   const [tab, setTab] = useState(0);
@@ -15,6 +15,17 @@ export default function ProfilPage() {
   const [namaBelakang, setNamaBelakang] = useState('');
   const [email, setEmail] = useState('');
   const [kota, setKota] = useState('Surabaya');
+
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [pwError, setPwError] = useState<string | null>(null);
+  const [pwSuccess, setPwSuccess] = useState(false);
+
+  const [notifBooking, setNotifBooking] = useState(true);
+  const [notifPromo, setNotifPromo] = useState(true);
+  const [notifJadwal, setNotifJadwal] = useState(true);
+  const [notifSuccess, setNotifSuccess] = useState(false);
 
   const initial = (namaDepan.charAt(0) + namaBelakang.charAt(0)).toUpperCase() || 'U';
 
@@ -32,6 +43,9 @@ export default function ProfilPage() {
       setNamaBelakang(names.slice(1).join(' ') || '');
       setEmail(data.email);
       setKota(data.kota || 'Surabaya');
+      setNotifBooking(data.notifPrefs.email_booking);
+      setNotifPromo(data.notifPrefs.email_promo);
+      setNotifJadwal(data.notifPrefs.pengingat_jadwal);
     }
     setLoading(false);
   }
@@ -57,6 +71,28 @@ export default function ProfilPage() {
     setSaving(false);
   }
 
+  async function handleChangePassword() {
+    setPwError(null);
+    setPwSuccess(false);
+    const result = await updatePasswordAction(currentPassword, newPassword, confirmPassword);
+    if (result.error) {
+      setPwError(result.error);
+    } else {
+      setPwSuccess(true);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    }
+  }
+
+  async function handleSaveNotif() {
+    setNotifSuccess(false);
+    const prefs = { email_booking: notifBooking, email_promo: notifPromo, pengingat_jadwal: notifJadwal };
+    await updateNotificationPrefs(prefs);
+    setNotifSuccess(true);
+    setTimeout(() => setNotifSuccess(false), 3000);
+  }
+
   return (
     <DashboardSidebar>
       <header className="page-header">
@@ -65,9 +101,11 @@ export default function ProfilPage() {
           {success && (
             <span style={{ color: 'var(--primary-lime)', fontSize: 14, marginRight: 12 }}>Tersimpan!</span>
           )}
-          <button className="btn-primary-dash" onClick={handleSave} disabled={saving}>
-            {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
-          </button>
+          {tab === 0 && (
+            <button className="btn-primary-dash" onClick={handleSave} disabled={saving}>
+              {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
+            </button>
+          )}
         </div>
       </header>
       <div className="page-body">
@@ -111,22 +149,9 @@ export default function ProfilPage() {
             cursor: pointer;
             font-size: 14px;
           }
-          .profile-meta h2 {
-            font-size: 28px;
-            margin-bottom: 8px;
-          }
-          .profile-meta p {
-            color: var(--text-gray);
-            font-size: 15px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-          }
-          .settings-grid {
-            display: grid;
-            grid-template-columns: 1fr 350px;
-            gap: 32px;
-          }
+          .profile-meta h2 { font-size: 28px; margin-bottom: 8px; }
+          .profile-meta p { color: var(--text-gray); font-size: 15px; display: flex; align-items: center; gap: 12px; }
+          .settings-grid { display: grid; grid-template-columns: 1fr 350px; gap: 32px; }
           .settings-tabs {
             display: flex;
             gap: 24px;
@@ -144,9 +169,7 @@ export default function ProfilPage() {
             position: relative;
             font-family: inherit;
           }
-          .tab-btn.active {
-            color: var(--primary-lime);
-          }
+          .tab-btn.active { color: var(--primary-lime); }
           .tab-btn.active::after {
             content: '';
             position: absolute;
@@ -156,14 +179,8 @@ export default function ProfilPage() {
             height: 2px;
             background: var(--primary-lime);
           }
-          .form-section {
-            margin-bottom: 32px;
-          }
-          .form-section h3 {
-            font-size: 18px;
-            margin-bottom: 20px;
-            color: var(--primary-lime);
-          }
+          .form-section { margin-bottom: 32px; }
+          .form-section h3 { font-size: 18px; margin-bottom: 20px; color: var(--primary-lime); }
           .gold-member-card {
             background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 45%, #b38728 100%);
             border: none;
@@ -172,24 +189,10 @@ export default function ProfilPage() {
             box-shadow: 0 15px 35px rgba(191, 149, 63, 0.3);
             color: #1a1608;
           }
-          .gold-member-card h4 {
-            color: #000;
-            font-weight: 800;
-          }
-          .gold-member-card p {
-            color: rgba(0, 0, 0, 0.7);
-          }
-          .gold-member-card .btn-gold {
-            background: #1a1608;
-            color: #fcf6ba;
-            border: none;
-            font-weight: 700;
-          }
-          .gold-member-card .btn-gold:hover {
-            background: #000;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-          }
+          .gold-member-card h4 { color: #000; font-weight: 800; }
+          .gold-member-card p { color: rgba(0, 0, 0, 0.7); }
+          .gold-member-card .btn-gold { background: #1a1608; color: #fcf6ba; border: none; font-weight: 700; }
+          .gold-member-card .btn-gold:hover { background: #000; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); }
           .gold-member-card::after {
             content: '';
             position: absolute;
@@ -202,6 +205,39 @@ export default function ProfilPage() {
             border-radius: 50%;
             pointer-events: none;
           }
+          .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border-color);
+          }
+          .toggle-row:last-child { border-bottom: none; }
+          .toggle-info h5 { font-size: 14px; font-weight: 600; margin-bottom: 4px; color: #fff; }
+          .toggle-info p { font-size: 12px; color: var(--text-gray); }
+          .toggle-switch {
+            width: 48px;
+            height: 26px;
+            background: #333;
+            border-radius: 13px;
+            position: relative;
+            cursor: pointer;
+            transition: 0.3s;
+            flex-shrink: 0;
+          }
+          .toggle-switch.active { background: var(--primary-lime); }
+          .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            transition: 0.3s;
+          }
+          .toggle-switch.active::after { left: 25px; }
           @media (max-width: 768px) {
             .settings-grid { grid-template-columns: 1fr; }
             .profile-header { flex-direction: column; text-align: center; }
@@ -284,13 +320,79 @@ export default function ProfilPage() {
 
                 {tab === 1 && (
                   <div className="content-card">
-                    <p style={{ color: '#aaa' }}>Pengaturan keamanan akan segera hadir.</p>
+                    {pwError && (
+                      <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', color: '#ef4444', padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '14px' }}>
+                        {pwError}
+                      </div>
+                    )}
+                    {pwSuccess && (
+                      <div style={{ backgroundColor: 'rgba(189, 209, 36, 0.1)', border: '1px solid var(--primary-lime)', color: 'var(--primary-lime)', padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '14px' }}>
+                        Kata sandi berhasil diubah!
+                      </div>
+                    )}
+
+                    <div className="form-section">
+                      <h3>Ubah Kata Sandi</h3>
+                      <div className="form-group">
+                        <label className="form-label">Kata Sandi Saat Ini</label>
+                        <input type="password" className="form-input" value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} placeholder="Masukkan kata sandi saat ini" />
+                      </div>
+                      <div className="form-grid-2">
+                        <div className="form-group">
+                          <label className="form-label">Kata Sandi Baru</label>
+                          <input type="password" className="form-input" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Minimal 8 karakter" />
+                        </div>
+                        <div className="form-group">
+                          <label className="form-label">Konfirmasi Kata Sandi Baru</label>
+                          <input type="password" className="form-input" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Ulangi kata sandi baru" />
+                        </div>
+                      </div>
+                      <button className="btn-primary-dash" onClick={handleChangePassword} style={{ marginTop: 8 }}>
+                        Ubah Kata Sandi
+                      </button>
+                    </div>
                   </div>
                 )}
 
                 {tab === 2 && (
                   <div className="content-card">
-                    <p style={{ color: '#aaa' }}>Pengaturan notifikasi akan segera hadir.</p>
+                    {notifSuccess && (
+                      <div style={{ backgroundColor: 'rgba(189, 209, 36, 0.1)', border: '1px solid var(--primary-lime)', color: 'var(--primary-lime)', padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '14px' }}>
+                        Preferensi notifikasi disimpan!
+                      </div>
+                    )}
+
+                    <div className="form-section" style={{ marginBottom: 0 }}>
+                      <h3>Notifikasi Email</h3>
+
+                      <div className="toggle-row">
+                        <div className="toggle-info">
+                          <h5>Konfirmasi Booking</h5>
+                          <p>Dapatkan notifikasi saat booking dikonfirmasi</p>
+                        </div>
+                        <div className={`toggle-switch ${notifBooking ? 'active' : ''}`} onClick={() => setNotifBooking(!notifBooking)} />
+                      </div>
+
+                      <div className="toggle-row">
+                        <div className="toggle-info">
+                          <h5>Promo & Penawaran</h5>
+                          <p>Info promo spesial dan penawaran terbaru</p>
+                        </div>
+                        <div className={`toggle-switch ${notifPromo ? 'active' : ''}`} onClick={() => setNotifPromo(!notifPromo)} />
+                      </div>
+
+                      <div className="toggle-row">
+                        <div className="toggle-info">
+                          <h5>Pengingat Jadwal</h5>
+                          <p>Pengingat H-1 sebelum jadwal booking</p>
+                        </div>
+                        <div className={`toggle-switch ${notifJadwal ? 'active' : ''}`} onClick={() => setNotifJadwal(!notifJadwal)} />
+                      </div>
+
+                      <button className="btn-primary-dash" onClick={handleSaveNotif} style={{ marginTop: 20 }}>
+                        Simpan Pengaturan
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>

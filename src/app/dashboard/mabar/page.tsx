@@ -2,18 +2,53 @@
 
 import { useState, useEffect } from 'react';
 import DashboardSidebar from '@/components/DashboardSidebar';
+import { getMatches, getMyMatches, createMatchAction, joinMatchAction } from './actions';
 
-const sessions = [
-  { venue: 'Kalam Kudus Sport Center', location: 'Surakarta, Solo', level: 'Bebas', date: 'Besok, 11 Mei', time: '19:00 - 21:00', gender: 'Campuran', host: 'Andi W.', slots: 5, total: 8, price: 'FREE', img: '/asset/card-main-bareng-1.png' },
-  { venue: 'GOR Sudirman', location: 'Surabaya, Jawa Timur', level: 'Intermediate', date: 'Sabtu, 12 Mei', time: '20:00 - 22:00', gender: 'Pria', host: 'Budi S.', slots: 2, total: 8, price: 'Rp 35.000', img: '/asset/card-main-bareng-2.png' },
-  { venue: 'Surabaya Badminton Hall', location: 'Surabaya, Jawa Timur', level: 'Beginner', date: 'Minggu, 13 Mei', time: '08:00 - 10:00', gender: 'Campuran', host: 'Citra P.', slots: 6, total: 8, price: 'Rp 25.000', img: '/asset/card-main-bareng-3.png' },
-];
+interface MabarSession {
+  id: number;
+  venue: string;
+  location: string;
+  level: string;
+  date: string;
+  time: string;
+  gender: string;
+  host: string;
+  slots: number;
+  total: number;
+  price: string;
+  img: string;
+}
 
 export default function MabarDashboardPage() {
   const [tab, setTab] = useState(0);
+  const [sessions, setSessions] = useState<MabarSession[]>([]);
+  const [mySessions, setMySessions] = useState<MabarSession[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  useEffect(() => { document.title = 'Main Bareng Dashboard - Minton'; }, []);
-  const tabs = ['Eksplorasi Sesi', 'Mabar Saya', 'Permintaan'];
+  const [actionLoading, setActionLoading] = useState<number | null>(null);
+
+  useEffect(() => {
+    document.title = 'Main Bareng - Minton';
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    if (tab === 1) loadMySessions();
+  }, [tab]);
+
+  async function loadData() {
+    setLoading(true);
+    const data = await getMatches();
+    setSessions(data);
+    setLoading(false);
+  }
+
+  async function loadMySessions() {
+    setLoading(true);
+    const data = await getMyMatches();
+    setMySessions(data);
+    setLoading(false);
+  }
 
   const openCreateModal = () => {
     setShowCreateModal(true);
@@ -25,18 +60,36 @@ export default function MabarDashboardPage() {
     document.body.style.overflow = 'auto';
   };
 
-  const submitMabar = (e: React.FormEvent) => {
+  async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
-    alert('Sukses! Jadwal Mabar Anda telah dipublikasikan.');
-    closeCreateModal();
-  };
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
+    const result = await createMatchAction(formData);
+    if (result.error) {
+      alert(result.error);
+    } else {
+      alert('Mabar berhasil dipublikasikan!');
+      closeCreateModal();
+      loadData();
+      loadMySessions();
+    }
+  }
+
+  async function handleJoin(matchId: number) {
+    setActionLoading(matchId);
+    const result = await joinMatchAction(matchId);
+    if (result.error) {
+      alert(result.error);
+    } else {
+      loadData();
+    }
+    setActionLoading(null);
+  }
 
   return (
     <DashboardSidebar>
       <header className="page-header">
         <h1>Main Bareng</h1>
         <div className="header-actions">
-          <button className="btn-secondary-dash"><i className="fa-solid fa-search"></i> Cari</button>
           <button className="btn-primary-dash" onClick={openCreateModal}><i className="fa-solid fa-plus"></i> Buat Mabar</button>
         </div>
       </header>
@@ -80,52 +133,73 @@ export default function MabarDashboardPage() {
           .btn-modal-cancel:hover { background: #ff4444; border-color: #ff4444; color: #fff; }
           @media (max-width: 768px) { .mabar-dash-grid { grid-template-columns: 1fr; } .form-grid { grid-template-columns: 1fr; } }
         `}</style>
+
         <div className="mabar-tabs">
-          {tabs.map((t, i) => (
+          {['Eksplorasi Sesi', 'Mabar Saya', 'Permintaan'].map((t, i) => (
             <div key={i} className={`tab-item ${tab === i ? 'active' : ''}`} onClick={() => setTab(i)}>{t}</div>
           ))}
         </div>
-        <div className="mabar-dash-grid">
-          {sessions.map((s, i) => (
-            <div key={i} className="mabar-dash-card">
-              <img src={s.img} alt={s.venue} className="mabar-card-img" />
-              <div className="mabar-dash-body">
-                <div className="mabar-header-info">
-                  <div className="mabar-venue">
-                    <h4>{s.venue}</h4>
-                    <p><i className="fa-solid fa-location-dot"></i> {s.location}</p>
-                  </div>
-                  <span className="level-badge">{s.level}</span>
-                </div>
-                <div className="mabar-details">
-                  <div className="detail-item-small">
-                    <span>Waktu</span>
-                    <span>{s.time}</span>
-                  </div>
-                  <div className="detail-item-small">
-                    <span>Tanggal</span>
-                    <span>{s.date}</span>
-                  </div>
-                  <div className="detail-item-small">
-                    <span>Gender</span>
-                    <span>{s.gender}</span>
-                  </div>
-                  <div className="detail-item-small">
-                    <span>Penyelenggara</span>
-                    <span>{s.host}</span>
-                  </div>
-                </div>
-                <div className="mabar-footer-dash">
-                  <div className="slot-pill"><i className="fa-solid fa-user-group"></i> {s.slots}/{s.total} Tersedia</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div className="price-text">{s.price}</div>
-                    <button className="btn-primary-dash" style={{ padding: '6px 14px', fontSize: '12px' }}>Gabung</button>
-                  </div>
-                </div>
+
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '80px 0' }}>
+            <div style={{ width: 40, height: 40, border: '3px solid var(--primary-lime)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 20px' }}></div>
+            <p style={{ color: '#aaa' }}>Memuat sesi...</p>
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+          </div>
+        ) : (
+          <div className="mabar-dash-grid">
+            {(tab === 0 ? sessions : tab === 1 ? mySessions : []).length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-gray)', gridColumn: '1 / -1' }}>
+                <p style={{ marginBottom: 12 }}>{tab === 0 ? 'Belum ada sesi mabar tersedia.' : tab === 1 ? 'Kamu belum membuat sesi mabar.' : 'Belum ada permintaan masuk.'}</p>
+                {tab === 1 && <button className="btn-primary-dash" onClick={openCreateModal}><i className="fa-solid fa-plus"></i> Buat Mabar</button>}
               </div>
-            </div>
-          ))}
-        </div>
+            ) : (
+              (tab === 0 ? sessions : mySessions).map(s => (
+                <div key={s.id} className="mabar-dash-card">
+                  <img src={s.img} alt={s.venue} className="mabar-card-img" />
+                  <div className="mabar-dash-body">
+                    <div className="mabar-header-info">
+                      <div className="mabar-venue">
+                        <h4>{s.venue}</h4>
+                        <p><i className="fa-solid fa-location-dot"></i> {s.location}</p>
+                      </div>
+                      <span className="level-badge">{s.level}</span>
+                    </div>
+                    <div className="mabar-details">
+                      <div className="detail-item-small">
+                        <span>Waktu</span>
+                        <span>{s.time}</span>
+                      </div>
+                      <div className="detail-item-small">
+                        <span>Tanggal</span>
+                        <span>{s.date}</span>
+                      </div>
+                      <div className="detail-item-small">
+                        <span>Gender</span>
+                        <span>{s.gender}</span>
+                      </div>
+                      <div className="detail-item-small">
+                        <span>Host</span>
+                        <span>{s.host}</span>
+                      </div>
+                    </div>
+                    <div className="mabar-footer-dash">
+                      <div className="slot-pill"><i className="fa-solid fa-user-group"></i> {s.slots}/{s.total} Tersedia</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div className="price-text">{s.price}</div>
+                        {tab !== 1 && (
+                          <button className="btn-primary-dash" style={{ padding: '6px 14px', fontSize: '12px' }} onClick={() => handleJoin(s.id)} disabled={actionLoading === s.id || s.slots === 0}>
+                            {actionLoading === s.id ? '...' : s.slots === 0 ? 'Penuh' : 'Gabung'}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
       </div>
 
       {showCreateModal && (
@@ -135,15 +209,15 @@ export default function MabarDashboardPage() {
               <h3>Buat Jadwal <span style={{ color: 'var(--primary-lime)' }}>Mabar.</span></h3>
               <button className="close-modal-mabar" onClick={closeCreateModal}>&times;</button>
             </div>
-            <form onSubmit={submitMabar}>
+            <form onSubmit={handleCreate}>
               <div className="form-grid">
                 <div className="form-group">
                   <label>Nama Venue</label>
-                  <input type="text" placeholder="Contoh: GOR Sudirman" required />
+                  <input type="text" name="venueName" placeholder="Contoh: GOR Sudirman" required />
                 </div>
                 <div className="form-group">
                   <label>Level</label>
-                  <select required>
+                  <select name="skillLevel" required>
                     <option value="All Level">All Level</option>
                     <option value="Beginner">Beginner</option>
                     <option value="Intermediate">Intermediate</option>
@@ -152,24 +226,20 @@ export default function MabarDashboardPage() {
                 </div>
                 <div className="form-group">
                   <label>Tanggal</label>
-                  <input type="date" required />
+                  <input type="date" name="date" required />
                 </div>
                 <div className="form-group">
                   <label>Waktu</label>
-                  <input type="text" placeholder="19:00 - 21:00" required />
+                  <input type="text" name="time" placeholder="19:00 - 21:00" required />
                 </div>
                 <div className="form-group">
                   <label>Maks Pemain</label>
-                  <input type="number" placeholder="8" required />
+                  <input type="number" name="totalSlots" placeholder="8" required />
                 </div>
                 <div className="form-group">
                   <label>Biaya / Orang</label>
-                  <input type="text" placeholder="Contoh: 30.000 atau Free" required />
+                  <input type="text" name="price" placeholder="Contoh: 30.000 atau Free" required />
                 </div>
-              </div>
-              <div className="form-group" style={{ marginBottom: '32px' }}>
-                <label>Deskripsi (Opsional)</label>
-                <textarea rows={3} placeholder="Info tambahan..." style={{ resize: 'none' }}></textarea>
               </div>
               <div style={{ display: 'flex', gap: '12px' }}>
                 <button type="button" className="btn-modal-cancel" style={{ flex: 1 }} onClick={closeCreateModal}>Batal</button>

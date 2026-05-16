@@ -66,7 +66,11 @@ function CheckoutContent() {
       setUserData({ name, email, phone: '' });
 
       if (email) {
-        const { data: userData } = await supabase.from('users').select('whatsapp').eq('email', email).single();
+        const { data: userData } = await supabase
+          .from('users')
+          .select('whatsapp')
+          .eq('email', email)
+          .maybeSingle();
         if (userData) {
           setUserData(prev => ({ ...prev, phone: userData.whatsapp || '' }));
         }

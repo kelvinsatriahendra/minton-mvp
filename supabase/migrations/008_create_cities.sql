@@ -1,4 +1,6 @@
-CREATE TABLE IF NOT EXISTS public.cities (
+DROP TABLE IF EXISTS public.cities CASCADE;
+
+CREATE TABLE public.cities (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
   province TEXT NOT NULL,

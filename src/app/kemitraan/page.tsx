@@ -86,8 +86,8 @@ export default function KemitraanPage() {
           <div className="hero-right">
             <p>Bergabung di ekosistem digital Minton dan ubah manajemen lapangan manual Anda menjadi serba otomatis.</p>
             <div style={{ display: 'flex', gap: '16px', marginTop: '20px' }}>
-              <button className="btn-outline" style={{ borderRadius: '8px', padding: '12px 24px', margin: 0 }} onClick={() => window.location.href = '/kemitraan/registrasi'}>Daftar GOR Anda Sekarang <i className="fa-solid fa-arrow-right"></i></button>
-              <button className="btn-primary" style={{ borderRadius: '8px', padding: '12px 24px', margin: 0 }} onClick={() => window.location.href = '/kemitraan/login-mitra'}>Login Dashboard</button>
+              <a href="/kemitraan/registrasi" className="btn-outline" style={{ borderRadius: '8px', padding: '12px 24px', margin: 0, textDecoration: 'none' }}>Daftar GOR Anda Sekarang <i className="fa-solid fa-arrow-right"></i></a>
+              <a href="/kemitraan/login-mitra" className="btn-primary" style={{ borderRadius: '8px', padding: '12px 24px', margin: 0, textDecoration: 'none' }}>Login Dashboard</a>
             </div>
           </div>
         </section>
@@ -161,8 +161,8 @@ export default function KemitraanPage() {
               <h2>Siap <span className="text-highlight">Digitalisasi<br />Bisnis GOR</span> anda?</h2>
               <p>Jadilah bagian dari revolusi sport-tech bersama Minton. dan biarkan teknologi bekerja untuk Anda.</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '32px' }}>
-                <button className="btn-cta" onClick={() => window.location.href = '/kemitraan/registrasi'}>Daftarkan GOR Sekarang!</button>
-                <button className="btn-cta btn-cta-login" style={{ flex: 1 }} onClick={() => window.location.href = '/kemitraan/login-mitra'}>Login Dashboard</button>
+                <a href="/kemitraan/registrasi" className="btn-cta" style={{ textDecoration: 'none' }}>Daftarkan GOR Sekarang!</a>
+                <a href="/kemitraan/login-mitra" className="btn-cta btn-cta-login" style={{ flex: 1, textDecoration: 'none' }}>Login Dashboard</a>
               </div>
             </div>
           </div>

@@ -64,7 +64,7 @@ export async function verifyOtpAction(prevState: any, formData: FormData) {
           cookieStore.set('userEmail', user?.email || '', { path: '/' });
           cookieStore.set('isLoggedIn', 'true', { path: '/' });
 
-          return { success: true, redirect: '/dashboard' };
+          return { success: true, redirect: '/' };
         }
 
         return { success: true, redirect: '/login' };

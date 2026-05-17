@@ -85,9 +85,7 @@ export default function KemitraanPage() {
           </div>
           <div className="hero-right">
             <p>Bergabung di ekosistem digital Minton dan ubah manajemen lapangan manual Anda menjadi serba otomatis.</p>
-            <div style={{ display: 'flex', gap: '16px', marginTop: '20px' }}>
-              <a href="/kemitraan/registrasi" className="btn-outline" style={{ borderRadius: '8px', padding: '12px 24px', margin: 0, textDecoration: 'none' }}>Daftar GOR Anda Sekarang <i className="fa-solid fa-arrow-right"></i></a>
-            </div>
+
           </div>
         </section>
 

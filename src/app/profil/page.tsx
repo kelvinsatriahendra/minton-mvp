@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import DashboardSidebar from '@/components/DashboardSidebar';
-import { getProfileData, updateProfileData, updatePasswordAction, updateNotificationPrefs } from './actions';
+import { getProfileData, updateProfileData, updatePasswordAction, updateNotificationPrefs, getUserStats } from './actions';
 
 export default function ProfilPage() {
   const [tab, setTab] = useState(0);

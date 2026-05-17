@@ -1,6 +1,6 @@
 'use server'
 
-import { supabase } from '@/utils/supabase';
+import { createServerSupabaseClient } from '@/utils/supabase';
 
 export async function sendOtpAction(prevState: any, formData: FormData) {
   const email = formData.get('email') as string;
@@ -8,7 +8,8 @@ export async function sendOtpAction(prevState: any, formData: FormData) {
   if (!email) return { error: 'Email tidak valid.' };
 
   try {
-    const { error } = await supabase.auth.signInWithOtp({
+    const supabaseClient = createServerSupabaseClient();
+    const { error } = await supabaseClient.auth.signInWithOtp({
       email,
       options: { shouldCreateUser: true },
     });
@@ -30,14 +31,15 @@ export async function verifyOtpAction(prevState: any, formData: FormData) {
   if (!email || !code) return { error: 'Email dan kode OTP wajib diisi.' };
 
   try {
+    const supabaseClient = createServerSupabaseClient();
     const typeOrder: Array<'email' | 'signup'> =
       source === 'login' ? ['email', 'signup'] : ['signup', 'email'];
 
     let lastError: string | null = null;
     for (const type of typeOrder) {
-      const { error } = await supabase.auth.verifyOtp({ email, token: code, type });
+      const { error } = await supabaseClient.auth.verifyOtp({ email, token: code, type });
       if (!error) {
-        await supabase.from('users').update({ email_verified: true }).eq('email', email);
+        await supabaseClient.from('users').update({ email_verified: true }).eq('email', email);
         return { success: true, redirect: '/login' };
       }
       lastError = error?.message || null;

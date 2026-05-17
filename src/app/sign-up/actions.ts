@@ -2,7 +2,7 @@
 
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
-import { supabase } from '@/utils/supabase';
+import { createServerSupabaseClient } from '@/utils/supabase';
 import { sendOtpAction } from '../otp/actions';
 
 const signUpSchema = z.object({
@@ -35,7 +35,8 @@ export async function signUpAction(prevState: any, formData: FormData) {
   };
 
   try {
-    const { data: existing } = await supabase
+    const supabaseClient = createServerSupabaseClient();
+    const { data: existing } = await supabaseClient
       .from('users')
       .select('id')
       .eq('email', email)
@@ -43,7 +44,7 @@ export async function signUpAction(prevState: any, formData: FormData) {
 
     if (existing) return { message: 'Email sudah terdaftar. Silakan login.' };
 
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('users')
       .insert([payload]);
 

@@ -4,7 +4,7 @@ import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { cookies } from 'next/headers';
-import { supabase } from '@/utils/supabase';
+import { createServerSupabaseClient } from '@/utils/supabase';
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Email wajib diisi" }),
@@ -25,7 +25,8 @@ export async function loginAction(prevState: any, formData: FormData) {
   }
 
   try {
-    const { data: users, error } = await supabase
+    const supabaseClient = createServerSupabaseClient();
+    const { data: users, error } = await supabaseClient
       .from('users')
       .select('*')
       .eq('email', email);
@@ -55,7 +56,7 @@ export async function loginAction(prevState: any, formData: FormData) {
     }
     
     const sessionToken = crypto.randomUUID();
-    await supabase.from('users').update({ session_token: sessionToken }).eq('email', email);
+    await supabaseClient.from('users').update({ session_token: sessionToken }).eq('email', email);
 
     const cookieStore = await cookies();
     cookieStore.set('session', sessionToken, {

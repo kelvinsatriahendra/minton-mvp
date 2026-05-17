@@ -77,8 +77,8 @@ function OtpContent() {
       setCode(Array(OTP_LENGTH).fill(''));
       inputRefs[0].current?.focus();
     } else {
-      router.push(result.redirect || '/');
-      router.refresh();
+      setLoading(false);
+      router.push('/login');
     }
   };
 

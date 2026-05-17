@@ -26,18 +26,30 @@ export async function loginAction(prevState: any, formData: FormData) {
 
   try {
     const supabaseClient = createServerSupabaseClient();
-    const { data: users, error } = await supabaseClient
+    const trimmedEmail = email.trim().toLowerCase();
+
+    let { data: users, error } = await supabaseClient
       .from('users')
       .select('*')
-      .eq('email', email);
+      .eq('email', trimmedEmail);
 
     if (error) {
       console.error('Login select error:', error);
       return { message: 'Terjadi kesalahan server: ' + error.message };
     }
+
+    if (!users || users.length === 0) {
+      const { data: ilikeUsers, error: ilikeError } = await supabaseClient
+        .from('users')
+        .select('*')
+        .ilike('email', trimmedEmail);
+      if (ilikeError) console.error('Login ilike error:', ilikeError);
+      users = ilikeUsers || null;
+    }
+
     if (!users || users.length === 0) {
       console.log('User not found for email:', email);
-      return { message: 'Maaf, Email atau Kata Sandi Anda salah.' };
+      return { message: 'Email tidak ditemukan. Pastikan email yang dimasukkan sudah benar.' };
     }
 
     const data = users[0];
@@ -46,7 +58,7 @@ export async function loginAction(prevState: any, formData: FormData) {
     const passwordMatch = await bcrypt.compare(password, data.password);
     if (!passwordMatch) {
       console.log('Password mismatch for email:', email);
-      return { message: 'Maaf, Email atau Kata Sandi Anda salah.' };
+      return { message: 'Password salah. Periksa kembali kata sandi Anda.' };
     }
 
     const user = data;

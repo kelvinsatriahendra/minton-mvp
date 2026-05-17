@@ -5,7 +5,6 @@ import { useSearchParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { supabase } from '@/utils/supabase';
-import { getAvailableVouchers, validateVoucher } from './actions';
 
 function KeranjangContent() {
   const searchParams = useSearchParams();
@@ -20,11 +19,6 @@ function KeranjangContent() {
   
   const [activeSlots, setActiveSlots] = useState<string[]>(initialSlots);
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
-  const [isVoucherModalOpen, setIsVoucherModalOpen] = useState(false);
-  const [voucherCode, setVoucherCode] = useState('');
-  const [appliedVoucher, setAppliedVoucher] = useState<{ code: string; discountAmount: number; description: string } | null>(null);
-  const [availableVouchers, setAvailableVouchers] = useState<any[]>([]);
-  const [voucherLoading, setVoucherLoading] = useState(false);
 
   useEffect(() => {
     const cookies = document.cookie.split(';').reduce((acc, c) => {
@@ -45,39 +39,6 @@ function KeranjangContent() {
     }
   }, [venueId, courtId]);
 
-  useEffect(() => {
-    if (!isVoucherModalOpen) {
-      document.body.style.overflow = 'auto';
-      return;
-    }
-
-    document.body.style.overflow = 'hidden';
-    let cancelled = false;
-
-    async function loadVouchers() {
-      try {
-        setVoucherLoading(true);
-        const vouchers = await getAvailableVouchers();
-        if (!cancelled) {
-          setAvailableVouchers(vouchers);
-        }
-      } catch (error) {
-        console.error('Error fetching vouchers:', error);
-      } finally {
-        if (!cancelled) {
-          setVoucherLoading(false);
-        }
-      }
-    }
-
-    loadVouchers();
-
-    return () => {
-      cancelled = true;
-      document.body.style.overflow = 'auto';
-    };
-  }, [isVoucherModalOpen]);
-
   async function loadCartData() {
     try {
       setLoading(true);
@@ -92,16 +53,6 @@ function KeranjangContent() {
     }
   }
 
-  async function handleOpenVoucherModal() {
-    setVoucherCode('');
-    setIsVoucherModalOpen(true);
-  }
-
-  function handleCloseVoucherModal() {
-    setIsVoucherModalOpen(false);
-    setVoucherCode('');
-  }
-
   const toggleSlot = (slot: string) => {
     if (activeSlots.includes(slot)) {
       setActiveSlots(activeSlots.filter(s => s !== slot));
@@ -111,28 +62,7 @@ function KeranjangContent() {
   };
 
   const totalPrice = venue ? activeSlots.length * venue.price_per_hour : 0;
-  const discountAmount = appliedVoucher?.discountAmount ?? 0;
-  const finalPrice = Math.max(0, totalPrice - discountAmount);
-
-  const handleApplyVoucher = async (code: string) => {
-    const codeToCheck = code.toUpperCase().trim();
-    if (!codeToCheck) return;
-    setVoucherLoading(true);
-    const result = await validateVoucher(codeToCheck, totalPrice);
-    if (result.valid) {
-      setAppliedVoucher({ code: result.code!, discountAmount: result.discountAmount!, description: result.description || '' });
-      setVoucherCode(result.code!);
-      handleCloseVoucherModal();
-    } else {
-      alert(result.error);
-    }
-    setVoucherLoading(false);
-  };
-
-  const handleRemoveVoucher = () => {
-    setAppliedVoucher(null);
-    setVoucherCode('');
-  };
+  const finalPrice = totalPrice;
 
   const handleCheckout = () => {
     if (activeSlots.length === 0) {
@@ -140,10 +70,7 @@ function KeranjangContent() {
       return;
     }
     const slotStr = activeSlots.join(',');
-    let url = `/sewa-lapangan/checkout?venueId=${venueId}&courtId=${courtId}&slots=${slotStr}`;
-    if (appliedVoucher) {
-      url += `&voucher=${appliedVoucher.code}&discount=${discountAmount}`;
-    }
+    const url = `/sewa-lapangan/checkout?venueId=${venueId}&courtId=${courtId}&slots=${slotStr}`;
     window.location.href = url;
   };
 
@@ -177,14 +104,8 @@ function KeranjangContent() {
         .btn-sewa-primary:hover { background: var(--primary-lime); border-color: var(--primary-lime); color: black; }
         .btn-sewa-primary:disabled { opacity: 0.4; cursor: not-allowed; }
         .btn-sewa-primary:disabled:hover { background: none; border-color: #ffffff; color: #ffffff; }
-        .small-box { background: #1c1c1c; padding: 14px 16px; border-radius: 12px; margin-bottom: 16px; cursor: pointer; font-size: 16px; border: 1px solid #333; transition: 0.3s; min-height: 66px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
-        .voucher-trigger { width: 100%; appearance: none; -webkit-appearance: none; text-align: center; color: #fff; font-family: inherit; }
+        .small-box { background: #1c1c1c; padding: 16px; border-radius: 12px; margin-bottom: 16px; text-align: center; cursor: pointer; font-size: 16px; border: 1px solid #333; transition: 0.3s; }
         .small-box:hover { border-color: var(--primary-lime); }
-        .voucher-line { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
-        .voucher-label { font-weight: 500; }
-        .voucher-detail { max-width: 100%; font-size: 13px; color: #c9c9c9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .voucher-tag { color: var(--primary-lime); font-weight: 700; }
-        .voucher-remove { font-size: 12px; color: #888; cursor: pointer; text-decoration: underline; }
         .modal-overlay { position: fixed; z-index: 3000; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; animation: fadeIn 0.3s ease; }
         .modal-content { background: #1c1c1c; width: 90%; max-width: 450px; border-radius: 20px; border: 1px solid #333; padding: 32px; position: relative; animation: slideUp 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -237,20 +158,6 @@ function KeranjangContent() {
         </div>
 
         <div className="right">
-          <button type="button" className="small-box voucher-trigger" onClick={handleOpenVoucherModal} style={appliedVoucher ? { borderColor: 'var(--primary-lime)' } : {}}>
-            <div className="voucher-line">
-              <i className="fa-solid fa-ticket" style={{ color: 'var(--primary-lime)' }}></i>
-              <span className="voucher-label">Gunakan Voucher</span>
-            </div>
-            {appliedVoucher && (
-              <div className="voucher-line voucher-detail" title={`${appliedVoucher.code} - Diskon Rp ${discountAmount.toLocaleString('id-ID')}`}>
-                <span className="voucher-tag">{appliedVoucher.code}</span>
-                <span>- Diskon Rp {discountAmount.toLocaleString('id-ID')}</span>
-                <span className="voucher-remove" onClick={(e) => { e.stopPropagation(); handleRemoveVoucher(); }}>hapus</span>
-              </div>
-            )}
-          </button>
-
           <div className="summary-box">
             <h4>Rincian Biaya</h4>
             <div className="summary-row">
@@ -261,12 +168,6 @@ function KeranjangContent() {
               <span>Biaya Produk Tambahan</span>
               <span>Rp 0</span>
             </div>
-            {appliedVoucher && (
-              <div className="summary-row" style={{ color: 'var(--primary-lime)' }}>
-                <span>Diskon Voucher ({appliedVoucher.code})</span>
-                <span>- Rp {discountAmount.toLocaleString('id-ID')}</span>
-              </div>
-            )}
             <hr style={{ border: '1px solid #333', margin: '10px 0' }} />
             <div className="total">
               <p>Total Biaya</p>
@@ -310,71 +211,6 @@ function KeranjangContent() {
         </div>
       )}
 
-      {isVoucherModalOpen && (
-        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) handleCloseVoucherModal(); }}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Gunakan Voucher</h2>
-              <button type="button" className="close-btn" onClick={handleCloseVoucherModal}>&times;</button>
-            </div>
-            <div style={{ marginBottom: '24px' }}>
-              <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
-                <input 
-                  type="text" 
-                  placeholder="Masukkan kode voucher"
-                  value={voucherCode}
-                  onChange={(e) => setVoucherCode(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleApplyVoucher(voucherCode)}
-                  style={{ flex: 1, background: '#000', border: '1px solid #333', color: '#fff', padding: '12px', borderRadius: '10px', outline: 'none', fontFamily: 'inherit' }}
-                />
-                <button type="button" className="btn-tambah" style={{ marginBottom: 0, padding: '10px 20px' }} onClick={() => handleApplyVoucher(voucherCode)} disabled={voucherLoading}>
-                  {voucherLoading ? '...' : 'Gunakan'}
-                </button>
-              </div>
-              <p style={{ fontSize: '12px', color: '#888' }}>Punya kode promo? Masukkan kodenya di sini.</p>
-            </div>
-
-            {voucherLoading ? (
-              <p style={{ fontSize: '13px', color: '#888', textAlign: 'center' }}>Memuat voucher...</p>
-            ) : availableVouchers.length > 0 ? (
-              <>
-                <div style={{ marginBottom: '8px', fontWeight: 600, fontSize: '14px' }}>Voucher Tersedia</div>
-                <div className="voucher-list" style={{ maxHeight: '250px', overflowY: 'auto', paddingRight: '5px' }}>
-                  {availableVouchers.map((v) => {
-                    const isUsed = appliedVoucher?.code === v.code;
-                    const isOverLimit = v.usage_limit > 0 && v.used_count >= v.usage_limit;
-                    return (
-                      <div
-                        key={v.id}
-                        style={{
-                          background: '#2a2a2a', borderRadius: '12px', padding: '16px', marginBottom: '12px',
-                          border: isUsed ? '1px dashed var(--primary-lime)' : '1px solid #333',
-                          cursor: isOverLimit ? 'not-allowed' : 'pointer', opacity: isOverLimit ? 0.5 : 1,
-                        }}
-                        onClick={() => {
-                          if (!isOverLimit) {
-                            setVoucherCode(v.code);
-                            handleApplyVoucher(v.code);
-                          }
-                        }}
-                      >
-                        <div style={{ fontWeight: 700, color: isUsed ? 'var(--primary-lime)' : '#fff', marginBottom: '4px' }}>{v.code}</div>
-                        <div style={{ fontSize: '13px', color: '#ccc', marginBottom: '8px' }}>{v.description}</div>
-                        <div style={{ fontSize: '11px', color: '#888' }}>
-                          {v.usage_limit > 0 ? `Sisa ${v.usage_limit - v.used_count} / ${v.usage_limit}` : 'Unlimited'}
-                          {v.expires_at && ` · Berlaku hingga ${new Date(v.expires_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}`}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </>
-            ) : (
-              <p style={{ fontSize: '13px', color: '#888', textAlign: 'center' }}>Tidak ada voucher tersedia</p>
-            )}
-          </div>
-        </div>
-      )}
     </>
   );
 }

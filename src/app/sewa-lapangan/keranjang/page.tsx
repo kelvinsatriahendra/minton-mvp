@@ -23,6 +23,7 @@ function KeranjangContent() {
   const [isVoucherModalOpen, setIsVoucherModalOpen] = useState(false);
   const [voucherCode, setVoucherCode] = useState('');
   const [voucherError, setVoucherError] = useState('');
+  const [voucherSuccess, setVoucherSuccess] = useState('');
   const [appliedVoucher, setAppliedVoucher] = useState<{ code: string; discountAmount: number; description: string } | null>(null);
   const [availableVouchers, setAvailableVouchers] = useState<any[]>([]);
   const [voucherLoading, setVoucherLoading] = useState(false);
@@ -80,11 +81,12 @@ function KeranjangContent() {
     if (!codeToCheck) return;
     setVoucherLoading(true);
     setVoucherError('');
+    setVoucherSuccess('');
     const result = await validateVoucher(codeToCheck, totalPrice);
     if (result.valid) {
       setAppliedVoucher({ code: result.code!, discountAmount: result.discountAmount!, description: result.description || '' });
       setVoucherCode(result.code!);
-      setIsVoucherModalOpen(false);
+      setVoucherSuccess(`Voucher ${result.code} berhasil digunakan`);
     } else {
       setVoucherError(result.error || 'Voucher tidak valid');
     }
@@ -94,6 +96,7 @@ function KeranjangContent() {
   const handleRemoveVoucher = () => {
     setAppliedVoucher(null);
     setVoucherCode('');
+    setVoucherSuccess('');
   };
 
   const handleCheckout = () => {
@@ -114,7 +117,7 @@ function KeranjangContent() {
   return (
     <>
       <style dangerouslySetInnerHTML={{__html: `
-        .sewa-container { display: flex; gap: 48px; padding: 120px 0 80px; width: 90%; max-width: 1600px; margin: auto; color: #fff; }
+        .sewa-container { display: flex; gap: 48px; padding: 140px 0 80px; width: 90%; max-width: 1600px; margin: auto; color: #fff; }
         .left { flex: 2; }
         .btn-tambah { padding: 12px 28px; border: 1px solid #ffffff; border-radius: 15px; background: none; color: #ffffff; font-size: 16px; font-weight: 500; margin-bottom: 32px; cursor: pointer; transition: 0.3s; }
         .btn-tambah:hover { background: var(--primary-lime); border-color: var(--primary-lime); color: black; }
@@ -139,8 +142,11 @@ function KeranjangContent() {
         .btn-sewa-primary:hover { background: var(--primary-lime); border-color: var(--primary-lime); color: black; }
         .btn-sewa-primary:disabled { opacity: 0.4; cursor: not-allowed; }
         .btn-sewa-primary:disabled:hover { background: none; border-color: #ffffff; color: #ffffff; }
-        .small-box { background: #1c1c1c; padding: 16px; border-radius: 12px; margin-bottom: 16px; text-align: center; cursor: pointer; font-size: 16px; border: 1px solid #333; transition: 0.3s; }
+        .small-box { background: #1c1c1c; padding: 16px; border-radius: 12px; margin-bottom: 16px; cursor: pointer; font-size: 16px; border: 1px solid #333; transition: 0.3s; min-height: 66px; display: flex; align-items: center; justify-content: center; }
         .small-box:hover { border-color: var(--primary-lime); }
+        .voucher-line { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .voucher-tag { color: var(--primary-lime); font-weight: 700; }
+        .voucher-remove { font-size: 12px; color: #888; cursor: pointer; text-decoration: underline; }
         .modal-overlay { position: fixed; z-index: 2000; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; animation: fadeIn 0.3s ease; }
         .modal-content { background: #1c1c1c; width: 90%; max-width: 450px; border-radius: 20px; border: 1px solid #333; padding: 32px; position: relative; animation: slideUp 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -194,11 +200,18 @@ function KeranjangContent() {
 
         <div className="right">
           <div className="small-box" onClick={() => setIsVoucherModalOpen(true)} style={appliedVoucher ? { borderColor: 'var(--primary-lime)' } : {}}>
-            <i className="fa-solid fa-ticket" style={{ color: 'var(--primary-lime)', marginRight: '12px' }}></i>
             {appliedVoucher ? (
-              <span>{appliedVoucher.code} — Diskon Rp {discountAmount.toLocaleString('id-ID')} <span style={{ fontSize: '12px', color: '#888', cursor: 'pointer' }} onClick={(e) => { e.stopPropagation(); handleRemoveVoucher(); }}>(hapus)</span></span>
+              <div className="voucher-line">
+                <i className="fa-solid fa-ticket" style={{ color: 'var(--primary-lime)' }}></i>
+                <span className="voucher-tag">{appliedVoucher.code}</span>
+                <span>Diskon Rp {discountAmount.toLocaleString('id-ID')}</span>
+                <span className="voucher-remove" onClick={(e) => { e.stopPropagation(); handleRemoveVoucher(); }}>hapus</span>
+              </div>
             ) : (
-              'Gunakan Voucher'
+              <div className="voucher-line">
+                <i className="fa-solid fa-ticket" style={{ color: 'var(--primary-lime)' }}></i>
+                <span>Gunakan Voucher</span>
+              </div>
             )}
           </div>
 
@@ -262,11 +275,11 @@ function KeranjangContent() {
       )}
 
       {isVoucherModalOpen && (
-        <div className="modal-overlay" onClick={() => { setIsVoucherModalOpen(false); setVoucherError(''); }}>
+        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) { setIsVoucherModalOpen(false); setVoucherError(''); setVoucherSuccess(''); } }}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Gunakan Voucher</h2>
-              <button className="close-btn" onClick={() => { setIsVoucherModalOpen(false); setVoucherError(''); }}>&times;</button>
+              <button type="button" className="close-btn" onClick={() => { setIsVoucherModalOpen(false); setVoucherError(''); setVoucherSuccess(''); }}>&times;</button>
             </div>
             <div style={{ marginBottom: '24px' }}>
               <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
@@ -278,11 +291,12 @@ function KeranjangContent() {
                   onKeyDown={(e) => e.key === 'Enter' && handleApplyVoucher()}
                   style={{ flex: 1, background: '#000', border: '1px solid #333', color: '#fff', padding: '12px', borderRadius: '10px', outline: 'none', fontFamily: 'inherit' }}
                 />
-                <button className="btn-tambah" style={{ marginBottom: 0, padding: '10px 20px' }} onClick={() => handleApplyVoucher()} disabled={voucherLoading}>
+                <button type="button" className="btn-tambah" style={{ marginBottom: 0, padding: '10px 20px' }} onClick={() => handleApplyVoucher()} disabled={voucherLoading}>
                   {voucherLoading ? '...' : 'Gunakan'}
                 </button>
               </div>
               {voucherError && <p style={{ fontSize: '12px', color: '#ff5252', marginBottom: '8px' }}>{voucherError}</p>}
+              {voucherSuccess && <p style={{ fontSize: '12px', color: 'var(--primary-lime)', marginBottom: '8px' }}>{voucherSuccess}</p>}
               <p style={{ fontSize: '12px', color: '#888' }}>Punya kode promo? Masukkan kodenya di sini.</p>
             </div>
 

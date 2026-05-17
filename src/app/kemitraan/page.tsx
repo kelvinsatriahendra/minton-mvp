@@ -20,7 +20,7 @@ export default function KemitraanPage() {
     <>
       <Navbar />
       <style dangerouslySetInnerHTML={{__html: `
-        .page-hero { width: 90%; max-width: 1600px; margin: 40px auto; margin-bottom: 48px; display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; }
+        .page-hero { width: 90%; max-width: 1600px; margin: 40px auto; margin-bottom: 48px; display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; position: relative; z-index: 9999; }
         .hero-left { flex: 1; }
         .badge { font-size: 24px; color: #ffffff; margin-bottom: 24px; display: block; font-weight: 500; }
         .hero-left h1 { font-size: 48px; font-weight: 700; line-height: 1.2; }

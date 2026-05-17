@@ -45,6 +45,39 @@ function KeranjangContent() {
     }
   }, [venueId, courtId]);
 
+  useEffect(() => {
+    if (!isVoucherModalOpen) {
+      document.body.style.overflow = 'auto';
+      return;
+    }
+
+    document.body.style.overflow = 'hidden';
+    let cancelled = false;
+
+    async function loadVouchers() {
+      try {
+        setVoucherLoading(true);
+        const vouchers = await getAvailableVouchers();
+        if (!cancelled) {
+          setAvailableVouchers(vouchers);
+        }
+      } catch (error) {
+        console.error('Error fetching vouchers:', error);
+      } finally {
+        if (!cancelled) {
+          setVoucherLoading(false);
+        }
+      }
+    }
+
+    loadVouchers();
+
+    return () => {
+      cancelled = true;
+      document.body.style.overflow = 'auto';
+    };
+  }, [isVoucherModalOpen]);
+
   async function loadCartData() {
     try {
       setLoading(true);
@@ -61,22 +94,12 @@ function KeranjangContent() {
 
   async function handleOpenVoucherModal() {
     setVoucherCode('');
-    setVoucherLoading(true);
     setIsVoucherModalOpen(true);
-    try {
-      const vouchers = await getAvailableVouchers();
-      setAvailableVouchers(vouchers);
-    } catch (error) {
-      console.error('Error fetching vouchers:', error);
-    } finally {
-      setVoucherLoading(false);
-    }
   }
 
   function handleCloseVoucherModal() {
     setIsVoucherModalOpen(false);
     setVoucherCode('');
-    setVoucherLoading(false);
   }
 
   const toggleSlot = (slot: string) => {
@@ -160,7 +183,7 @@ function KeranjangContent() {
         .voucher-detail { max-width: 100%; font-size: 13px; color: #c9c9c9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .voucher-tag { color: var(--primary-lime); font-weight: 700; }
         .voucher-remove { font-size: 12px; color: #888; cursor: pointer; text-decoration: underline; }
-        .modal-overlay { position: fixed; z-index: 2000; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; animation: fadeIn 0.3s ease; }
+        .modal-overlay { position: fixed; z-index: 3000; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; animation: fadeIn 0.3s ease; }
         .modal-content { background: #1c1c1c; width: 90%; max-width: 450px; border-radius: 20px; border: 1px solid #333; padding: 32px; position: relative; animation: slideUp 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }

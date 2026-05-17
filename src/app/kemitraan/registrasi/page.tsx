@@ -24,10 +24,8 @@ export default function RegistrasiPage() {
 
   useEffect(() => {
     if (state?.success) {
-      const timer = setTimeout(() => {
-        router.push('/kemitraan/dashboard-mitra');
-      }, 800);
-      return () => clearTimeout(timer);
+      router.push('/kemitraan/dashboard-mitra');
+      router.refresh();
     }
   }, [state?.success, router]);
 
@@ -56,13 +54,8 @@ export default function RegistrasiPage() {
               {state.message}
             </div>
           )}
-          {state?.success && (
-            <div style={{ padding: '15px', backgroundColor: '#e8f5e9', color: '#2e7d32', borderRadius: '8px', marginBottom: '20px', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <i className="fa-solid fa-check-circle"></i> Pendaftaran berhasil! Mengalihkan ke dashboard...
-            </div>
-          )}
 
-          <form action={formAction} style={{ opacity: state?.success ? 0.5 : 1, pointerEvents: state?.success ? 'none' : 'auto' }}>
+          <form action={formAction}>
             <div className="form-section">
               <div className="section-title">
                 <i className="fa-solid fa-building"></i> Informasi GOR & Akun
@@ -172,8 +165,8 @@ export default function RegistrasiPage() {
               </div>
             </div>
 
-            <button type="submit" className="btn-submit-reg" disabled={isPending || !!state?.success} style={{ opacity: isPending || state?.success ? 0.7 : 1 }}>
-              {state?.success ? 'Pendaftaran Berhasil!' : isPending ? 'Memproses Pendaftaran...' : 'Daftarkan Sekarang'} <i className="fa-solid fa-paper-plane"></i>
+            <button type="submit" className="btn-submit-reg" disabled={isPending} style={{ opacity: isPending ? 0.7 : 1 }}>
+              {isPending ? 'Memproses Pendaftaran...' : 'Daftarkan Sekarang'} <i className="fa-solid fa-paper-plane"></i>
             </button>
           </form>
         </div>

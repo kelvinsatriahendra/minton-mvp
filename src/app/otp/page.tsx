@@ -77,7 +77,7 @@ function OtpContent() {
       setCode(Array(OTP_LENGTH).fill(''));
       inputRefs[0].current?.focus();
     } else {
-      router.push('/');
+      router.push(result.redirect || '/');
       router.refresh();
     }
   };

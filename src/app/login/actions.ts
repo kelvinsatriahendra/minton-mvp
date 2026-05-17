@@ -55,9 +55,15 @@ export async function loginAction(prevState: any, formData: FormData) {
     const data = users[0];
     console.log('User found:', { email: data.email, id: data.id, verified: data.email_verified });
 
+    if (!data.password || !data.password.startsWith('$2')) {
+      if (data.password === 'oauth-user') {
+        return { message: 'Akun ini terdaftar dengan Google. Silakan masuk menggunakan Google.' };
+      }
+      return { message: 'Password salah. Periksa kembali kata sandi Anda.' };
+    }
+
     const passwordMatch = await bcrypt.compare(password, data.password);
     if (!passwordMatch) {
-      console.log('Password mismatch for email:', email);
       return { message: 'Password salah. Periksa kembali kata sandi Anda.' };
     }
 

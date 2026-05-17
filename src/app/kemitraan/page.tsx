@@ -1,13 +1,10 @@
 
 "use client";
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
 export default function KemitraanPage() {
-  const router = useRouter();
-
   useEffect(() => { document.title = 'Kemitraan - Minton'; }, []);
 
   useEffect(() => {
@@ -73,8 +70,8 @@ export default function KemitraanPage() {
           <div className="hero-right">
             <p>Bergabung di ekosistem digital Minton dan ubah manajemen lapangan manual Anda menjadi serba otomatis.</p>
             <div style={{ display: 'flex', gap: '16px', marginTop: '20px' }}>
-              <button className="btn-outline" style={{ borderRadius: '8px', padding: '12px 24px', margin: 0 }} onClick={() => router.push('/kemitraan/registrasi')}>Daftar GOR Anda Sekarang <i className="fa-solid fa-arrow-right"></i></button>
-              <button className="btn-primary" style={{ borderRadius: '8px', padding: '12px 24px', margin: 0 }} onClick={() => router.push('/kemitraan/login-mitra')}>Login Dashboard</button>
+              <button className="btn-outline" style={{ borderRadius: '8px', padding: '12px 24px', margin: 0 }} onClick={() => window.location.href = '/kemitraan/registrasi'}>Daftar GOR Anda Sekarang <i className="fa-solid fa-arrow-right"></i></button>
+              <button className="btn-primary" style={{ borderRadius: '8px', padding: '12px 24px', margin: 0 }} onClick={() => window.location.href = '/kemitraan/login-mitra'}>Login Dashboard</button>
             </div>
           </div>
         </section>
@@ -109,8 +106,8 @@ export default function KemitraanPage() {
               <h2>Siap <span className="text-highlight">Digitalisasi<br />Bisnis GOR</span> anda?</h2>
               <p>Jadilah bagian dari revolusi sport-tech bersama Minton. dan biarkan teknologi bekerja untuk Anda.</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '32px' }}>
-                <button className="btn-cta" onClick={() => router.push('/kemitraan/registrasi')}>Daftarkan GOR Sekarang!</button>
-                <button className="btn-cta btn-cta-login" onClick={() => router.push('/kemitraan/login-mitra')}>Login Dashboard</button>
+                <button className="btn-cta" onClick={() => window.location.href = '/kemitraan/registrasi'}>Daftarkan GOR Sekarang!</button>
+                <button className="btn-cta btn-cta-login" onClick={() => window.location.href = '/kemitraan/login-mitra'}>Login Dashboard</button>
               </div>
             </div>
           </div>

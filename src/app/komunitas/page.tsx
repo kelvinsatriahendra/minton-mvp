@@ -1,10 +1,64 @@
-import type { Metadata } from 'next';
+'use client';
+
+import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { supabase } from '@/utils/supabase';
+import { getLeaderboard, getClubs, getFeedPosts, getMyRank } from './actions';
 
-export const metadata: Metadata = { title: 'Komunitas - Minton' };
+interface LeaderboardUser { email: string; nama_lengkap: string; points: number }
+interface Club { id: string; name: string; description: string; city: string; level: string; schedule: string; fee: string; member_count: number; image_url: string }
+interface FeedPost { id: string; title: string; content: string; author_name: string; image_url: string; published_at: string }
+
+function formatDate(dateStr: string) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const days = Math.floor(diff / 86400000);
+  if (days === 0) return 'Hari ini';
+  if (days === 1) return '1 Hari yang lalu';
+  if (days < 7) return `${days} Hari yang lalu`;
+  if (days < 30) return `${Math.floor(days / 7)} Minggu yang lalu`;
+  return `${Math.floor(days / 30)} Bulan yang lalu`;
+}
+
+function getAvatar(email: string, idx: number) {
+  const imgs = ['/asset/peringkat-1.png','/asset/testimoni-rina.png','/asset/peringkat-2.png','/asset/testimoni-budi.png','/asset/testimoni-sari.png'];
+  return imgs[idx] ?? undefined;
+}
 
 export default function KomunitasPage() {
+  const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
+  const [clubs, setClubs] = useState<Club[]>([]);
+  const [feed, setFeed] = useState<FeedPost[]>([]);
+  const [myRank, setMyRank] = useState<{ rank: number } | null>(null);
+  const [userEmail, setUserEmail] = useState('');
+  const [search, setSearch] = useState('');
+  const [cityFilter, setCityFilter] = useState('');
+
+  useEffect(() => { document.title = 'Komunitas - Minton'; }, []);
+
+  useEffect(() => {
+    (async () => {
+      const [lb, c, f] = await Promise.all([getLeaderboard(), getClubs(), getFeedPosts()]);
+      setLeaderboard(lb);
+      setClubs(c);
+      setFeed(f);
+    })();
+    const email = document.cookie.replace(/(?:(?:^|.*;\s*)userEmail\s*=\s*([^;]*).*$)|^.*$/, '$1');
+    setUserEmail(email);
+    if (email) getMyRank(email).then(setMyRank);
+  }, []);
+
+  const filteredClubs = clubs.filter((c) => {
+    if (search && !c.name.toLowerCase().includes(search.toLowerCase())) return false;
+    if (cityFilter && !c.city.toLowerCase().includes(cityFilter.toLowerCase())) return false;
+    return true;
+  });
+
+  const cities = [...new Set(clubs.map((c) => c.city))];
+
+  const top3 = leaderboard.slice(0, 3);
+  const rest = leaderboard.slice(3);
+
   return (
     <>
       <Navbar />
@@ -15,30 +69,36 @@ export default function KomunitasPage() {
             <h2>Jajaran Para <span className="text-highlight">Jagoan.</span></h2>
           </div>
           <div className="podium-container">
-            <div className="podium-card rank-2">
-              <div className="podium-rank">2</div>
-              <div className="podium-content">
-                <div className="podium-name">Siti Aminah</div>
-                <div className="podium-points">2.890</div>
-                <div className="podium-label">Poin</div>
+            {top3.length >= 2 && (
+              <div className="podium-card rank-2">
+                <div className="podium-rank">2</div>
+                <div className="podium-content">
+                  <div className="podium-name">{top3[1]?.nama_lengkap ?? '-'}</div>
+                  <div className="podium-points">{top3[1]?.points.toLocaleString()}</div>
+                  <div className="podium-label">Poin</div>
+                </div>
               </div>
-            </div>
-            <div className="podium-card rank-1">
-              <div className="podium-rank">1</div>
-              <div className="podium-content">
-                <div className="podium-name">Bagus Saputra</div>
-                <div className="podium-points">3.150</div>
-                <div className="podium-label">Poin</div>
+            )}
+            {top3.length >= 1 && (
+              <div className="podium-card rank-1">
+                <div className="podium-rank">1</div>
+                <div className="podium-content">
+                  <div className="podium-name">{top3[0]?.nama_lengkap ?? '-'}</div>
+                  <div className="podium-points">{top3[0]?.points.toLocaleString()}</div>
+                  <div className="podium-label">Poin</div>
+                </div>
               </div>
-            </div>
-            <div className="podium-card rank-3">
-              <div className="podium-rank">3</div>
-              <div className="podium-content">
-                <div className="podium-name">Kevin Sanjaya</div>
-                <div className="podium-points">2.540</div>
-                <div className="podium-label">Poin</div>
+            )}
+            {top3.length >= 3 && (
+              <div className="podium-card rank-3">
+                <div className="podium-rank">3</div>
+                <div className="podium-content">
+                  <div className="podium-name">{top3[2]?.nama_lengkap ?? '-'}</div>
+                  <div className="podium-points">{top3[2]?.points.toLocaleString()}</div>
+                  <div className="podium-label">Poin</div>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </section>
 
@@ -48,49 +108,41 @@ export default function KomunitasPage() {
           </div>
           <div className="leaderboard-header">
             <div className="lb-tabs">
-              <div className="lb-tab active">Pria</div>
-              <div className="lb-tab">Wanita</div>
-              <div className="lb-tab">Klub/Grup</div>
+              <div className="lb-tab active">Semua</div>
             </div>
-            <button className="btn btn-primary">Lihat Peringkat Saya</button>
+            <button className="btn btn-primary" onClick={() => {
+              const el = document.getElementById('my-rank');
+              el?.scrollIntoView({ behavior: 'smooth' });
+            }}>Lihat Peringkat Saya</button>
           </div>
           <div className="leaderboard-grid">
-            <div className="lb-list">
-              <div className="lb-row"><span className="lb-rank">1</span><div className="lb-user"><div className="lb-avatar"><img src="/asset/peringkat-1.png" alt="User 1" /></div>Bagus Saputra</div><span className="lb-score">3.150 pts</span></div>
-              <div className="lb-row"><span className="lb-rank">2</span><div className="lb-user"><div className="lb-avatar"><img src="/asset/testimoni-rina.png" alt="User 2" /></div>Siti Aminah</div><span className="lb-score">2.890 pts</span></div>
-              <div className="lb-row"><span className="lb-rank">3</span><div className="lb-user"><div className="lb-avatar"><img src="/asset/peringkat-2.png" alt="User 3" /></div>Kevin Sanjaya</div><span className="lb-score">2.540 pts</span></div>
-              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>4</span><div className="lb-user"><div className="lb-avatar"><img src="/asset/testimoni-budi.png" alt="User 4" /></div>Ahmad F.</div><span className="lb-score">2.400 pts</span></div>
-              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>5</span><div className="lb-user"><div className="lb-avatar"><img src="/asset/testimoni-sari.png" alt="User 5" /></div>Rina M.</div><span className="lb-score">2.350 pts</span></div>
-              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>6</span><div className="lb-user"><div className="lb-avatar"></div>Joko S.</div><span className="lb-score">2.210 pts</span></div>
-              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>7</span><div className="lb-user"><div className="lb-avatar"></div>Dedi T.</div><span className="lb-score">2.100 pts</span></div>
-              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>8</span><div className="lb-user"><div className="lb-avatar"></div>Fajar A.</div><span className="lb-score">2.050 pts</span></div>
-              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>9</span><div className="lb-user"><div className="lb-avatar"></div>Rian A.</div><span className="lb-score">1.980 pts</span></div>
-              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>10</span><div className="lb-user"><div className="lb-avatar"></div>Hendra S.</div><span className="lb-score">1.890 pts</span></div>
-            </div>
-            <div className="lb-list">
-              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>11</span><div className="lb-user"><div className="lb-avatar"></div>Ahsan S.</div><span className="lb-score">1.850 pts</span></div>
-              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>12</span><div className="lb-user"><div className="lb-avatar"></div>Tontowi A.</div><span className="lb-score">1.800 pts</span></div>
-              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>13</span><div className="lb-user"><div className="lb-avatar"></div>Liliyana N.</div><span className="lb-score">1.750 pts</span></div>
-              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>14</span><div className="lb-user"><div className="lb-avatar"></div>Praveen J.</div><span className="lb-score">1.700 pts</span></div>
-              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>15</span><div className="lb-user"><div className="lb-avatar"></div>Melati D.</div><span className="lb-score">1.650 pts</span></div>
-              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>16</span><div className="lb-user"><div className="lb-avatar"></div>Apriyani R.</div><span className="lb-score">1.600 pts</span></div>
-              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>17</span><div className="lb-user"><div className="lb-avatar"></div>Greysia P.</div><span className="lb-score">1.550 pts</span></div>
-              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>18</span><div className="lb-user"><div className="lb-avatar"></div>Jonatan C.</div><span className="lb-score">1.500 pts</span></div>
-              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>19</span><div className="lb-user"><div className="lb-avatar"></div>Anthony G.</div><span className="lb-score">1.450 pts</span></div>
-              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>20</span><div className="lb-user"><div className="lb-avatar"></div>Chico A.</div><span className="lb-score">1.400 pts</span></div>
-            </div>
-            <div className="lb-list">
-              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>21</span><div className="lb-user"><div className="lb-avatar"></div>Shesar H.</div><span className="lb-score">1.350 pts</span></div>
-              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>22</span><div className="lb-user"><div className="lb-avatar"></div>Gregoria M.</div><span className="lb-score">1.300 pts</span></div>
-              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>23</span><div className="lb-user"><div className="lb-avatar"></div>Putri K.</div><span className="lb-score">1.250 pts</span></div>
-              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>24</span><div className="lb-user"><div className="lb-avatar"></div>Rinov R.</div><span className="lb-score">1.200 pts</span></div>
-              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>25</span><div className="lb-user"><div className="lb-avatar"></div>Pitha H.</div><span className="lb-score">1.150 pts</span></div>
-              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>26</span><div className="lb-user"><div className="lb-avatar"></div>Rehan N.</div><span className="lb-score">1.100 pts</span></div>
-              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>27</span><div className="lb-user"><div className="lb-avatar"></div>Lisa A.</div><span className="lb-score">1.050 pts</span></div>
-              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>28</span><div className="lb-user"><div className="lb-avatar"></div>Dejan F.</div><span className="lb-score">1.000 pts</span></div>
-              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>29</span><div className="lb-user"><div className="lb-avatar"></div>Gloria E.</div><span className="lb-score">950 pts</span></div>
-              <div className="lb-row"><span className="lb-rank" style={{ color: '#aaaaaa' }}>30</span><div className="lb-user"><div className="lb-avatar"></div>Zachariah J.</div><span className="lb-score">900 pts</span></div>
-            </div>
+            {(() => {
+              const cols = 3;
+              const perCol = Math.ceil(rest.length / cols) || 1;
+              return Array.from({ length: cols }, (_, ci) => (
+                <div key={ci} className="lb-list">
+                  {rest.slice(ci * perCol, (ci + 1) * perCol).map((u, i) => {
+                    const globalIdx = ci * perCol + i + 4;
+                    const isMe = u.email === userEmail;
+                    return (
+                      <div
+                        key={u.email}
+                        className="lb-row"
+                        id={isMe ? 'my-rank' : undefined}
+                        style={isMe ? { background: 'var(--primary-lime)', borderRadius: '8px', padding: '4px 8px' } : undefined}
+                      >
+                        <span className="lb-rank" style={globalIdx > 3 ? { color: '#aaaaaa' } : undefined}>{globalIdx}</span>
+                        <div className="lb-user">
+                          <div className="lb-avatar">{getAvatar(u.email, globalIdx - 1) && <img src={getAvatar(u.email, globalIdx - 1)} alt="" />}</div>
+                          {u.nama_lengkap}
+                        </div>
+                        <span className="lb-score">{u.points.toLocaleString()} pts</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              ));
+            })()}
           </div>
         </section>
 
@@ -101,111 +153,41 @@ export default function KomunitasPage() {
           <div className="filter-bar">
             <div className="filter-input">
               <i className="fa-solid fa-magnifying-glass"></i>
-              <input type="text" placeholder="Cari nama klub/komunitas" />
+              <input type="text" placeholder="Cari nama klub/komunitas" value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
             <div className="filter-input">
               <i className="fa-solid fa-location-dot"></i>
-              <select defaultValue="">
-                <option value="" disabled>Lokasi</option>
-                <option value="surabaya">Surabaya</option>
-                <option value="jakarta">Jakarta</option>
+              <select value={cityFilter} onChange={(e) => setCityFilter(e.target.value)}>
+                <option value="">Semua Lokasi</option>
+                {cities.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
-            <div className="filter-input">
-              <i className="fa-regular fa-calendar"></i>
-              <select defaultValue="">
-                <option value="" disabled>Jadwal Rutin</option>
-                <option value="weekend">Weekend</option>
-                <option value="weekday">Weekday</option>
-              </select>
-            </div>
-            <button className="btn btn-primary">Terapkan Filter</button>
+            <button className="btn btn-primary" onClick={() => { setSearch(''); setCityFilter(''); }}>Reset Filter</button>
           </div>
           <div className="klub-grid">
-            <div className="klub-card">
-              <img src="/asset/card-komunitas1.png" className="klub-img" alt="Klub 1" />
-              <div className="klub-info">
-                <div className="klub-header">
-                  <div>
-                    <h3>PB Djarum Surabaya</h3>
-                    <p>Kota Surabaya</p>
+            {filteredClubs.map((club) => (
+              <div key={club.id} className="klub-card">
+                <img src={club.image_url} className="klub-img" alt={club.name} />
+                <div className="klub-info">
+                  <div className="klub-header">
+                    <div>
+                      <h3>{club.name}</h3>
+                      <p>Kota {club.city}</p>
+                    </div>
+                    <div className="text-highlight"><i className="fa-solid fa-users"></i> {club.member_count}</div>
                   </div>
-                  <div className="text-highlight"><i className="fa-solid fa-users"></i> 124</div>
-                </div>
-                <div className="klub-stats">
-                  <div><span className="stat-label">Level</span><span className="stat-val">Campuran</span></div>
-                  <div><span className="stat-label">Jadwal Rutin</span><span className="stat-val">Sabtu & Minggu</span></div>
-                  <div><span className="stat-label">Iuran</span><span className="stat-val">Rp 50K / bln</span></div>
-                </div>
-                <div className="klub-actions">
-                  <button className="btn btn-outline">Join Komunitas</button>
-                  <button className="btn btn-outline">Mabar Bareng</button>
+                  <div className="klub-stats">
+                    <div><span className="stat-label">Level</span><span className="stat-val">{club.level}</span></div>
+                    <div><span className="stat-label">Jadwal Rutin</span><span className="stat-val">{club.schedule}</span></div>
+                    <div><span className="stat-label">Iuran</span><span className="stat-val">{club.fee}</span></div>
+                  </div>
+                  <div className="klub-actions">
+                    <button className="btn btn-outline">Join Komunitas</button>
+                    <button className="btn btn-outline">Mabar Bareng</button>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="klub-card">
-              <img src="/asset/card-komunitas2.png" className="klub-img" alt="Klub 2" />
-              <div className="klub-info">
-                <div className="klub-header">
-                  <div>
-                    <h3>Smash Hunter SBY</h3>
-                    <p>Kota Surabaya</p>
-                  </div>
-                  <div className="text-highlight"><i className="fa-solid fa-users"></i> 86</div>
-                </div>
-                <div className="klub-stats">
-                  <div><span className="stat-label">Level</span><span className="stat-val">Menengah - Pro</span></div>
-                  <div><span className="stat-label">Jadwal Rutin</span><span className="stat-val">Rabu & Jumat</span></div>
-                  <div><span className="stat-label">Iuran</span><span className="stat-val">Rp 75K / bln</span></div>
-                </div>
-                <div className="klub-actions">
-                  <button className="btn btn-outline">Join Komunitas</button>
-                  <button className="btn btn-outline">Mabar Bareng</button>
-                </div>
-              </div>
-            </div>
-            <div className="klub-card">
-              <img src="/asset/card-komunitas3.png" className="klub-img" alt="Klub 3" />
-              <div className="klub-info">
-                <div className="klub-header">
-                  <div>
-                    <h3>Badminton Lovers Sidoarjo</h3>
-                    <p>Sidoarjo</p>
-                  </div>
-                  <div className="text-highlight"><i className="fa-solid fa-users"></i> 210</div>
-                </div>
-                <div className="klub-stats">
-                  <div><span className="stat-label">Level</span><span className="stat-val">Pemula - Menengah</span></div>
-                  <div><span className="stat-label">Jadwal Rutin</span><span className="stat-val">Minggu Pagi</span></div>
-                  <div><span className="stat-label">Iuran</span><span className="stat-val">Patungan Harian</span></div>
-                </div>
-                <div className="klub-actions">
-                  <button className="btn btn-outline">Join Komunitas</button>
-                  <button className="btn btn-outline">Mabar Bareng</button>
-                </div>
-              </div>
-            </div>
-            <div className="klub-card">
-              <img src="/asset/card-komunitas4.png" className="klub-img" alt="Klub 4" />
-              <div className="klub-info">
-                <div className="klub-header">
-                  <div>
-                    <h3>Kok Terbang Club</h3>
-                    <p>Kota Malang</p>
-                  </div>
-                  <div className="text-highlight"><i className="fa-solid fa-users"></i> 45</div>
-                </div>
-                <div className="klub-stats">
-                  <div><span className="stat-label">Level</span><span className="stat-val">Campuran</span></div>
-                  <div><span className="stat-label">Jadwal Rutin</span><span className="stat-val">Selasa Malam</span></div>
-                  <div><span className="stat-label">Iuran</span><span className="stat-val">Rp 40K / bln</span></div>
-                </div>
-                <div className="klub-actions">
-                  <button className="btn btn-outline">Join Komunitas</button>
-                  <button className="btn btn-outline">Mabar Bareng</button>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
           <div style={{ textAlign: 'right', marginTop: '24px' }}>
             <button className="btn btn-outline" style={{ borderColor: 'var(--primary-lime)', color: 'var(--primary-lime)' }}>
@@ -219,72 +201,19 @@ export default function KomunitasPage() {
             <h2>Community <span className="text-highlight">Feed & Tips</span></h2>
           </div>
           <div className="feed-grid">
-            <div className="feed-card">
-              <img src="/asset/card-artikel1.png" className="feed-img" alt="Artikel 1" />
-              <div className="feed-info">
-                <h3 className="feed-title">Tips Grip Raket yang Benar</h3>
-                <p className="feed-desc">Genggaman raket sangat menentukan kekuatan pukulan smash dan backhand kamu. Simak teknik dasar memegang raket ala atlet pro.</p>
-                <div className="feed-footer">
-                  <span><i className="fa-regular fa-user"></i> Coach Hendra</span>
-                  <span>2 Hari yang lalu</span>
+            {feed.map((post) => (
+              <div key={post.id} className="feed-card">
+                <img src={post.image_url} className="feed-img" alt={post.title} />
+                <div className="feed-info">
+                  <h3 className="feed-title">{post.title}</h3>
+                  <p className="feed-desc">{post.content}</p>
+                  <div className="feed-footer">
+                    <span><i className="fa-regular fa-user"></i> {post.author_name}</span>
+                    <span>{formatDate(post.published_at)}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="feed-card">
-              <img src="/asset/card-artikel2.png" className="feed-img" alt="Artikel 2" />
-              <div className="feed-info">
-                <h3 className="feed-title">Review Sepatu Badminton 2026</h3>
-                <p className="feed-desc">Mencari sepatu yang ringan namun empuk di pergelangan kaki? Berikut adalah komparasi top 5 sepatu badminton rilis terbaru.</p>
-                <div className="feed-footer">
-                  <span><i className="fa-regular fa-user"></i> Budi Santoso</span>
-                  <span>4 Hari yang lalu</span>
-                </div>
-              </div>
-            </div>
-            <div className="feed-card">
-              <img src="/asset/card-artikel3.png" className="feed-img" alt="Artikel 3" />
-              <div className="feed-info">
-                <h3 className="feed-title">Aturan Poin Baru BWF</h3>
-                <p className="feed-desc">BWF merilis wacana sistem poin 5x11 menggantikan 3x21. Bagaimana pengaruhnya terhadap stamina pemain dan durasi laga?</p>
-                <div className="feed-footer">
-                  <span><i className="fa-regular fa-user"></i> Minton News</span>
-                  <span>1 Minggu yang lalu</span>
-                </div>
-              </div>
-            </div>
-            <div className="feed-card">
-              <img src="/asset/card-artikel4.png" className="feed-img" alt="Artikel 4" />
-              <div className="feed-info">
-                <h3 className="feed-title">Turnamen Tarkam Surabaya</h3>
-                <p className="feed-desc">Persiapkan tim kamu! Turnamen tahunan antar kecamatan se-Surabaya kembali digelar bulan depan. Daftarkan tim di GOR terdekat.</p>
-                <div className="feed-footer">
-                  <span><i className="fa-regular fa-user"></i> PBSI Surabaya</span>
-                  <span>2 Minggu yang lalu</span>
-                </div>
-              </div>
-            </div>
-            <div className="feed-card">
-              <img src="/asset/card-artikel5.png" className="feed-img" alt="Artikel 5" />
-              <div className="feed-info">
-                <h3 className="feed-title">Pemanasan Wajib Sebelum Main</h3>
-                <p className="feed-desc">Jangan anggap remeh cedera engkel dan lutut. Berikut 5 gerakan dinamis untuk memanaskan otot bagian bawah sebelum turun lapang.</p>
-                <div className="feed-footer">
-                  <span><i className="fa-regular fa-user"></i> Dr. Andi Sport</span>
-                  <span>3 Minggu yang lalu</span>
-                </div>
-              </div>
-            </div>
-            <div className="feed-card">
-              <img src="/asset/card-artikel6.png" className="feed-img" alt="Artikel 6" />
-              <div className="feed-info">
-                <h3 className="feed-title">Mitos vs Fakta Senar Raket</h3>
-                <p className="feed-desc">Apakah tarikan senar yang lebih kencang selalu berarti smash lebih kuat? Mari bedah fisika di balik pantulan senar raket badminton.</p>
-                <div className="feed-footer">
-                  <span><i className="fa-regular fa-user"></i> Stringer Pro ID</span>
-                  <span>1 Bulan yang lalu</span>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         </section>
 

@@ -158,6 +158,32 @@ export default function MintonPayPage() {
   return (
     <DashboardSidebar>
       <style>{`
+        .pay-header { background: linear-gradient(135deg,#1d1d1d,#111); border: 1px solid #333; border-radius: 20px; padding: 32px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; position: relative; overflow: hidden; }
+        .pay-header::after { content: ''; position: absolute; right: -50px; top: -50px; width: 200px; height: 200px; background: var(--primary-lime); opacity: 0.05; border-radius: 50%; }
+        .balance-info h2 { font-size: 14px; color: #aaa; font-weight: 500; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        .balance-amount { font-size: 36px; font-weight: 800; }
+        .pay-actions { display: flex; gap: 16px; }
+        .pay-btn { display: flex; flex-direction: column; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); border: 1px solid #333; padding: 16px 24px; border-radius: 16px; cursor: pointer; transition: 0.3s; min-width: 110px; }
+        .pay-btn:hover { background: rgba(189,209,36,0.1); border-color: var(--primary-lime); transform: translateY(-4px); }
+        .pay-btn i { font-size: 20px; color: var(--primary-lime); }
+        .pay-btn span { font-size: 13px; font-weight: 600; }
+        .transaction-section { display: grid; grid-template-columns: 1fr 350px; gap: 32px; }
+        .history-list { display: flex; flex-direction: column; gap: 8px; }
+        .history-item { display: flex; align-items: center; padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: 0.2s; }
+        .history-item:hover { background: rgba(255,255,255,0.02); }
+        .history-icon { width: 44px; height: 44px; border-radius: 12px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; margin-right: 16px; }
+        .history-details { flex: 1; }
+        .history-details h4 { font-size: 15px; margin-bottom: 4px; }
+        .history-details p { font-size: 12px; color: #aaa; }
+        .history-amount { text-align: right; font-weight: 700; }
+        .amount-minus { color: #ff5252; }
+        .amount-plus { color: var(--primary-lime); }
+        .payment-methods { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+        .method-card { border: 1px solid #333; padding: 16px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; transition: 0.3s; }
+        .method-card:hover { border-color: var(--primary-lime); background: rgba(189,209,36,0.05); }
+        .method-card i { font-size: 20px; color: #aaa; }
+        .method-card span { font-size: 13px; }
+        .promo-card { background: rgba(189,209,36,0.05); border-color: var(--primary-lime); display: flex; gap: 16px; align-items: center; }
         .modal-overlay-mp { display: flex; position: fixed; z-index: 2000; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); justify-content: center; align-items: center; }
         .modal-content-mp { background-color: #1c1c1c; border: 1px solid #333; width: 90%; max-width: 440px; border-radius: 20px; padding: 32px; position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.5); max-height: 90vh; overflow-y: auto; }
         .modal-content-mp h3 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
@@ -178,6 +204,10 @@ export default function MintonPayPage() {
         .notification-toast-mp { position: fixed; top: 100px; left: 50%; transform: translateX(-50%); z-index: 3000; padding: 14px 24px; border-radius: 12px; font-size: 14px; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.3); animation: fadeIn 0.3s ease; }
         .notification-toast-mp.success { background: #16a34a; color: #fff; }
         .notification-toast-mp.error { background: #dc2626; color: #fff; }
+        @media (max-width: 768px) {
+          .transaction-section { grid-template-columns: 1fr; }
+          .pay-header { flex-direction: column; gap: 24px; text-align: center; }
+        }
         @keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(-10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
       `}</style>
 

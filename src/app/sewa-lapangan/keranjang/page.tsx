@@ -201,16 +201,16 @@ function KeranjangContent() {
         </div>
 
         <div className="right">
-          <div className="small-box" onClick={() => setIsVoucherModalOpen(true)} style={appliedVoucher ? { borderColor: 'var(--primary-lime)' } : {}}>
-            <div className="voucher-line">
+          <div className="small-box" role="button" tabIndex={0} onClick={() => setIsVoucherModalOpen(true)} onKeyDown={(e) => e.key === 'Enter' && setIsVoucherModalOpen(true)} style={appliedVoucher ? { borderColor: 'var(--primary-lime)', cursor: 'pointer' } : { cursor: 'pointer' }}>
+            <div className="voucher-line" style={{ pointerEvents: 'none' }}>
               <i className="fa-solid fa-ticket" style={{ color: 'var(--primary-lime)' }}></i>
               <span className="voucher-label">Gunakan Voucher</span>
             </div>
             {appliedVoucher && (
-              <div className="voucher-line voucher-detail" title={`${appliedVoucher.code} - Diskon Rp ${discountAmount.toLocaleString('id-ID')}`}>
+              <div className="voucher-line voucher-detail" style={{ pointerEvents: 'none' }} title={`${appliedVoucher.code} - Diskon Rp ${discountAmount.toLocaleString('id-ID')}`}>
                 <span className="voucher-tag">{appliedVoucher.code}</span>
                 <span>- Diskon Rp {discountAmount.toLocaleString('id-ID')}</span>
-                <span className="voucher-remove" onClick={(e) => { e.stopPropagation(); handleRemoveVoucher(); }}>hapus</span>
+                <span className="voucher-remove" style={{ pointerEvents: 'auto' }} onClick={(e) => { e.stopPropagation(); handleRemoveVoucher(); }}>hapus</span>
               </div>
             )}
           </div>

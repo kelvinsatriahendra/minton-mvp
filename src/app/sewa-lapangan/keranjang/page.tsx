@@ -189,12 +189,8 @@ function KeranjangContent() {
         .btn-sewa-primary:disabled:hover { background: none; border-color: #ffffff; color: #ffffff; }
         .small-box { background: #1c1c1c; padding: 16px; border-radius: 12px; margin-bottom: 16px; text-align: center; cursor: pointer; font-size: 16px; border: 1px solid #333; transition: 0.3s; }
         .small-box:hover { border-color: var(--primary-lime); }
-        .voucher-line { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
-        .voucher-detail { margin-top: 6px; font-size: 13px; color: #c9c9c9; }
-        .voucher-tag { color: var(--primary-lime); font-weight: 700; margin-right: 8px; }
-        .voucher-remove { margin-left: 8px; font-size: 12px; color: #888; text-decoration: underline; cursor: pointer; }
         .voucher-card { background: #2a2a2a; border-radius: 12px; padding: 16px; margin-bottom: 12px; border: 1px solid #333; cursor: pointer; }
-        .voucher-card.used { border: 1px dashed var(--primary-lime); }
+        .voucher-card.active { border: 1px dashed var(--primary-lime); }
         .modal-overlay { position: fixed; z-index: 3000; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; animation: fadeIn 0.3s ease; }
         .modal-content { background: #1c1c1c; width: 90%; max-width: 450px; border-radius: 20px; border: 1px solid #333; padding: 32px; position: relative; animation: slideUp 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -247,19 +243,7 @@ function KeranjangContent() {
         </div>
 
         <div className="right">
-          <button type="button" className="small-box" onClick={handleOpenVoucherModal} style={appliedVoucher ? { borderColor: 'var(--primary-lime)' } : {}}>
-            <div className="voucher-line">
-              <i className="fa-solid fa-ticket" style={{ color: 'var(--primary-lime)' }}></i>
-              <span>Gunakan Voucher</span>
-            </div>
-            {appliedVoucher && (
-              <div className="voucher-detail">
-                <span className="voucher-tag">{appliedVoucher.code}</span>
-                <span>- Rp {discountAmount.toLocaleString('id-ID')}</span>
-                <span className="voucher-remove" onClick={(e) => { e.stopPropagation(); handleRemoveVoucher(); }}>hapus</span>
-              </div>
-            )}
-          </button>
+          <div className="small-box" onClick={handleOpenVoucherModal}><i className="fa-solid fa-ticket" style={{ color: 'var(--primary-lime)', marginRight: '12px' }}></i> Gunakan Voucher</div>
 
           <div className="summary-box">
             <h4>Rincian Biaya</h4>
@@ -271,12 +255,6 @@ function KeranjangContent() {
               <span>Biaya Produk Tambahan</span>
               <span>Rp 0</span>
             </div>
-            {appliedVoucher && discountAmount > 0 && (
-              <div className="summary-row" style={{ color: 'var(--primary-lime)' }}>
-                <span>Diskon Voucher ({appliedVoucher.code})</span>
-                <span>- Rp {discountAmount.toLocaleString('id-ID')}</span>
-              </div>
-            )}
             <hr style={{ border: '1px solid #333', margin: '10px 0' }} />
             <div className="total">
               <p>Total Biaya</p>
@@ -359,18 +337,19 @@ function KeranjangContent() {
                 <div style={{ marginBottom: '8px', fontWeight: 600, fontSize: '14px' }}>Voucher Tersedia</div>
                 <div style={{ maxHeight: '250px', overflowY: 'auto', paddingRight: '5px' }}>
                   {availableVouchers.map((v) => {
-                    const isUsed = appliedVoucher?.code === v.code;
+                    const isActive = appliedVoucher?.code === v.code;
                     const isOverLimit = v.usage_limit > 0 && v.used_count >= v.usage_limit;
                     return (
                       <div
                         key={v.id}
-                        className={`voucher-card${isUsed ? ' used' : ''}`}
-                        style={{ cursor: isOverLimit ? 'not-allowed' : 'pointer', opacity: isOverLimit ? 0.5 : 1 }}
+                        className={`voucher-card${isActive ? ' active' : ''}`}
+                        style={{ cursor: isOverLimit && !isActive ? 'not-allowed' : 'pointer', opacity: isOverLimit && !isActive ? 0.5 : 1 }}
                         onClick={() => {
+                          if (isActive) { handleRemoveVoucher(); handleCloseVoucherModal(); return; }
                           if (!isOverLimit) handleApplyVoucher(v.code);
                         }}
                       >
-                        <div style={{ fontWeight: 700, color: isUsed ? 'var(--primary-lime)' : '#fff', marginBottom: '4px' }}>{v.code}</div>
+                        <div style={{ fontWeight: 700, color: isActive ? 'var(--primary-lime)' : '#fff', marginBottom: '4px' }}>{v.code}</div>
                         <div style={{ fontSize: '13px', color: '#ccc', marginBottom: '8px' }}>{v.description}</div>
                         <div style={{ fontSize: '11px', color: '#888' }}>
                           {v.usage_limit > 0 ? `Sisa ${v.usage_limit - v.used_count} / ${v.usage_limit}` : 'Unlimited'}

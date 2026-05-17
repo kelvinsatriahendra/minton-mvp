@@ -4,7 +4,6 @@ import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
 import { supabase } from '@/utils/supabase';
 
 const loginSchema = z.object({
@@ -26,17 +25,18 @@ export async function loginAction(prevState: any, formData: FormData) {
   }
 
   try {
-    const { data, error } = await supabase
+    const { data: users, error } = await supabase
       .from('users')
       .select('*')
-      .eq('email', email)
-      .maybeSingle();
+      .eq('email', email);
 
     if (error) {
       console.error('Login select error:', error);
       return { message: 'Terjadi kesalahan server: ' + error.message };
     }
-    if (!data) return { message: 'Maaf, Email atau Kata Sandi Anda salah.' };
+    if (!users || users.length === 0) return { message: 'Maaf, Email atau Kata Sandi Anda salah.' };
+
+    const data = users[0];
 
     const passwordMatch = await bcrypt.compare(password, data.password);
     if (!passwordMatch) return { message: 'Maaf, Email atau Kata Sandi Anda salah.' };

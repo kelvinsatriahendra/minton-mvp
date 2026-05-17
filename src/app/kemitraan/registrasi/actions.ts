@@ -52,7 +52,7 @@ export async function registerMitraAction(prevState: any, formData: FormData) {
   }
 
   try {
-    const { gor_name, owner_name, email, password } = validatedFields.data;
+    const { gor_name, owner_name, email, password, address, city, maps_url, court_count, floor_type, facilities } = validatedFields.data;
 
     const { data: existingData } = await supabase
       .from('partners')
@@ -73,7 +73,13 @@ export async function registerMitraAction(prevState: any, formData: FormData) {
           gor_name,
           owner_name,
           email,
-          password: hashedPassword
+          password: hashedPassword,
+          address: address || null,
+          city: city || null,
+          maps_url: maps_url || null,
+          court_count: court_count || null,
+          floor_type: floor_type || null,
+          facilities: facilities || null,
         }
       ])
       .select()

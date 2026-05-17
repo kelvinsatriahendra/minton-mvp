@@ -29,7 +29,10 @@ export default function LoginMitraPage() {
       </div>
       <div className="split-layout">
         <div className="left-side">
-          <div className="left-content"></div>
+          <div className="left-content">
+            <h1>Kelola GOR Anda<br />Lebih Mudah & Modern</h1>
+            <p>Dashboard khusus mitra untuk mengelola jadwal, pemesanan, layanan, dan data pemain dalam satu platform terintegrasi.</p>
+          </div>
         </div>
         <div className="right-side">
           <div className="login-card">

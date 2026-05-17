@@ -3,13 +3,11 @@
 import { useEffect, useState, useCallback } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { getLeaderboard, getClubs, getFeedPosts, getMyRank, joinClub, requestMabar, getTournaments } from './actions';
+import { getLeaderboard, getClubs, getFeedPosts, getMyRank, joinClub, requestMabar } from './actions';
 
 interface LeaderboardUser { email: string; nama_lengkap: string; gender?: string; points: number }
 interface Club { id: string; name: string; description: string; city: string; level: string; schedule: string; fee: string; member_count: number; image_url: string }
 interface FeedPost { id: string; title: string; content: string; author_name: string; image_url: string; published_at: string }
-interface Tournament { id: string; badge: string; title: string; description: string; image_url: string; date: string; location: string; category: string; price: string; max_participants: number; slots_filled: number; is_open: boolean }
-
 function formatDate(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
   const days = Math.floor(diff / 86400000);
@@ -36,7 +34,6 @@ export default function KomunitasPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
   const [clubs, setClubs] = useState<Club[]>([]);
   const [feed, setFeed] = useState<FeedPost[]>([]);
-  const [tournament, setTournament] = useState<Tournament | null>(null);
   const [myRank, setMyRank] = useState<{ rank: number } | null>(null);
   const [userEmail, setUserEmail] = useState('');
   const [userName, setUserName] = useState('');
@@ -66,10 +63,9 @@ export default function KomunitasPage() {
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const [lb, f, t] = await Promise.all([getLeaderboard(), getFeedPosts(), getTournaments()]);
+      const [lb, f] = await Promise.all([getLeaderboard(), getFeedPosts()]);
       setLeaderboard(lb);
       setFeed(f);
-      setTournament(t);
 
       const [{ clubs: initialClubs, hasMore }] = await Promise.all([getClubs(CLUB_PAGE_SIZE, 0)]);
       setClubs(initialClubs);
@@ -341,15 +337,15 @@ export default function KomunitasPage() {
             <h2>Upcoming <span className="text-highlight">Tournament</span></h2>
           </div>
           <img
-            src={tournament?.image_url || '/asset/turnamen.png'}
-            alt={tournament?.title || 'Badminton Tournament Banner'}
+            src="/asset/turnamen.png"
+            alt="Badminton Tournament Banner"
             className="tournament-banner"
             onClick={() => setArticleModal({
-              id: tournament?.id || 'tournament',
-              title: tournament?.title || 'Turnamen Badminton Minton 2026',
-              content: tournament?.description || 'Turnamen tahunan Minton akan segera digelar! Berbagai kategori dipertandingkan mulai dari Ganda Dewasa, Tunggal Pemula, hingga Ganda Campuran. Total hadiah mencapai puluhan juta rupiah. Segera daftarkan tim Anda melalui GOR mitra Minton terdekat. Pantau terus informasi jadwal kualifikasi dan pendaftaran di halaman ini.',
-              author_name: tournament?.badge || 'Minton Tournament',
-              image_url: tournament?.image_url || '/asset/turnamen.png',
+              id: 'tournament',
+              title: 'Turnamen Badminton Minton 2026',
+              content: 'Turnamen tahunan Minton akan segera digelar! Berbagai kategori dipertandingkan mulai dari Ganda Dewasa, Tunggal Pemula, hingga Ganda Campuran. Total hadiah mencapai puluhan juta rupiah. Segera daftarkan tim Anda melalui GOR mitra Minton terdekat. Pantau terus informasi jadwal kualifikasi dan pendaftaran di halaman ini.',
+              author_name: 'Minton Tournament',
+              image_url: '/asset/turnamen.png',
               published_at: new Date().toISOString(),
             })}
           />

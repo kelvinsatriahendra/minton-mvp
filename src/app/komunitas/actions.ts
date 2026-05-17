@@ -88,12 +88,4 @@ export async function requestMabar(clubId: string, userEmail: string, userName: 
   return { success: true, message: 'Permintaan Mabar Bareng telah dikirim.' };
 }
 
-export async function getTournaments() {
-  const supabase = createServerSupabaseClient();
-  const { data } = await supabase
-    .from('tournaments')
-    .select('*')
-    .order('date', { ascending: true })
-    .limit(1);
-  return data?.[0] ?? null;
-}
+

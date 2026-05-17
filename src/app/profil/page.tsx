@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import DashboardSidebar from '@/components/DashboardSidebar';
 import { getProfileData, updateProfileData, updatePasswordAction, updateNotificationPrefs, getUserStats } from './actions';
+import { getCitiesAction } from '@/app/kota/actions';
 
 export default function ProfilPage() {
   const [tab, setTab] = useState(0);
@@ -27,12 +28,14 @@ const [level, setLevel] = useState('Pemula');
   const [notifPromo, setNotifPromo] = useState(true);
   const [notifJadwal, setNotifJadwal] = useState(true);
   const [notifSuccess, setNotifSuccess] = useState(false);
+  const [cities, setCities] = useState<{ id: number; name: string; province: string }[]>([]);
 
   const initial = (namaDepan.charAt(0) + namaBelakang.charAt(0)).toUpperCase() || 'U';
 
   useEffect(() => {
     document.title = 'Profil Saya - Minton';
     loadProfile();
+    getCitiesAction().then(setCities);
   }, []);
 
   async function loadProfile() {
@@ -313,10 +316,10 @@ if (stats) {
                       <div className="form-group">
                         <label className="form-label">Kota</label>
                         <select className="form-select" value={kota} onChange={e => setKota(e.target.value)}>
-                          <option value="Surabaya">Surabaya</option>
-                          <option value="Sidoarjo">Sidoarjo</option>
-                          <option value="Gresik">Gresik</option>
-                          <option value="Lainnya">Lainnya</option>
+                          <option value="">Pilih Kota</option>
+                          {cities.map(c => (
+                            <option key={c.id} value={c.name}>{c.name} ({c.province})</option>
+                          ))}
                         </select>
                       </div>
                     </div>

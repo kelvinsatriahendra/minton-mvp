@@ -4,7 +4,6 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import NotificationBell from '@/app/notifications/NotificationBell';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -85,8 +84,8 @@ export default function Navbar() {
 
           <div className="nav-btn">
             {isLoggedIn ? (
-              <div className={`user-dropdown ${isDropdownOpen ? 'open' : ''}`} ref={dropdownRef}>
-                <NotificationBell />
+                <div className={`user-dropdown ${isDropdownOpen ? 'open' : ''}`} ref={dropdownRef}>
+                
                 <div className="user-profile-btn" onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
                   <div className="user-avatar">{userName.charAt(0).toUpperCase()}</div>
                   <span>{userName}</span>

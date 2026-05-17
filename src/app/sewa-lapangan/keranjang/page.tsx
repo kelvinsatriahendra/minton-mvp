@@ -153,6 +153,7 @@ function KeranjangContent() {
         .btn-sewa-primary:disabled { opacity: 0.4; cursor: not-allowed; }
         .btn-sewa-primary:disabled:hover { background: none; border-color: #ffffff; color: #ffffff; }
         .small-box { background: #1c1c1c; padding: 14px 16px; border-radius: 12px; margin-bottom: 16px; cursor: pointer; font-size: 16px; border: 1px solid #333; transition: 0.3s; min-height: 66px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+        .voucher-trigger { width: 100%; appearance: none; -webkit-appearance: none; text-align: center; color: #fff; font-family: inherit; }
         .small-box:hover { border-color: var(--primary-lime); }
         .voucher-line { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
         .voucher-label { font-weight: 500; }
@@ -211,19 +212,19 @@ function KeranjangContent() {
         </div>
 
         <div className="right">
-          <div className="small-box" role="button" tabIndex={0} onClick={handleOpenVoucherModal} onKeyDown={(e) => e.key === 'Enter' && handleOpenVoucherModal()} style={appliedVoucher ? { borderColor: 'var(--primary-lime)', cursor: 'pointer' } : { cursor: 'pointer' }}>
-            <div className="voucher-line" style={{ pointerEvents: 'none' }}>
+          <button type="button" className="small-box voucher-trigger" onClick={handleOpenVoucherModal} style={appliedVoucher ? { borderColor: 'var(--primary-lime)' } : {}}>
+            <div className="voucher-line">
               <i className="fa-solid fa-ticket" style={{ color: 'var(--primary-lime)' }}></i>
               <span className="voucher-label">Gunakan Voucher</span>
             </div>
             {appliedVoucher && (
-              <div className="voucher-line voucher-detail" style={{ pointerEvents: 'none' }} title={`${appliedVoucher.code} - Diskon Rp ${discountAmount.toLocaleString('id-ID')}`}>
+              <div className="voucher-line voucher-detail" title={`${appliedVoucher.code} - Diskon Rp ${discountAmount.toLocaleString('id-ID')}`}>
                 <span className="voucher-tag">{appliedVoucher.code}</span>
                 <span>- Diskon Rp {discountAmount.toLocaleString('id-ID')}</span>
-                <span className="voucher-remove" style={{ pointerEvents: 'auto' }} onClick={(e) => { e.stopPropagation(); handleRemoveVoucher(); }}>hapus</span>
+                <span className="voucher-remove" onClick={(e) => { e.stopPropagation(); handleRemoveVoucher(); }}>hapus</span>
               </div>
             )}
-          </div>
+          </button>
 
           <div className="summary-box">
             <h4>Rincian Biaya</h4>

@@ -1,5 +1,7 @@
 'use server'
 
+import crypto from 'crypto';
+import { cookies } from 'next/headers';
 import { createServerSupabaseClient } from '@/utils/supabase';
 
 export async function sendOtpAction(prevState: any, formData: FormData) {
@@ -40,6 +42,31 @@ export async function verifyOtpAction(prevState: any, formData: FormData) {
       const { error } = await supabaseClient.auth.verifyOtp({ email, token: code, type });
       if (!error) {
         await supabaseClient.from('users').update({ email_verified: true }).eq('email', email);
+
+        if (source === 'login') {
+          const sessionToken = crypto.randomUUID();
+          await supabaseClient.from('users').update({ session_token: sessionToken }).eq('email', email);
+
+          const { data: user } = await supabaseClient
+            .from('users')
+            .select('*')
+            .eq('email', email)
+            .maybeSingle();
+
+          const cookieStore = await cookies();
+          cookieStore.set('session', sessionToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 60 * 60 * 24 * 7,
+            path: '/',
+          });
+          cookieStore.set('userName', user?.nama_lengkap || '', { path: '/' });
+          cookieStore.set('userEmail', user?.email || '', { path: '/' });
+          cookieStore.set('isLoggedIn', 'true', { path: '/' });
+
+          return { success: true, redirect: '/dashboard' };
+        }
+
         return { success: true, redirect: '/login' };
       }
       lastError = error?.message || null;

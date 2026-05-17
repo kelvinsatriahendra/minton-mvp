@@ -78,7 +78,7 @@ function OtpContent() {
       inputRefs[0].current?.focus();
     } else {
       setLoading(false);
-      router.push('/login');
+      router.push(result.redirect || '/login');
     }
   };
 

@@ -46,7 +46,7 @@ export default function SignUpPage() {
       setError(result.message);
       setLoading(false);
     } else if (result?.email) {
-      router.push(`/otp?email=${encodeURIComponent(result.email)}&source=signup`);
+      router.push(`/login?success=registrasi`);
     }
   }
 

@@ -61,3 +61,19 @@ export async function loginMitraAction(prevState: any, formData: FormData) {
     return { message: 'Terjadi kesalahan pada server saat login.' };
   }
 }
+
+export async function mitraLogoutAction() {
+  const cookieStore = await cookies();
+  const email = cookieStore.get('mitraEmail')?.value;
+
+  if (email) {
+    await supabase.from('partners').update({ session_token: null }).eq('email', email);
+  }
+
+  cookieStore.delete('mitraSession');
+  cookieStore.delete('mitraName');
+  cookieStore.delete('mitraEmail');
+  cookieStore.delete('mitraGorName');
+  cookieStore.delete('mitraId');
+  cookieStore.delete('isMitraLoggedIn');
+}

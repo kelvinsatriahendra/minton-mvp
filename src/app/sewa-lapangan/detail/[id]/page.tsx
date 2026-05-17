@@ -2,7 +2,6 @@
 import { useEffect, useState, use } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { supabase } from '@/utils/supabase';
 import { getVenueDetail, getBookedSlots, getVenueReviews } from './actions';
 
 interface Venue {

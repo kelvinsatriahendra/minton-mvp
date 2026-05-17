@@ -14,6 +14,9 @@ export default function ProfilPage() {
 
   const [namaDepan, setNamaDepan] = useState('');
 const [level, setLevel] = useState('Pemula');
+  const [winRate, setWinRate] = useState(0);
+  const [stamina, setStamina] = useState(0);
+  const [power, setPower] = useState(0);
   const [namaBelakang, setNamaBelakang] = useState('');
   const [email, setEmail] = useState('');
   const [kota, setKota] = useState('Surabaya');
@@ -44,6 +47,9 @@ const [level, setLevel] = useState('Pemula');
 const stats = await getUserStats();
 if (stats) {
   setLevel(stats.level);
+  setWinRate(stats.winRate);
+  setStamina(stats.stamina);
+  setPower(stats.power);
 }
     if (data) {
       const names = data.nama_lengkap.split(' ');
@@ -408,30 +414,30 @@ if (stats) {
               <div className="side-panel">
                 <div className="content-card">
                   <span className="content-card-title">Statistik Pemain</span>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 20 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ color: 'var(--text-gray)', fontSize: 14 }}>Win Rate</span>
-                      <span style={{ fontWeight: 700 }}>68%</span>
-                    </div>
-                    <div style={{ width: '100%', height: 6, background: '#252525', borderRadius: 3, overflow: 'hidden' }}>
-                      <div style={{ width: '68%', height: '100%', background: 'var(--primary-lime)' }} />
-                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 20 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ color: 'var(--text-gray)', fontSize: 14 }}>Win Rate</span>
+                        <span style={{ fontWeight: 700 }}>{winRate}%</span>
+                      </div>
+                      <div style={{ width: '100%', height: 6, background: '#252525', borderRadius: 3, overflow: 'hidden' }}>
+                        <div style={{ width: `${winRate}%`, height: '100%', background: 'var(--primary-lime)' }} />
+                      </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
-                      <span style={{ color: 'var(--text-gray)', fontSize: 14 }}>Stamina</span>
-                      <span style={{ fontWeight: 700 }}>85%</span>
-                    </div>
-                    <div style={{ width: '100%', height: 6, background: '#252525', borderRadius: 3, overflow: 'hidden' }}>
-                      <div style={{ width: '85%', height: '100%', background: 'var(--primary-lime)' }} />
-                    </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
+                        <span style={{ color: 'var(--text-gray)', fontSize: 14 }}>Stamina</span>
+                        <span style={{ fontWeight: 700 }}>{stamina}%</span>
+                      </div>
+                      <div style={{ width: '100%', height: 6, background: '#252525', borderRadius: 3, overflow: 'hidden' }}>
+                        <div style={{ width: `${stamina}%`, height: '100%', background: 'var(--primary-lime)' }} />
+                      </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
-                      <span style={{ color: 'var(--text-gray)', fontSize: 14 }}>Power</span>
-                      <span style={{ fontWeight: 700 }}>74%</span>
-                    </div>
-                    <div style={{ width: '100%', height: 6, background: '#252525', borderRadius: 3, overflow: 'hidden' }}>
-                      <div style={{ width: '74%', height: '100%', background: 'var(--primary-lime)' }} />
-                    </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8 }}>
+                        <span style={{ color: 'var(--text-gray)', fontSize: 14 }}>Power</span>
+                        <span style={{ fontWeight: 700 }}>{power}%</span>
+                      </div>
+                      <div style={{ width: '100%', height: 6, background: '#252525', borderRadius: 3, overflow: 'hidden' }}>
+                        <div style={{ width: `${power}%`, height: '100%', background: 'var(--primary-lime)' }} />
+                      </div>
                   </div>
                 </div>
 

@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from 'next/navigation';
+import { mitraLogoutAction } from '@/app/kemitraan/login-mitra/actions';
 
 const navItems = [
   { href: "/kemitraan/dashboard-mitra", icon: "fa-solid fa-calendar-check", label: "Booking" },
@@ -30,14 +31,7 @@ export default function MitraSidebar({ active }: { active: string }) {
 
   const handleLogout = async (e: React.MouseEvent) => {
     e.preventDefault();
-    // Menghapus cookies dengan mengatur expiry date ke masa lalu
-    document.cookie = "mitraSession=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    document.cookie = "mitraName=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    document.cookie = "mitraEmail=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    document.cookie = "mitraGorName=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    document.cookie = "mitraId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    document.cookie = "isMitraLoggedIn=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    
+    await mitraLogoutAction();
     router.push('/kemitraan/login-mitra');
     router.refresh();
   };

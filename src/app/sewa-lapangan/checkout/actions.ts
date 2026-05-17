@@ -22,6 +22,8 @@ export async function createBooking(formData: FormData) {
   const venueImg = formData.get('venueImg') as string;
   const venueLocation = formData.get('venueLocation') as string;
   const totalPrice = formData.get('totalPrice') as string;
+  const originalPrice = formData.get('originalPrice') as string;
+  const voucherCode = formData.get('voucherCode') as string;
   const courtName = formData.get('courtName') as string;
 
   const slots = slotsParam ? slotsParam.split(',') : [];
@@ -48,6 +50,8 @@ export async function createBooking(formData: FormData) {
     duration,
     court: courtName,
     price: `Rp ${parseInt(totalPrice).toLocaleString('id-ID')}`,
+    original_price: originalPrice ? `Rp ${parseInt(originalPrice).toLocaleString('id-ID')}` : null,
+    voucher_code: voucherCode || null,
   });
 
   if (error) return { error: error.message };

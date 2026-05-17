@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { supabase } from '@/utils/supabase';
+import { getAvailableVouchers, validateVoucher } from './actions';
 
 function KeranjangContent() {
   const searchParams = useSearchParams();
@@ -21,6 +22,10 @@ function KeranjangContent() {
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
   const [isVoucherModalOpen, setIsVoucherModalOpen] = useState(false);
   const [voucherCode, setVoucherCode] = useState('');
+  const [voucherError, setVoucherError] = useState('');
+  const [appliedVoucher, setAppliedVoucher] = useState<{ code: string; discountAmount: number; description: string } | null>(null);
+  const [availableVouchers, setAvailableVouchers] = useState<any[]>([]);
+  const [voucherLoading, setVoucherLoading] = useState(false);
 
   useEffect(() => {
     if (venueId && courtId) {
@@ -37,6 +42,9 @@ function KeranjangContent() {
       const { data: cData } = await supabase.from('courts').select('*').eq('id', courtId).single();
       setVenue(vData);
       setCourt(cData);
+
+      const vouchers = await getAvailableVouchers();
+      setAvailableVouchers(vouchers);
     } catch (error) {
       console.error('Error fetching keranjang details:', error);
     } finally {
@@ -53,6 +61,29 @@ function KeranjangContent() {
   };
 
   const totalPrice = venue ? activeSlots.length * venue.price_per_hour : 0;
+  const discountAmount = appliedVoucher?.discountAmount ?? 0;
+  const finalPrice = Math.max(0, totalPrice - discountAmount);
+
+  const handleApplyVoucher = async (code?: string) => {
+    const codeToCheck = (code || voucherCode).toUpperCase().trim();
+    if (!codeToCheck) return;
+    setVoucherLoading(true);
+    setVoucherError('');
+    const result = await validateVoucher(codeToCheck, totalPrice);
+    if (result.valid) {
+      setAppliedVoucher({ code: result.code, discountAmount: result.discountAmount, description: result.description });
+      setVoucherCode(result.code);
+      setIsVoucherModalOpen(false);
+    } else {
+      setVoucherError(result.error);
+    }
+    setVoucherLoading(false);
+  };
+
+  const handleRemoveVoucher = () => {
+    setAppliedVoucher(null);
+    setVoucherCode('');
+  };
 
   const handleCheckout = () => {
     if (activeSlots.length === 0) {
@@ -60,7 +91,11 @@ function KeranjangContent() {
       return;
     }
     const slotStr = activeSlots.join(',');
-    window.location.href = `/sewa-lapangan/checkout?venueId=${venueId}&courtId=${courtId}&slots=${slotStr}`;
+    let url = `/sewa-lapangan/checkout?venueId=${venueId}&courtId=${courtId}&slots=${slotStr}`;
+    if (appliedVoucher) {
+      url += `&voucher=${appliedVoucher.code}&discount=${discountAmount}`;
+    }
+    window.location.href = url;
   };
 
   if (loading) return <div style={{ background: '#000', color: '#fff', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Memuat Keranjang...</div>;
@@ -147,8 +182,13 @@ function KeranjangContent() {
         </div>
 
         <div className="right">
-          <div className="small-box" onClick={() => setIsVoucherModalOpen(true)}>
-            <i className="fa-solid fa-ticket" style={{ color: 'var(--primary-lime)', marginRight: '12px' }}></i> Gunakan Voucher
+          <div className="small-box" onClick={() => setIsVoucherModalOpen(true)} style={appliedVoucher ? { borderColor: 'var(--primary-lime)' } : {}}>
+            <i className="fa-solid fa-ticket" style={{ color: 'var(--primary-lime)', marginRight: '12px' }}></i>
+            {appliedVoucher ? (
+              <span>{appliedVoucher.code} — Diskon Rp {discountAmount.toLocaleString('id-ID')} <span style={{ fontSize: '12px', color: '#888', cursor: 'pointer' }} onClick={(e) => { e.stopPropagation(); handleRemoveVoucher(); }}>(hapus)</span></span>
+            ) : (
+              'Gunakan Voucher'
+            )}
           </div>
 
           <div className="summary-box">
@@ -161,10 +201,16 @@ function KeranjangContent() {
               <span>Biaya Produk Tambahan</span>
               <span>Rp 0</span>
             </div>
+            {appliedVoucher && (
+              <div className="summary-row" style={{ color: 'var(--primary-lime)' }}>
+                <span>Diskon Voucher ({appliedVoucher.code})</span>
+                <span>- Rp {discountAmount.toLocaleString('id-ID')}</span>
+              </div>
+            )}
             <hr style={{ border: '1px solid #333', margin: '10px 0' }} />
             <div className="total">
               <p>Total Biaya</p>
-              <p>Rp {totalPrice.toLocaleString('id-ID')}</p>
+              <p>Rp {finalPrice.toLocaleString('id-ID')}</p>
             </div>
           </div>
 
@@ -172,7 +218,7 @@ function KeranjangContent() {
             <h4>Metode Pembayaran</h4>
             <div className="summary-row">
               <span>Bayar Lunas</span>
-              <span>Rp {totalPrice.toLocaleString('id-ID')}</span>
+              <span>Rp {finalPrice.toLocaleString('id-ID')}</span>
             </div>
           </div>
 
@@ -205,11 +251,11 @@ function KeranjangContent() {
       )}
 
       {isVoucherModalOpen && (
-        <div className="modal-overlay" onClick={() => setIsVoucherModalOpen(false)}>
+        <div className="modal-overlay" onClick={() => { setIsVoucherModalOpen(false); setVoucherError(''); }}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Gunakan Voucher</h2>
-              <button className="close-btn" onClick={() => setIsVoucherModalOpen(false)}>&times;</button>
+              <button className="close-btn" onClick={() => { setIsVoucherModalOpen(false); setVoucherError(''); }}>&times;</button>
             </div>
             <div style={{ marginBottom: '24px' }}>
               <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
@@ -217,27 +263,52 @@ function KeranjangContent() {
                   type="text" 
                   placeholder="Masukkan kode voucher"
                   value={voucherCode}
-                  onChange={(e) => setVoucherCode(e.target.value)}
+                  onChange={(e) => { setVoucherCode(e.target.value); setVoucherError(''); }}
+                  onKeyDown={(e) => e.key === 'Enter' && handleApplyVoucher()}
                   style={{ flex: 1, background: '#000', border: '1px solid #333', color: '#fff', padding: '12px', borderRadius: '10px', outline: 'none', fontFamily: 'inherit' }}
                 />
-                <button className="btn-tambah" style={{ marginBottom: 0, padding: '10px 20px' }}>Gunakan</button>
+                <button className="btn-tambah" style={{ marginBottom: 0, padding: '10px 20px' }} onClick={() => handleApplyVoucher()} disabled={voucherLoading}>
+                  {voucherLoading ? '...' : 'Gunakan'}
+                </button>
               </div>
+              {voucherError && <p style={{ fontSize: '12px', color: '#ff5252', marginBottom: '8px' }}>{voucherError}</p>}
               <p style={{ fontSize: '12px', color: '#888' }}>Punya kode promo? Masukkan kodenya di sini.</p>
             </div>
 
-            <div style={{ marginBottom: '8px', fontWeight: 600, fontSize: '14px' }}>Voucher Tersedia</div>
-            <div className="voucher-list" style={{ maxHeight: '250px', overflowY: 'auto', paddingRight: '5px' }}>
-              <div style={{ background: '#2a2a2a', borderRadius: '12px', padding: '16px', marginBottom: '12px', border: '1px dashed var(--primary-lime)' }}>
-                <div style={{ fontWeight: 700, color: 'var(--primary-lime)', marginBottom: '4px' }}>DISKON MINTON 10%</div>
-                <div style={{ fontSize: '13px', color: '#ccc', marginBottom: '8px' }}>Potongan harga 10% hingga Rp25.000</div>
-                <div style={{ fontSize: '11px', color: '#888' }}>Berlaku hingga 12 Mar 2026</div>
-              </div>
-              <div style={{ background: '#2a2a2a', borderRadius: '12px', padding: '16px', marginBottom: '12px', border: '1px solid #333' }}>
-                <div style={{ fontWeight: 700, color: '#fff', marginBottom: '4px' }}>MAINKAN SURAKARTA</div>
-                <div style={{ fontSize: '13px', color: '#ccc', marginBottom: '8px' }}>Potongan Rp15.000 tanpa minimal sewa</div>
-                <div style={{ fontSize: '11px', color: '#888' }}>Berlaku hingga 15 Mar 2026</div>
-              </div>
-            </div>
+            {availableVouchers.length > 0 && (
+              <>
+                <div style={{ marginBottom: '8px', fontWeight: 600, fontSize: '14px' }}>Voucher Tersedia</div>
+                <div className="voucher-list" style={{ maxHeight: '250px', overflowY: 'auto', paddingRight: '5px' }}>
+                  {availableVouchers.map((v) => {
+                    const isUsed = appliedVoucher?.code === v.code;
+                    const isOverLimit = v.usage_limit > 0 && v.used_count >= v.usage_limit;
+                    return (
+                      <div
+                        key={v.id}
+                        style={{
+                          background: '#2a2a2a', borderRadius: '12px', padding: '16px', marginBottom: '12px',
+                          border: isUsed ? '1px dashed var(--primary-lime)' : '1px solid #333',
+                          cursor: isOverLimit ? 'not-allowed' : 'pointer', opacity: isOverLimit ? 0.5 : 1,
+                        }}
+                        onClick={() => {
+                          if (!isOverLimit) {
+                            setVoucherCode(v.code);
+                            handleApplyVoucher(v.code);
+                          }
+                        }}
+                      >
+                        <div style={{ fontWeight: 700, color: isUsed ? 'var(--primary-lime)' : '#fff', marginBottom: '4px' }}>{v.code}</div>
+                        <div style={{ fontSize: '13px', color: '#ccc', marginBottom: '8px' }}>{v.description}</div>
+                        <div style={{ fontSize: '11px', color: '#888' }}>
+                          {v.usage_limit > 0 ? `Sisa ${v.usage_limit - v.used_count} / ${v.usage_limit}` : 'Unlimited'}
+                          {v.expires_at && ` · Berlaku hingga ${new Date(v.expires_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}`}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

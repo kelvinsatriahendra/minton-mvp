@@ -1,12 +1,13 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { logoutAction } from '@/app/logout/actions';
 
 export default function DashboardSidebar({ children, active }: { children?: React.ReactNode; active?: string }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [userName, setUserName] = useState('User');
   const [initial, setInitial] = useState('U');
 
@@ -57,12 +58,11 @@ export default function DashboardSidebar({ children, active }: { children?: Reac
             <span>{item.label}</span>
           </Link>
         ))}
-        <a href="/" className="logout" onClick={(e) => {
+        <a href="/" className="logout" onClick={async (e) => {
           e.preventDefault();
-          document.cookie = "session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-          document.cookie = "isLoggedIn=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-          document.cookie = "userName=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-          window.location.href = '/';
+          await logoutAction();
+          router.push('/');
+          router.refresh();
         }}>
           <i className="fa-solid fa-right-from-bracket"></i>
           <span>Keluar</span>

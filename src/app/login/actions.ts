@@ -34,12 +34,19 @@ export async function loginAction(prevState: any, formData: FormData) {
       console.error('Login select error:', error);
       return { message: 'Terjadi kesalahan server: ' + error.message };
     }
-    if (!users || users.length === 0) return { message: 'Maaf, Email atau Kata Sandi Anda salah.' };
+    if (!users || users.length === 0) {
+      console.log('User not found for email:', email);
+      return { message: 'Maaf, Email atau Kata Sandi Anda salah.' };
+    }
 
     const data = users[0];
+    console.log('User found:', { email: data.email, id: data.id, verified: data.email_verified });
 
     const passwordMatch = await bcrypt.compare(password, data.password);
-    if (!passwordMatch) return { message: 'Maaf, Email atau Kata Sandi Anda salah.' };
+    if (!passwordMatch) {
+      console.log('Password mismatch for email:', email);
+      return { message: 'Maaf, Email atau Kata Sandi Anda salah.' };
+    }
 
     const user = data;
 

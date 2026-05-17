@@ -35,6 +35,14 @@ export async function signUpAction(prevState: any, formData: FormData) {
   };
 
   try {
+    const { data: existing } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', email)
+      .maybeSingle();
+
+    if (existing) return { message: 'Email sudah terdaftar. Silakan login.' };
+
     const { data, error } = await supabase
       .from('users')
       .insert([payload]);

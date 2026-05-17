@@ -30,9 +30,10 @@ export async function loginAction(prevState: any, formData: FormData) {
       .from('users')
       .select('*')
       .eq('email', email)
-      .single();
+      .maybeSingle();
 
-    if (error || !data) return { message: 'Maaf, Email atau Kata Sandi Anda salah.' };
+    if (error) return { message: 'Terjadi kesalahan server. Silakan coba lagi.' };
+    if (!data) return { message: 'Maaf, Email atau Kata Sandi Anda salah.' };
 
     const passwordMatch = await bcrypt.compare(password, data.password);
     if (!passwordMatch) return { message: 'Maaf, Email atau Kata Sandi Anda salah.' };

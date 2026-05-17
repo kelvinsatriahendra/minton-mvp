@@ -1,5 +1,6 @@
 'use server'
 
+import crypto from 'crypto';
 import { supabase } from '@/utils/supabase';
 import { cookies } from 'next/headers';
 
@@ -38,7 +39,8 @@ export async function verifyOtpAction(prevState: any, formData: FormData) {
     for (const type of typeOrder) {
       const { error } = await supabase.auth.verifyOtp({ email, token: code, type });
       if (!error) {
-        await supabase.from('users').update({ email_verified: true }).eq('email', email);
+        const sessionToken = crypto.randomUUID();
+        await supabase.from('users').update({ email_verified: true, session_token: sessionToken }).eq('email', email);
 
         const { data: user } = await supabase
           .from('users')
@@ -47,7 +49,7 @@ export async function verifyOtpAction(prevState: any, formData: FormData) {
           .single();
 
         const cookieStore = await cookies();
-        cookieStore.set('session', 'supabase-session-token', {
+        cookieStore.set('session', sessionToken, {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
           maxAge: 60 * 60 * 24 * 7,

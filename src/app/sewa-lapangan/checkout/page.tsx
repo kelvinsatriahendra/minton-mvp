@@ -11,6 +11,8 @@ function CheckoutContent() {
   const venueId = searchParams.get('venueId');
   const courtId = searchParams.get('courtId');
   const slots = searchParams.get('slots')?.split(',') || [];
+  const voucherCode = searchParams.get('voucher') || '';
+  const discountParam = parseInt(searchParams.get('discount') || '0', 10);
 
   const [venue, setVenue] = useState<any>(null);
   const [court, setCourt] = useState<any>(null);
@@ -80,7 +82,8 @@ function CheckoutContent() {
   }
 
   const totalPrice = venue ? slots.length * venue.price_per_hour : 0;
-  const finalPrice = totalPrice;
+  const discountNominal = discountParam > 0 ? Math.min(discountParam, totalPrice) : 0;
+  const finalPrice = Math.max(0, totalPrice - discountNominal);
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -103,6 +106,8 @@ function CheckoutContent() {
     fd.set('totalPrice', String(finalPrice));
     fd.set('courtName', court?.name || '');
     fd.set('userEmail', userData.email);
+    fd.set('originalPrice', String(totalPrice));
+    fd.set('voucherCode', voucherCode);
 
     const result = await createBooking(fd);
 
@@ -450,6 +455,7 @@ function CheckoutContent() {
             <div className="summary-body">
               <div className="summary-row"><span>Biaya Sewa</span><span>Rp{totalPrice.toLocaleString('id-ID')}</span></div>
               <div className="summary-row"><span>Biaya Produk Tambahan</span><span>Rp0</span></div>
+              {discountNominal > 0 && <div className="summary-row" style={{ color: '#22c55e' }}><span>Diskon Voucher ({voucherCode})</span><span>-Rp{discountNominal.toLocaleString('id-ID')}</span></div>}
               <div className="summary-row"><span>Total Biaya (Lunas)</span><span>Rp{finalPrice.toLocaleString('id-ID')}</span></div>
               <div className="summary-row"><span>Convenience Fee</span><span>Rp0</span></div>
               <div className="summary-row"><span>Biaya Transaksi</span><span>Rp0</span></div>

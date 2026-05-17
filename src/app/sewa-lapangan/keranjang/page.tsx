@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { supabase } from '@/utils/supabase';
+import { getAvailableVouchers, validateVoucher } from './actions';
 
 function KeranjangContent() {
   const searchParams = useSearchParams();
@@ -19,6 +20,12 @@ function KeranjangContent() {
   
   const [activeSlots, setActiveSlots] = useState<string[]>(initialSlots);
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
+  const [isVoucherModalOpen, setIsVoucherModalOpen] = useState(false);
+  const [voucherCode, setVoucherCode] = useState('');
+  const [voucherError, setVoucherError] = useState('');
+  const [appliedVoucher, setAppliedVoucher] = useState<{ code: string; discountAmount: number } | null>(null);
+  const [availableVouchers, setAvailableVouchers] = useState<any[]>([]);
+  const [voucherLoading, setVoucherLoading] = useState(false);
 
   useEffect(() => {
     const cookies = document.cookie.split(';').reduce((acc, c) => {
@@ -38,6 +45,36 @@ function KeranjangContent() {
       setLoading(false);
     }
   }, [venueId, courtId]);
+
+  useEffect(() => {
+    if (!isVoucherModalOpen) {
+      document.body.style.overflow = 'auto';
+      return;
+    }
+
+    document.body.style.overflow = 'hidden';
+    let cancelled = false;
+
+    async function loadVouchers() {
+      try {
+        setVoucherLoading(true);
+        setVoucherError('');
+        const vouchers = await getAvailableVouchers();
+        if (!cancelled) setAvailableVouchers(vouchers);
+      } catch {
+        if (!cancelled) setVoucherError('Gagal memuat voucher');
+      } finally {
+        if (!cancelled) setVoucherLoading(false);
+      }
+    }
+
+    loadVouchers();
+
+    return () => {
+      cancelled = true;
+      document.body.style.overflow = 'auto';
+    };
+  }, [isVoucherModalOpen]);
 
   async function loadCartData() {
     try {
@@ -61,8 +98,51 @@ function KeranjangContent() {
     }
   };
 
+  const handleOpenVoucherModal = () => {
+    setVoucherCode('');
+    setVoucherError('');
+    setIsVoucherModalOpen(true);
+  };
+
+  const handleCloseVoucherModal = () => {
+    setIsVoucherModalOpen(false);
+    setVoucherCode('');
+    setVoucherError('');
+  };
+
+  const handleApplyVoucher = async (code: string) => {
+    const codeToCheck = code.toUpperCase().trim();
+    if (!codeToCheck) {
+      setVoucherError('Masukkan kode voucher');
+      return;
+    }
+
+    setVoucherLoading(true);
+    setVoucherError('');
+
+    try {
+      const result = await validateVoucher(codeToCheck, totalPrice);
+      if (!result.valid || !result.code || !result.discountAmount) {
+        setVoucherError(result.error || 'Voucher tidak valid');
+        return;
+      }
+
+      setAppliedVoucher({ code: result.code, discountAmount: result.discountAmount });
+      handleCloseVoucherModal();
+    } catch {
+      setVoucherError('Terjadi kesalahan saat validasi voucher');
+    } finally {
+      setVoucherLoading(false);
+    }
+  };
+
+  const handleRemoveVoucher = () => {
+    setAppliedVoucher(null);
+  };
+
   const totalPrice = venue ? activeSlots.length * venue.price_per_hour : 0;
-  const finalPrice = totalPrice;
+  const discountAmount = appliedVoucher ? Math.min(appliedVoucher.discountAmount, totalPrice) : 0;
+  const finalPrice = Math.max(0, totalPrice - discountAmount);
 
   const handleCheckout = () => {
     if (activeSlots.length === 0) {
@@ -70,7 +150,10 @@ function KeranjangContent() {
       return;
     }
     const slotStr = activeSlots.join(',');
-    const url = `/sewa-lapangan/checkout?venueId=${venueId}&courtId=${courtId}&slots=${slotStr}`;
+    let url = `/sewa-lapangan/checkout?venueId=${venueId}&courtId=${courtId}&slots=${slotStr}`;
+    if (appliedVoucher && discountAmount > 0) {
+      url += `&voucher=${encodeURIComponent(appliedVoucher.code)}&discount=${discountAmount}`;
+    }
     window.location.href = url;
   };
 
@@ -106,6 +189,12 @@ function KeranjangContent() {
         .btn-sewa-primary:disabled:hover { background: none; border-color: #ffffff; color: #ffffff; }
         .small-box { background: #1c1c1c; padding: 16px; border-radius: 12px; margin-bottom: 16px; text-align: center; cursor: pointer; font-size: 16px; border: 1px solid #333; transition: 0.3s; }
         .small-box:hover { border-color: var(--primary-lime); }
+        .voucher-line { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
+        .voucher-detail { margin-top: 6px; font-size: 13px; color: #c9c9c9; }
+        .voucher-tag { color: var(--primary-lime); font-weight: 700; margin-right: 8px; }
+        .voucher-remove { margin-left: 8px; font-size: 12px; color: #888; text-decoration: underline; cursor: pointer; }
+        .voucher-card { background: #2a2a2a; border-radius: 12px; padding: 16px; margin-bottom: 12px; border: 1px solid #333; cursor: pointer; }
+        .voucher-card.used { border: 1px dashed var(--primary-lime); }
         .modal-overlay { position: fixed; z-index: 3000; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; animation: fadeIn 0.3s ease; }
         .modal-content { background: #1c1c1c; width: 90%; max-width: 450px; border-radius: 20px; border: 1px solid #333; padding: 32px; position: relative; animation: slideUp 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -158,6 +247,20 @@ function KeranjangContent() {
         </div>
 
         <div className="right">
+          <button type="button" className="small-box" onClick={handleOpenVoucherModal} style={appliedVoucher ? { borderColor: 'var(--primary-lime)' } : {}}>
+            <div className="voucher-line">
+              <i className="fa-solid fa-ticket" style={{ color: 'var(--primary-lime)' }}></i>
+              <span>Gunakan Voucher</span>
+            </div>
+            {appliedVoucher && (
+              <div className="voucher-detail">
+                <span className="voucher-tag">{appliedVoucher.code}</span>
+                <span>- Rp {discountAmount.toLocaleString('id-ID')}</span>
+                <span className="voucher-remove" onClick={(e) => { e.stopPropagation(); handleRemoveVoucher(); }}>hapus</span>
+              </div>
+            )}
+          </button>
+
           <div className="summary-box">
             <h4>Rincian Biaya</h4>
             <div className="summary-row">
@@ -168,6 +271,12 @@ function KeranjangContent() {
               <span>Biaya Produk Tambahan</span>
               <span>Rp 0</span>
             </div>
+            {appliedVoucher && discountAmount > 0 && (
+              <div className="summary-row" style={{ color: 'var(--primary-lime)' }}>
+                <span>Diskon Voucher ({appliedVoucher.code})</span>
+                <span>- Rp {discountAmount.toLocaleString('id-ID')}</span>
+              </div>
+            )}
             <hr style={{ border: '1px solid #333', margin: '10px 0' }} />
             <div className="total">
               <p>Total Biaya</p>
@@ -207,6 +316,74 @@ function KeranjangContent() {
               <li>Jika terdapat perbedaan harga pada slot baru, penyewa wajib membayar selisihnya.</li>
             </ul>
             <button className="btn-tambah" style={{ width: '100%', marginBottom: 0 }} onClick={() => setIsRescheduleModalOpen(false)}>Saya Mengerti</button>
+          </div>
+        </div>
+      )}
+
+      {isVoucherModalOpen && (
+        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) handleCloseVoucherModal(); }}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Gunakan Voucher</h2>
+              <button type="button" className="close-btn" onClick={handleCloseVoucherModal}>&times;</button>
+            </div>
+
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
+                <input
+                  type="text"
+                  placeholder="Masukkan kode voucher"
+                  value={voucherCode}
+                  onChange={(e) => setVoucherCode(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleApplyVoucher(voucherCode)}
+                  style={{ flex: 1, background: '#000', border: '1px solid #333', color: '#fff', padding: '12px', borderRadius: '10px', outline: 'none', fontFamily: 'inherit' }}
+                />
+                <button
+                  type="button"
+                  className="btn-tambah"
+                  style={{ marginBottom: 0, padding: '10px 20px' }}
+                  onClick={() => handleApplyVoucher(voucherCode)}
+                  disabled={voucherLoading}
+                >
+                  {voucherLoading ? '...' : 'Gunakan'}
+                </button>
+              </div>
+              {voucherError && <p style={{ fontSize: '12px', color: '#ff6b6b' }}>{voucherError}</p>}
+              <p style={{ fontSize: '12px', color: '#888' }}>Punya kode promo? Masukkan kodenya di sini.</p>
+            </div>
+
+            {voucherLoading ? (
+              <p style={{ fontSize: '13px', color: '#888', textAlign: 'center' }}>Memuat voucher...</p>
+            ) : availableVouchers.length > 0 ? (
+              <>
+                <div style={{ marginBottom: '8px', fontWeight: 600, fontSize: '14px' }}>Voucher Tersedia</div>
+                <div style={{ maxHeight: '250px', overflowY: 'auto', paddingRight: '5px' }}>
+                  {availableVouchers.map((v) => {
+                    const isUsed = appliedVoucher?.code === v.code;
+                    const isOverLimit = v.usage_limit > 0 && v.used_count >= v.usage_limit;
+                    return (
+                      <div
+                        key={v.id}
+                        className={`voucher-card${isUsed ? ' used' : ''}`}
+                        style={{ cursor: isOverLimit ? 'not-allowed' : 'pointer', opacity: isOverLimit ? 0.5 : 1 }}
+                        onClick={() => {
+                          if (!isOverLimit) handleApplyVoucher(v.code);
+                        }}
+                      >
+                        <div style={{ fontWeight: 700, color: isUsed ? 'var(--primary-lime)' : '#fff', marginBottom: '4px' }}>{v.code}</div>
+                        <div style={{ fontSize: '13px', color: '#ccc', marginBottom: '8px' }}>{v.description}</div>
+                        <div style={{ fontSize: '11px', color: '#888' }}>
+                          {v.usage_limit > 0 ? `Sisa ${v.usage_limit - v.used_count} / ${v.usage_limit}` : 'Unlimited'}
+                          {v.expires_at && ` · Berlaku hingga ${new Date(v.expires_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}`}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              <p style={{ fontSize: '13px', color: '#888', textAlign: 'center' }}>Tidak ada voucher tersedia</p>
+            )}
           </div>
         </div>
       )}

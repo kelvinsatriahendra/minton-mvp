@@ -28,6 +28,17 @@ function KeranjangContent() {
   const [voucherLoading, setVoucherLoading] = useState(false);
 
   useEffect(() => {
+    const cookies = document.cookie.split(';').reduce((acc, c) => {
+      const [key, val] = c.trim().split('=');
+      acc[key] = val;
+      return acc;
+    }, {} as Record<string, string>);
+
+    if (cookies['isLoggedIn'] !== 'true') {
+      window.location.href = `/login?redirect=/sewa-lapangan/keranjang${window.location.search}`;
+      return;
+    }
+
     if (venueId && courtId) {
       fetchDetails();
     } else {
@@ -71,11 +82,11 @@ function KeranjangContent() {
     setVoucherError('');
     const result = await validateVoucher(codeToCheck, totalPrice);
     if (result.valid) {
-      setAppliedVoucher({ code: result.code, discountAmount: result.discountAmount, description: result.description });
-      setVoucherCode(result.code);
+      setAppliedVoucher({ code: result.code!, discountAmount: result.discountAmount!, description: result.description || '' });
+      setVoucherCode(result.code!);
       setIsVoucherModalOpen(false);
     } else {
-      setVoucherError(result.error);
+      setVoucherError(result.error || 'Voucher tidak valid');
     }
     setVoucherLoading(false);
   };

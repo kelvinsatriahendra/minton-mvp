@@ -3,7 +3,6 @@
 import bcrypt from 'bcryptjs';
 import { cookies } from 'next/headers';
 import { supabase } from '@/utils/supabase';
-import { cookies } from 'next/headers';
 
 export async function getUserStats() {
   const cookieStore = await cookies();

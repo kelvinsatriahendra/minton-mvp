@@ -39,29 +39,26 @@ export async function loginAction(prevState: any, formData: FormData) {
 
     const user = data;
 
-      if (!user.email_verified) {
-        return { message: 'Email belum terverifikasi. Silakan cek OTP yang dikirim ke email Anda.', needsOtp: true, email: user.email };
-      }
-      
-      const sessionToken = crypto.randomUUID();
-      await supabase.from('users').update({ session_token: sessionToken }).eq('email', email);
-
-      const cookieStore = await cookies();
-      cookieStore.set('session', sessionToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 60 * 60 * 24 * 7,
-        path: '/',
-      });
-      
-      cookieStore.set('userName', user.nama_lengkap, { path: '/' });
-      cookieStore.set('userEmail', user.email, { path: '/' });
-      cookieStore.set('isLoggedIn', 'true', { path: '/' });
-
-      return { success: true, userName: user.nama_lengkap };
-    } else {
-      return { message: 'Maaf, Email atau Kata Sandi Anda salah.' };
+    if (!user.email_verified) {
+      return { message: 'Email belum terverifikasi. Silakan cek OTP yang dikirim ke email Anda.', needsOtp: true, email: user.email };
     }
+    
+    const sessionToken = crypto.randomUUID();
+    await supabase.from('users').update({ session_token: sessionToken }).eq('email', email);
+
+    const cookieStore = await cookies();
+    cookieStore.set('session', sessionToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 24 * 7,
+      path: '/',
+    });
+    
+    cookieStore.set('userName', user.nama_lengkap, { path: '/' });
+    cookieStore.set('userEmail', user.email, { path: '/' });
+    cookieStore.set('isLoggedIn', 'true', { path: '/' });
+
+    return { success: true, userName: user.nama_lengkap };
   } catch (err) {
     console.error('Error Login:', err);
     return { message: 'Terjadi kesalahan pada server saat login.' };

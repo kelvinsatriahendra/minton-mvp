@@ -37,29 +37,25 @@ export async function loginMitraAction(prevState: any, formData: FormData) {
     if (!passwordMatch) return { message: 'Maaf, Email atau Kata Sandi Anda salah.' };
 
     const partner = data;
-      
-      const sessionToken = crypto.randomUUID();
-      await supabase.from('partners').update({ session_token: sessionToken }).eq('email', email);
 
-      const cookieStore = await cookies();
-      cookieStore.set('mitraSession', sessionToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 60 * 60 * 24 * 7,
-        path: '/',
-      });
-      
-      // Store partner details in cookies for UI
-      cookieStore.set('mitraName', partner.owner_name, { path: '/' });
-      cookieStore.set('mitraEmail', partner.email, { path: '/' });
-      cookieStore.set('mitraGorName', partner.gor_name, { path: '/' });
-      cookieStore.set('mitraId', partner.id.toString(), { path: '/' });
-      cookieStore.set('isMitraLoggedIn', 'true', { path: '/' });
+    const sessionToken = crypto.randomUUID();
+    await supabase.from('partners').update({ session_token: sessionToken }).eq('email', email);
 
-      return { success: true, mitraName: partner.owner_name };
-    } else {
-      return { message: 'Maaf, Email atau Kata Sandi Anda salah.' };
-    }
+    const cookieStore = await cookies();
+    cookieStore.set('mitraSession', sessionToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 24 * 7,
+      path: '/',
+    });
+    
+    cookieStore.set('mitraName', partner.owner_name, { path: '/' });
+    cookieStore.set('mitraEmail', partner.email, { path: '/' });
+    cookieStore.set('mitraGorName', partner.gor_name, { path: '/' });
+    cookieStore.set('mitraId', partner.id.toString(), { path: '/' });
+    cookieStore.set('isMitraLoggedIn', 'true', { path: '/' });
+
+    return { success: true, mitraName: partner.owner_name };
   } catch (err) {
     console.error('Error Login Mitra:', err);
     return { message: 'Terjadi kesalahan pada server saat login.' };

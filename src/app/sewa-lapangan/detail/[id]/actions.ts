@@ -23,10 +23,17 @@ export async function getVenueDetail(id: string) {
 export async function getBookedSlots(venueName: string, date: string) {
   const supabase = createServerSupabaseClient();
 
-  const { data: bookings } = await supabase
+  // Get all bookings — filter in JS for better matching
+  const { data: allBookings } = await supabase
     .from('bookings')
-    .select('court, time')
-    .ilike('venue', `%${venueName}%`);
+    .select('court, time, venue');
+
+  // Match venue: check if venueName is contained in booking's venue field or vice versa
+  const venueParts = venueName.toLowerCase().split(/\s+/);
+  const bookings = (allBookings ?? []).filter((b: any) => {
+    const bVenue = (b.venue || '').toLowerCase();
+    return venueParts.some((part: string) => part.length > 3 && bVenue.includes(part));
+  });
 
   const booked: Record<string, string[]> = {};
   for (const b of bookings ?? []) {
@@ -52,12 +59,16 @@ export async function getBookedSlots(venueName: string, date: string) {
 export async function getVenueReviews(venueName: string) {
   const supabase = createServerSupabaseClient();
 
-  const { data } = await supabase
+  const { data: allFeedbacks } = await supabase
     .from('feedbacks')
     .select('*')
-    .ilike('venue', `%${venueName}%`)
-    .order('created_at', { ascending: false })
-    .limit(4);
+    .order('created_at', { ascending: false });
 
-  return data ?? [];
+  const venueParts = venueName.toLowerCase().split(/\s+/);
+  const data = (allFeedbacks ?? []).filter((f: any) => {
+    const fVenue = (f.venue || '').toLowerCase();
+    return venueParts.some((part: string) => part.length > 3 && fVenue.includes(part));
+  }).slice(0, 4);
+
+  return data;
 }

@@ -136,7 +136,7 @@ function CheckoutContent() {
         .checkout-container {
           display: flex;
           gap: 48px;
-          padding: 60px 0;
+          padding: 140px 0 80px;
           width: 90%;
           max-width: 1600px;
           margin: auto;

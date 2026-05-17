@@ -36,6 +36,8 @@ export async function getAllTransactions(userEmail: string) {
 }
 
 export async function ensureWallet(userEmail: string) {
+  if (!userEmail) return { success: false };
+
   const supabase = createServerSupabaseClient();
 
   const { data: existing } = await supabase
@@ -45,16 +47,23 @@ export async function ensureWallet(userEmail: string) {
     .maybeSingle();
 
   if (!existing) {
-    await supabase.from('wallets').insert({ user_email: userEmail, balance: 0 });
+    const { error } = await supabase.from('wallets').insert({ user_email: userEmail, balance: 0 });
+    if (error) {
+      console.error('ensureWallet error:', error);
+      return { success: false, error: error.message };
+    }
   }
+  return { success: true };
 }
 
 export async function topUp(userEmail: string, amount: number) {
+  if (!userEmail) return { success: false, message: 'Silakan login terlebih dahulu.' };
   if (amount < 1000) return { success: false, message: 'Minimal top-up Rp 1.000' };
 
   const supabase = createServerSupabaseClient();
 
-  await ensureWallet(userEmail);
+  const walletResult = await ensureWallet(userEmail);
+  if (!walletResult.success) return { success: false, message: 'Gagal menyiapkan wallet. Periksa kembali akun Anda.' };
 
   const { error: txError } = await supabase.from('transactions').insert({
     user_email: userEmail,
@@ -64,13 +73,21 @@ export async function topUp(userEmail: string, amount: number) {
     status: 'completed',
   });
 
-  if (txError) return { success: false, message: 'Gagal mencatat transaksi.' };
+  if (txError) {
+    console.error('topUp tx error:', txError);
+    return { success: false, message: 'Gagal mencatat transaksi. Pastikan tabel wallet & transaksi sudah ada di database.' };
+  }
 
-  const { data: wallet } = await supabase
+  const { data: wallet, error: walletError } = await supabase
     .from('wallets')
     .select('balance')
     .eq('user_email', userEmail)
     .single();
+
+  if (walletError) {
+    console.error('topUp wallet fetch error:', walletError);
+    return { success: false, message: 'Gagal mengambil saldo wallet.' };
+  }
 
   const newBalance = (wallet?.balance ?? 0) + amount;
 
@@ -79,7 +96,10 @@ export async function topUp(userEmail: string, amount: number) {
     .update({ balance: newBalance, updated_at: new Date().toISOString() })
     .eq('user_email', userEmail);
 
-  if (updateError) return { success: false, message: 'Gagal memperbarui saldo.' };
+  if (updateError) {
+    console.error('topUp update error:', updateError);
+    return { success: false, message: 'Gagal memperbarui saldo.' };
+  }
 
   revalidatePath('/minton-pay');
   return { success: true, message: `Top Up Rp ${amount.toLocaleString()} berhasil!` };
@@ -90,13 +110,17 @@ function formatAmount(n: number) {
 }
 
 export async function transfer(senderEmail: string, amount: number, destinationEmail: string) {
+  if (!senderEmail) return { success: false, message: 'Silakan login terlebih dahulu.' };
+  if (!destinationEmail) return { success: false, message: 'Email tujuan tidak valid.' };
   if (amount < 1000) return { success: false, message: 'Minimal transfer Rp 1.000' };
   if (senderEmail === destinationEmail) return { success: false, message: 'Tidak bisa transfer ke diri sendiri.' };
 
   const supabase = createServerSupabaseClient();
 
-  await ensureWallet(senderEmail);
-  await ensureWallet(destinationEmail);
+  const w1 = await ensureWallet(senderEmail);
+  if (!w1.success) return { success: false, message: 'Gagal menyiapkan wallet pengirim.' };
+  const w2 = await ensureWallet(destinationEmail);
+  if (!w2.success) return { success: false, message: 'Gagal menyiapkan wallet penerima.' };
 
   const { data: senderWallet } = await supabase
     .from('wallets')

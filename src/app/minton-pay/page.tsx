@@ -85,6 +85,10 @@ export default function MintonPayPage() {
   }, []);
 
   const handleTopUp = useCallback(async () => {
+    if (!userEmail) {
+      setNotification({ message: 'Silakan login terlebih dahulu.', type: 'error' });
+      return;
+    }
     const amount = parseInt(topUpAmount.replace(/\D/g, ''));
     if (!amount || amount < 1000) {
       setNotification({ message: 'Minimal top-up Rp 1.000', type: 'error' });
@@ -104,6 +108,10 @@ export default function MintonPayPage() {
   }, [userEmail, topUpAmount]);
 
   const handleTransfer = useCallback(async () => {
+    if (!userEmail) {
+      setNotification({ message: 'Silakan login terlebih dahulu.', type: 'error' });
+      return;
+    }
     const amount = parseInt(transferAmount.replace(/\D/g, ''));
     if (!amount || amount < 1000) {
       setNotification({ message: 'Minimal transfer Rp 1.000', type: 'error' });

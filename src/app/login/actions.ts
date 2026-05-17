@@ -32,7 +32,10 @@ export async function loginAction(prevState: any, formData: FormData) {
       .eq('email', email)
       .maybeSingle();
 
-    if (error) return { message: 'Terjadi kesalahan server. Silakan coba lagi.' };
+    if (error) {
+      console.error('Login select error:', error);
+      return { message: 'Terjadi kesalahan server: ' + error.message };
+    }
     if (!data) return { message: 'Maaf, Email atau Kata Sandi Anda salah.' };
 
     const passwordMatch = await bcrypt.compare(password, data.password);
@@ -62,6 +65,6 @@ export async function loginAction(prevState: any, formData: FormData) {
     return { success: true, userName: user.nama_lengkap };
   } catch (err) {
     console.error('Error Login:', err);
-    return { message: 'Terjadi kesalahan pada server saat login.' };
+    return { message: 'Terjadi kesalahan server: ' + (err instanceof Error ? err.message : 'Unknown error') };
   }
 }

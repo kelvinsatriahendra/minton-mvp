@@ -22,8 +22,6 @@ function KeranjangContent() {
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
   const [isVoucherModalOpen, setIsVoucherModalOpen] = useState(false);
   const [voucherCode, setVoucherCode] = useState('');
-  const [voucherError, setVoucherError] = useState('');
-  const [voucherSuccess, setVoucherSuccess] = useState('');
   const [appliedVoucher, setAppliedVoucher] = useState<{ code: string; discountAmount: number; description: string } | null>(null);
   const [availableVouchers, setAvailableVouchers] = useState<any[]>([]);
   const [voucherLoading, setVoucherLoading] = useState(false);
@@ -63,8 +61,6 @@ function KeranjangContent() {
 
   async function handleOpenVoucherModal() {
     setVoucherCode('');
-    setVoucherError('');
-    setVoucherSuccess('');
     setVoucherLoading(true);
     setIsVoucherModalOpen(true);
     try {
@@ -80,8 +76,7 @@ function KeranjangContent() {
   function handleCloseVoucherModal() {
     setIsVoucherModalOpen(false);
     setVoucherCode('');
-    setVoucherError('');
-    setVoucherSuccess('');
+    setVoucherLoading(false);
   }
 
   const toggleSlot = (slot: string) => {
@@ -96,19 +91,15 @@ function KeranjangContent() {
   const discountAmount = appliedVoucher?.discountAmount ?? 0;
   const finalPrice = Math.max(0, totalPrice - discountAmount);
 
-  const handleApplyVoucher = async (code?: string) => {
-    const codeToCheck = (code || voucherCode).toUpperCase().trim();
+  const handleApplyVoucher = async (code: string) => {
+    const codeToCheck = code.toUpperCase().trim();
     if (!codeToCheck) return;
     setVoucherLoading(true);
-    setVoucherError('');
-    setVoucherSuccess('');
     const result = await validateVoucher(codeToCheck, totalPrice);
     if (result.valid) {
       setAppliedVoucher({ code: result.code!, discountAmount: result.discountAmount!, description: result.description || '' });
       setVoucherCode(result.code!);
-      setVoucherSuccess(`Voucher ${result.code} berhasil digunakan`);
-    } else {
-      setVoucherError(result.error || 'Voucher tidak valid');
+      handleCloseVoucherModal();
     }
     setVoucherLoading(false);
   };
@@ -116,7 +107,6 @@ function KeranjangContent() {
   const handleRemoveVoucher = () => {
     setAppliedVoucher(null);
     setVoucherCode('');
-    setVoucherSuccess('');
   };
 
   const handleCheckout = () => {
@@ -307,16 +297,14 @@ function KeranjangContent() {
                   type="text" 
                   placeholder="Masukkan kode voucher"
                   value={voucherCode}
-                  onChange={(e) => { setVoucherCode(e.target.value); setVoucherError(''); }}
-                  onKeyDown={(e) => e.key === 'Enter' && handleApplyVoucher()}
+                  onChange={(e) => setVoucherCode(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleApplyVoucher(voucherCode)}
                   style={{ flex: 1, background: '#000', border: '1px solid #333', color: '#fff', padding: '12px', borderRadius: '10px', outline: 'none', fontFamily: 'inherit' }}
                 />
-                <button type="button" className="btn-tambah" style={{ marginBottom: 0, padding: '10px 20px' }} onClick={() => handleApplyVoucher()} disabled={voucherLoading}>
+                <button type="button" className="btn-tambah" style={{ marginBottom: 0, padding: '10px 20px' }} onClick={() => handleApplyVoucher(voucherCode)} disabled={voucherLoading}>
                   {voucherLoading ? '...' : 'Gunakan'}
                 </button>
               </div>
-              {voucherError && <p style={{ fontSize: '12px', color: '#ff5252', marginBottom: '8px' }}>{voucherError}</p>}
-              {voucherSuccess && <p style={{ fontSize: '12px', color: 'var(--primary-lime)', marginBottom: '8px' }}>{voucherSuccess}</p>}
               <p style={{ fontSize: '12px', color: '#888' }}>Punya kode promo? Masukkan kodenya di sini.</p>
             </div>
 

@@ -123,6 +123,8 @@ function KeranjangContent() {
       setAppliedVoucher({ code: result.code!, discountAmount: result.discountAmount!, description: result.description || '' });
       setVoucherCode(result.code!);
       handleCloseVoucherModal();
+    } else {
+      alert(result.error);
     }
     setVoucherLoading(false);
   };

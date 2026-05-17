@@ -21,21 +21,7 @@ interface Match {
   gender?: string;
 }
 
-const SLOT_DATA: Record<number, { filled: number; total: number }> = {
-  1: { filled: 5, total: 8 },
-  2: { filled: 3, total: 8 },
-  3: { filled: 2, total: 8 },
-  4: { filled: 6, total: 8 },
-  5: { filled: 1, total: 8 },
-  6: { filled: 4, total: 8 },
-};
 
-function getSlotInfo(match: Match): { filled: number; total: number } {
-  if (match.slots_filled !== undefined && match.total_slots !== undefined) {
-    return { filled: match.slots_filled, total: match.total_slots };
-  }
-  return SLOT_DATA[match.id] ?? { filled: 0, total: 8 };
-}
 
 export default function MainBarengPage() {
   const [matches, setMatches] = useState<Match[]>([]);
@@ -50,6 +36,8 @@ export default function MainBarengPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [processing, setProcessing] = useState(false);
+  const [msg, setMsg] = useState('');
+  const [msgType, setMsgType] = useState<'success' | 'error'>('success');
 
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -82,9 +70,12 @@ export default function MainBarengPage() {
         const dayName = days[d.getDay()];
         if (dayName !== dayFilter) return false;
       }
-      if (timeFilter === 'malam') {
+      if (timeFilter) {
         const hour = parseInt(match.start_time.substring(0, 2));
-        if (hour < 18) return false;
+        if (timeFilter === 'pagi' && (hour < 6 || hour >= 10)) return false;
+        if (timeFilter === 'siang' && (hour < 10 || hour >= 15)) return false;
+        if (timeFilter === 'sore' && (hour < 15 || hour >= 18)) return false;
+        if (timeFilter === 'malam' && (hour < 18)) return false;
       }
       if (genderFilter && (match.gender || '').toLowerCase() !== genderFilter.toLowerCase()) return false;
       return true;
@@ -115,11 +106,14 @@ export default function MainBarengPage() {
     setProcessing(true);
     const res = await joinMatch(selectedMatch.id);
     setProcessing(false);
-    
+
     if (res.error) {
-      alert('Gagal bergabung: ' + res.error);
+      setMsgType('error');
+      setMsg(res.error);
+      closeDetailModal();
     } else {
-      alert('Selamat! Anda berhasil bergabung ke pertandingan ini. Silakan cek menu Jadwal Saya atau hubungi Host.');
+      setMsgType('success');
+      setMsg('Berhasil bergabung! Cek menu Jadwal Saya.');
       fetchMatches();
       closeDetailModal();
     }
@@ -144,16 +138,18 @@ export default function MainBarengPage() {
   const submitMabar = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formRef.current) return;
-    
+
     setProcessing(true);
     const formData = new FormData(formRef.current);
     const res = await createMatch(formData);
     setProcessing(false);
 
     if (res.error) {
-      alert('Gagal membuat jadwal: ' + res.error);
+      setMsgType('error');
+      setMsg(res.error);
     } else {
-      alert('Jadwal Main Bareng Anda telah berhasil dibuat dan dipublikasikan!');
+      setMsgType('success');
+      setMsg('Jadwal Main Bareng berhasil dipublikasikan!');
       fetchMatches();
       closeCreateModal();
     }
@@ -229,6 +225,12 @@ export default function MainBarengPage() {
       <Navbar />
 
       <div className="container" style={{ paddingTop: '60px', width: '90%', maxWidth: '1600px', margin: 'auto' }}>
+        {msg && (
+          <div style={{ padding: '12px 20px', borderRadius: '8px', marginBottom: '16px', fontSize: '14px', backgroundColor: msgType === 'error' ? 'rgba(244,67,54,0.1)' : 'rgba(189,209,36,0.1)', color: msgType === 'error' ? '#ff5252' : 'var(--primary-lime)', border: `1px solid ${msgType === 'error' ? '#ff5252' : 'var(--primary-lime)'}` }}>
+            {msg}
+            <button onClick={() => setMsg('')} style={{ float: 'right', background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', fontSize: '16px' }}>&times;</button>
+          </div>
+        )}
         <section className="hero-mabar">
           <div className="hero-text">
             <h1>Cari Kawan. Lawan. <br /> <span className="text-highlight">Dan Kemenangan.</span></h1>
@@ -247,8 +249,8 @@ export default function MainBarengPage() {
           <div className="filter-grid">
             <select className="form-select" value={cityFilter} onChange={(e) => setCityFilter(e.target.value)}><option value="">Lokasi</option><option value="surakarta">Surakarta</option><option value="surabaya">Surabaya</option><option value="jakarta">Jakarta</option></select>
             <select className="form-select" value={dayFilter} onChange={(e) => setDayFilter(e.target.value)}><option value="">Hari</option><option value="senin">Senin</option><option value="selasa">Selasa</option><option value="rabu">Rabu</option><option value="kamis">Kamis</option><option value="jumat">Jumat</option><option value="sabtu">Sabtu</option><option value="minggu">Minggu</option></select>
-            <select className="form-select" value={timeFilter} onChange={(e) => setTimeFilter(e.target.value)}><option value="">Waktu</option><option value="malam">Malam (18:00 - 23:00)</option></select>
-            <select className="form-select" value={genderFilter} onChange={(e) => setGenderFilter(e.target.value)}><option value="">Jenis Kelamin</option><option value="campur">Campur</option></select>
+            <select className="form-select" value={timeFilter} onChange={(e) => setTimeFilter(e.target.value)}><option value="">Waktu</option><option value="pagi">Pagi (06:00 - 10:00)</option><option value="siang">Siang (10:00 - 15:00)</option><option value="sore">Sore (15:00 - 18:00)</option><option value="malam">Malam (18:00 - 23:00)</option></select>
+            <select className="form-select" value={genderFilter} onChange={(e) => setGenderFilter(e.target.value)}><option value="">Jenis Kelamin</option><option value="campur">Campur</option><option value="pria">Pria Saja</option><option value="wanita">Wanita Saja</option></select>
             <button className="btn btn-primary filter-btn" onClick={handleFilter}>Terapkan Filter</button>
           </div>
           <div className="filter-actions-bottom">
@@ -280,8 +282,8 @@ export default function MainBarengPage() {
                   <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width: 16, height: 16 }}>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                   </svg>
-                  <span className={`font-semibold ${getSlotInfo(match).filled >= getSlotInfo(match).total ? 'text-red-500' : 'text-green-600'}`}>
-                    {getSlotInfo(match).filled}/{getSlotInfo(match).total} slot tersedia
+                  <span className={`font-semibold ${(match.slots_filled || 0) >= (match.total_slots || 8) ? 'text-red-500' : 'text-green-600'}`}>
+                    {match.slots_filled || 0}/{match.total_slots || 8} slot tersedia
                   </span>
                 </div>
                 <div className="mabar-footer">
@@ -336,10 +338,11 @@ export default function MainBarengPage() {
               <i className="fa-solid fa-users"></i>
               <span>
                 {(() => {
-                  const s = getSlotInfo(selectedMatch);
-                  const remaining = s.total - s.filled;
+                  const filled = selectedMatch.slots_filled || 0;
+                  const total = selectedMatch.total_slots || 8;
+                  const remaining = total - filled;
                   return remaining > 0
-                    ? `${remaining} slot tersisa dari ${s.total} slot`
+                    ? `${remaining} slot tersisa dari ${total} slot`
                     : 'Slot sudah penuh';
                 })()}
               </span>
@@ -347,6 +350,13 @@ export default function MainBarengPage() {
             <div className="modal-footer-mabar">
               <div className="footer-top">
                 <button className="btn btn-outline btn-cancel-mabar" style={{ flex: 1 }} onClick={closeDetailModal}>Batal</button>
+                <button className="btn btn-outline" style={{ flex: 2, borderColor: '#25D366', color: '#25D366' }}
+                  onClick={() => {
+                    const msg = `Halo Admin Minton, saya ingin bertanya tentang main bareng di ${selectedMatch.venue_name} jam ${selectedMatch.start_time.substring(0,5)} - ${selectedMatch.end_time.substring(0,5)}. Apakah masih ada slot?`;
+                    window.open(`https://wa.me/6281234567890?text=${encodeURIComponent(msg)}`, '_blank');
+                  }}>
+                  <i className="fa-brands fa-whatsapp"></i> Hubungi Admin
+                </button>
               </div>
               <button className="btn btn-primary" style={{ border: 'none', color: '#000', fontWeight: 600 }} onClick={confirmJoin} disabled={processing}>
                 {processing ? 'Memproses...' : 'Konfirmasi Ikut'}
@@ -393,6 +403,25 @@ export default function MainBarengPage() {
                 <div className="form-group-mabar">
                   <label>Harga / Orang</label>
                   <input type="text" name="price" placeholder="Contoh: 35.000 atau Free" required />
+                </div>
+                <div className="form-group-mabar">
+                  <label>Kota</label>
+                  <select name="city" required>
+                    <option value="Surabaya">Surabaya</option>
+                    <option value="Surakarta">Surakarta</option>
+                    <option value="Jakarta">Jakarta</option>
+                    <option value="Bandung">Bandung</option>
+                    <option value="Semarang">Semarang</option>
+                    <option value="Yogyakarta">Yogyakarta</option>
+                  </select>
+                </div>
+                <div className="form-group-mabar">
+                  <label>Jenis Kelamin</label>
+                  <select name="gender" required>
+                    <option value="Campur">Campur</option>
+                    <option value="Pria">Pria Saja</option>
+                    <option value="Wanita">Wanita Saja</option>
+                  </select>
                 </div>
               </div>
               <div className="form-group-mabar" style={{ marginBottom: '24px' }}>

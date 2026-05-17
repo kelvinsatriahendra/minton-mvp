@@ -1,6 +1,7 @@
 'use server'
 
 import { z } from 'zod';
+import bcrypt from 'bcryptjs';
 import { supabase } from '@/utils/supabase';
 import { sendOtpAction } from '../otp/actions';
 
@@ -24,10 +25,12 @@ export async function signUpAction(prevState: any, formData: FormData) {
     };
   }
 
+  const hashedPassword = await bcrypt.hash(password, 10);
+
   const payload = {
     nama_lengkap: nama,
     email: email,
-    password: password,
+    password: hashedPassword,
     email_verified: false,
   };
 

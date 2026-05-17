@@ -11,6 +11,7 @@ function OtpContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get('email') || '';
+  const source = searchParams.get('source') || 'signup';
 
   const [code, setCode] = useState(Array(OTP_LENGTH).fill(''));
   const [error, setError] = useState<string | null>(null);
@@ -67,6 +68,7 @@ function OtpContent() {
     const fd = new FormData();
     fd.set('email', email);
     fd.set('code', otp);
+    fd.set('source', source);
     const result = await verifyOtpAction(null, fd);
 
     if (result.error) {

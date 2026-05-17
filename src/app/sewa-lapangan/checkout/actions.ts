@@ -1,5 +1,6 @@
 'use server'
 
+import crypto from 'crypto';
 import { cookies } from 'next/headers';
 import { supabase } from '@/utils/supabase';
 
@@ -30,7 +31,7 @@ export async function createBooking(formData: FormData) {
   const timeDisplay = `${startTime} - ${endTime}`;
   const duration = `${slots.length} Jam`;
 
-  const bookingId = `MKM${Math.floor(Math.random() * 90000) + 10000}`;
+  const bookingId = `MKM-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
   const today = new Date();
   const dateStr = today.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 

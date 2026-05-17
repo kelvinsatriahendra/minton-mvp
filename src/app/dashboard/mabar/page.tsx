@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import DashboardSidebar from '@/components/DashboardSidebar';
-import { getMatches, getMyMatches, createMatchAction, joinMatchAction } from './actions';
+import { getMatches, getMyMatches, createMatchAction, joinMatchAction, getJoinRequests } from './actions';
 
 interface MabarSession {
   id: number;
@@ -19,10 +19,22 @@ interface MabarSession {
   img: string;
 }
 
+interface JoinRequest {
+  id: number;
+  matchId: number;
+  venue: string;
+  date: string;
+  time: string;
+  userName: string;
+  email: string;
+  joinedAt: string;
+}
+
 export default function MabarDashboardPage() {
   const [tab, setTab] = useState(0);
   const [sessions, setSessions] = useState<MabarSession[]>([]);
   const [mySessions, setMySessions] = useState<MabarSession[]>([]);
+  const [joinRequests, setJoinRequests] = useState<JoinRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [actionLoading, setActionLoading] = useState<number | null>(null);
@@ -30,10 +42,13 @@ export default function MabarDashboardPage() {
   useEffect(() => {
     document.title = 'Main Bareng - Minton';
     loadData();
+    loadMySessions();
+    loadJoinRequests();
   }, []);
 
   useEffect(() => {
     if (tab === 1) loadMySessions();
+    if (tab === 2) loadJoinRequests();
   }, [tab]);
 
   async function loadData() {
@@ -47,6 +62,13 @@ export default function MabarDashboardPage() {
     setLoading(true);
     const data = await getMyMatches();
     setMySessions(data);
+    setLoading(false);
+  }
+
+  async function loadJoinRequests() {
+    setLoading(true);
+    const data = await getJoinRequests();
+    setJoinRequests(data);
     setLoading(false);
   }
 
@@ -148,11 +170,32 @@ export default function MabarDashboardPage() {
           </div>
         ) : (
           <div className="mabar-dash-grid">
-            {(tab === 0 ? sessions : tab === 1 ? mySessions : []).length === 0 ? (
+            {(tab === 0 ? sessions : tab === 1 ? mySessions : []).length === 0 && tab !== 2 ? (
               <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-gray)', gridColumn: '1 / -1' }}>
-                <p style={{ marginBottom: 12 }}>{tab === 0 ? 'Belum ada sesi mabar tersedia.' : tab === 1 ? 'Kamu belum membuat sesi mabar.' : 'Belum ada permintaan masuk.'}</p>
+                <p style={{ marginBottom: 12 }}>{tab === 0 ? 'Belum ada sesi mabar tersedia.' : tab === 1 ? 'Kamu belum membuat sesi mabar.' : ''}</p>
                 {tab === 1 && <button className="btn-primary-dash" onClick={openCreateModal}><i className="fa-solid fa-plus"></i> Buat Mabar</button>}
               </div>
+            ) : tab === 2 ? (
+              joinRequests.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-gray)', gridColumn: '1 / -1' }}>
+                  <p>Belum ada permintaan masuk.</p>
+                </div>
+              ) : (
+                joinRequests.map(r => (
+                  <div key={r.id} className="mabar-dash-card" style={{ padding: 20 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div>
+                        <h4 style={{ marginBottom: 4 }}>{r.userName}</h4>
+                        <p style={{ fontSize: 12, color: '#aaa' }}>{r.email}</p>
+                        <p style={{ fontSize: 12, color: '#666', marginTop: 8 }}>
+                          <i className="fa-solid fa-location-dot"></i> {r.venue} &middot; {r.date} &middot; {r.time}
+                        </p>
+                      </div>
+                      <span className="level-badge" style={{ fontSize: 11 }}>Bergabung</span>
+                    </div>
+                  </div>
+                ))
+              )
             ) : (
               (tab === 0 ? sessions : mySessions).map(s => (
                 <div key={s.id} className="mabar-dash-card">

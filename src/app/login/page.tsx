@@ -15,10 +15,12 @@ export default function LoginPage() {
 
   async function handleGoogleLogin() {
     console.log("Memulai Login Google...");
+    const params = new URLSearchParams(window.location.search);
+    const redirectTo = params.get('redirect') || '/';
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${window.location.origin}/auth/callback?redirect_to=${encodeURIComponent(redirectTo)}`,
         queryParams: {
           access_type: 'offline',
           prompt: 'consent',
@@ -43,7 +45,7 @@ export default function LoginPage() {
       setError(result.message);
       setLoading(false);
       if (result.needsOtp && result.email) {
-        router.push(`/otp?email=${encodeURIComponent(result.email)}`);
+        router.push(`/otp?email=${encodeURIComponent(result.email)}&source=login`);
       }
     } else {
       const params = new URLSearchParams(window.location.search);

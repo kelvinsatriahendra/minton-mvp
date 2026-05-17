@@ -1,4 +1,4 @@
-
+import crypto from 'crypto';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { supabase } from '@/utils/supabase';
@@ -7,15 +7,16 @@ export async function POST(request: Request) {
   const { userName, email, userId } = await request.json();
   const cookieStore = await cookies();
 
-  // 1. Sync to database
+  const sessionToken = crypto.randomUUID();
+
   await supabase.from('users').upsert({
     email: email,
     nama_lengkap: userName,
-    password: 'oauth-user'
+    password: 'oauth-user',
+    session_token: sessionToken,
   }, { onConflict: 'email' });
 
-  // 2. Set cookies
-  cookieStore.set('session', 'supabase-session-token', {
+  cookieStore.set('session', sessionToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     maxAge: 60 * 60 * 24 * 7,

@@ -1,6 +1,8 @@
 'use server'
 
 import { z } from 'zod';
+import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import { supabase } from '@/utils/supabase';
 import { cookies } from 'next/headers';
 
@@ -52,7 +54,6 @@ export async function registerMitraAction(prevState: any, formData: FormData) {
   try {
     const { gor_name, owner_name, email, password } = validatedFields.data;
 
-    // Cek apakah email sudah terdaftar
     const { data: existingData } = await supabase
       .from('partners')
       .select('id')
@@ -63,7 +64,8 @@ export async function registerMitraAction(prevState: any, formData: FormData) {
       return { message: "Email ini sudah terdaftar sebagai Mitra." };
     }
 
-    // Insert ke tabel partners
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const { data, error } = await supabase
       .from('partners')
       .insert([
@@ -71,7 +73,7 @@ export async function registerMitraAction(prevState: any, formData: FormData) {
           gor_name,
           owner_name,
           email,
-          password // Simpan plaintext sesuai skema MVP
+          password: hashedPassword
         }
       ])
       .select()
@@ -79,10 +81,12 @@ export async function registerMitraAction(prevState: any, formData: FormData) {
 
     if (error) throw error;
 
-    // Langsung login-kan setelah daftar
     if (data) {
+      const sessionToken = crypto.randomUUID();
+      await supabase.from('partners').update({ session_token: sessionToken }).eq('email', email);
+
       const cookieStore = await cookies();
-      cookieStore.set('mitraSession', 'supabase-mitra-token', {
+      cookieStore.set('mitraSession', sessionToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         maxAge: 60 * 60 * 24 * 7,

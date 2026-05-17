@@ -12,6 +12,7 @@ export default function ProfilPage() {
   const [success, setSuccess] = useState(false);
 
   const [namaDepan, setNamaDepan] = useState('');
+const [level, setLevel] = useState('Pemula');
   const [namaBelakang, setNamaBelakang] = useState('');
   const [email, setEmail] = useState('');
   const [kota, setKota] = useState('Surabaya');
@@ -37,6 +38,10 @@ export default function ProfilPage() {
   async function loadProfile() {
     setLoading(true);
     const data = await getProfileData();
+const stats = await getUserStats();
+if (stats) {
+  setLevel(stats.level);
+}
     if (data) {
       const names = data.nama_lengkap.split(' ');
       setNamaDepan(names[0] || '');
@@ -264,7 +269,7 @@ export default function ProfilPage() {
                   </p>
                 <div style={{ display: 'flex', gap: 10 }}>
                   <span className="badge badge-gold">Member Gold</span>
-                  <span className="badge badge-pro">Semi-Pro</span>
+                  <span className="badge badge-pro">{level}</span>
                 </div>
               </div>
             </div>

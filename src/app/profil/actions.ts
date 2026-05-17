@@ -1,7 +1,32 @@
 'use server'
 
+import bcrypt from 'bcryptjs';
 import { cookies } from 'next/headers';
 import { supabase } from '@/utils/supabase';
+import { cookies } from 'next/headers';
+
+export async function getUserStats() {
+  const cookieStore = await cookies();
+  const email = cookieStore.get('userEmail')?.value;
+  if (!email) return { level: 'Pemula', totalBookings: 0, confirmedBookings: 0, winRate: 0 };
+
+  const { data: allBookings } = await supabase
+    .from('bookings')
+    .select('status')
+    .eq('user_email', email);
+
+  const total = allBookings?.length || 0;
+  const confirmed = allBookings?.filter(b => b.status === 'Terkonfirmasi').length || 0;
+  const winRate = total > 0 ? Math.round((confirmed / total) * 100) : 0;
+
+  let level = 'Pemula';
+  if (total >= 20) level = 'Pro';
+  else if (total >= 10) level = 'Semi-Pro';
+  else if (total >= 5) level = 'Kasual';
+
+  return { level, totalBookings: total, confirmedBookings: confirmed, winRate };
+}
+
 
 const DEFAULT_NOTIF = {
   email_booking: true,
@@ -79,13 +104,16 @@ export async function updatePasswordAction(currentPassword: string, newPassword:
     .eq('email', email)
     .single();
 
-  if (!user || user.password !== currentPassword) {
-    return { error: 'Kata sandi saat ini salah.' };
-  }
+  if (!user) return { error: 'Kata sandi saat ini salah.' };
+
+  const passwordMatch = await bcrypt.compare(currentPassword, user.password);
+  if (!passwordMatch) return { error: 'Kata sandi saat ini salah.' };
+
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
 
   const { error } = await supabase
     .from('users')
-    .update({ password: newPassword })
+    .update({ password: hashedPassword })
     .eq('email', email);
 
   if (error) return { error: 'Gagal menyimpan: ' + error.message };

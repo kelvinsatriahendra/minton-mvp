@@ -48,6 +48,16 @@ export async function getRecentBookings() {
 }
 
 export async function deleteDataAction(id: string) {
-  await new Promise((resolve) => setTimeout(resolve, 1500));
+  const cookieStore = await cookies();
+  const email = cookieStore.get('userEmail')?.value;
+  if (!email) return { error: 'Sesi tidak ditemukan' };
+
+  const { error } = await supabase
+    .from('bookings')
+    .update({ status: 'Dibatalkan' })
+    .eq('booking_id', id)
+    .eq('user_email', email);
+
+  if (error) return { error: error.message };
   return { success: true };
 }

@@ -1,6 +1,8 @@
 'use server'
 
 import { z } from 'zod';
+import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import { cookies } from 'next/headers';
 import { supabase } from '@/utils/supabase';
 
@@ -27,15 +29,20 @@ export async function loginMitraAction(prevState: any, formData: FormData) {
       .from('partners')
       .select('*')
       .eq('email', email)
-      .eq('password', password);
+      .single();
 
-    if (error) throw error;
+    if (error || !data) return { message: 'Maaf, Email atau Kata Sandi Anda salah.' };
 
-    if (data && data.length > 0) {
-      const partner = data[0];
+    const passwordMatch = await bcrypt.compare(password, data.password);
+    if (!passwordMatch) return { message: 'Maaf, Email atau Kata Sandi Anda salah.' };
+
+    const partner = data;
       
+      const sessionToken = crypto.randomUUID();
+      await supabase.from('partners').update({ session_token: sessionToken }).eq('email', email);
+
       const cookieStore = await cookies();
-      cookieStore.set('mitraSession', 'supabase-mitra-token', {
+      cookieStore.set('mitraSession', sessionToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         maxAge: 60 * 60 * 24 * 7,

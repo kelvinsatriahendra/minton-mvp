@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { supabase } from '@/utils/supabase';
 import { getLeaderboard, getClubs, getFeedPosts, getMyRank } from './actions';
 
 interface LeaderboardUser { email: string; nama_lengkap: string; points: number }
@@ -33,6 +32,13 @@ export default function KomunitasPage() {
   const [userEmail, setUserEmail] = useState('');
   const [search, setSearch] = useState('');
   const [cityFilter, setCityFilter] = useState('');
+  const [scheduleFilter, setScheduleFilter] = useState('');
+  const [activeTab, setActiveTab] = useState('Pria');
+
+  const [articleModal, setArticleModal] = useState<FeedPost | null>(null);
+  const [clubModal, setClubModal] = useState<{ club: Club; action: string } | null>(null);
+  const [myRankModal, setMyRankModal] = useState(false);
+  const [loadMoreModal, setLoadMoreModal] = useState(false);
 
   useEffect(() => { document.title = 'Komunitas - Minton'; }, []);
 
@@ -51,6 +57,7 @@ export default function KomunitasPage() {
   const filteredClubs = clubs.filter((c) => {
     if (search && !c.name.toLowerCase().includes(search.toLowerCase())) return false;
     if (cityFilter && !c.city.toLowerCase().includes(cityFilter.toLowerCase())) return false;
+    if (scheduleFilter && !c.schedule.toLowerCase().includes(scheduleFilter.toLowerCase())) return false;
     return true;
   });
 
@@ -59,8 +66,28 @@ export default function KomunitasPage() {
   const top3 = leaderboard.slice(0, 3);
   const rest = leaderboard.slice(3);
 
+  function openArticleModal(post: FeedPost) { setArticleModal(post); document.body.style.overflow = 'hidden'; }
+  function closeArticleModal() { setArticleModal(null); document.body.style.overflow = 'auto'; }
+
   return (
     <>
+      <style dangerouslySetInnerHTML={{__html: `
+        .modal-overlay-kom { display: flex; position: fixed; z-index: 1000; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); justify-content: center; align-items: center; }
+        .modal-content-kom { background-color: #1c1c1c; border: 1px solid #333; width: 90%; max-width: 560px; border-radius: 20px; padding: 32px; position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.5); max-height: 90vh; overflow-y: auto; }
+        .modal-header-kom { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-header-kom h3 { font-size: 24px; font-weight: 700; margin: 0; }
+        .close-modal-kom { background: transparent; border: none; color: #aaaaaa; font-size: 24px; cursor: pointer; }
+        .close-modal-kom:hover { color: #fff; }
+        .modal-body-kom p { font-size: 14px; color: #ccc; line-height: 1.7; margin-bottom: 16px; }
+        .modal-body-kom img { width: 100%; border-radius: 12px; margin-bottom: 16px; }
+        .modal-footer-kom { display: flex; gap: 12px; margin-top: 24px; }
+        .modal-footer-kom button { flex: 1; padding: 14px; border-radius: 8px; font-size: 14px; cursor: pointer; border: none; font-family: inherit; font-weight: 600; }
+        .btn-kom-secondary { background: transparent; border: 1px solid #333 !important; color: #fff; }
+        .btn-kom-primary { background: var(--primary-lime); color: #000; }
+        .btn-kom-primary:hover { background: #d4e92a; }
+        .btn-kom-secondary:hover { background: rgba(255,255,255,0.05); }
+      `}} />
+
       <Navbar />
       <div className="container">
         <section>
@@ -108,12 +135,13 @@ export default function KomunitasPage() {
           </div>
           <div className="leaderboard-header">
             <div className="lb-tabs">
-              <div className="lb-tab active">Semua</div>
+              {['Pria', 'Wanita', 'Klub/Grup'].map((tab) => (
+                <div key={tab} className={`lb-tab ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>{tab}</div>
+              ))}
             </div>
-            <button className="btn btn-primary" onClick={() => {
-              const el = document.getElementById('my-rank');
-              el?.scrollIntoView({ behavior: 'smooth' });
-            }}>Lihat Peringkat Saya</button>
+            <button className="btn-standard primary" onClick={() => setMyRankModal(true)}>
+              Lihat Peringkat Saya
+            </button>
           </div>
           <div className="leaderboard-grid">
             {(() => {
@@ -158,11 +186,21 @@ export default function KomunitasPage() {
             <div className="filter-input">
               <i className="fa-solid fa-location-dot"></i>
               <select value={cityFilter} onChange={(e) => setCityFilter(e.target.value)}>
-                <option value="">Semua Lokasi</option>
+                <option value="">Lokasi</option>
                 {cities.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
-            <button className="btn btn-primary" onClick={() => { setSearch(''); setCityFilter(''); }}>Reset Filter</button>
+            <div className="filter-input">
+              <i className="fa-regular fa-calendar"></i>
+              <select value={scheduleFilter} onChange={(e) => setScheduleFilter(e.target.value)}>
+                <option value="">Jadwal Rutin</option>
+                <option value="weekend">Weekend</option>
+                <option value="weekday">Weekday</option>
+              </select>
+            </div>
+            <button className="btn-standard primary" onClick={() => { setSearch(''); setCityFilter(''); setScheduleFilter(''); }}>
+              <i className="fa-solid fa-rotate-left"></i> Reset Filter
+            </button>
           </div>
           <div className="klub-grid">
             {filteredClubs.map((club) => (
@@ -182,15 +220,15 @@ export default function KomunitasPage() {
                     <div><span className="stat-label">Iuran</span><span className="stat-val">{club.fee}</span></div>
                   </div>
                   <div className="klub-actions">
-                    <button className="btn btn-outline">Join Komunitas</button>
-                    <button className="btn btn-outline">Mabar Bareng</button>
+                    <button className="btn btn-outline" onClick={() => setClubModal({ club, action: 'join' })}>Join Komunitas</button>
+                    <button className="btn btn-outline" onClick={() => setClubModal({ club, action: 'mabar' })}>Mabar Bareng</button>
                   </div>
                 </div>
               </div>
             ))}
           </div>
           <div style={{ textAlign: 'right', marginTop: '24px' }}>
-            <button className="btn btn-outline" style={{ borderColor: 'var(--primary-lime)', color: 'var(--primary-lime)' }}>
+            <button className="btn btn-outline" style={{ borderColor: 'var(--primary-lime)', color: 'var(--primary-lime)' }} onClick={() => setLoadMoreModal(true)}>
               <i className="fa-solid fa-plus"></i> Muat Lebih Banyak
             </button>
           </div>
@@ -202,7 +240,7 @@ export default function KomunitasPage() {
           </div>
           <div className="feed-grid">
             {feed.map((post) => (
-              <div key={post.id} className="feed-card">
+              <div key={post.id} className="feed-card" onClick={() => openArticleModal(post)}>
                 <img src={post.image_url} className="feed-img" alt={post.title} />
                 <div className="feed-info">
                   <h3 className="feed-title">{post.title}</h3>
@@ -221,10 +259,95 @@ export default function KomunitasPage() {
           <div className="section-title">
             <h2>Upcoming <span className="text-highlight">Tournament</span></h2>
           </div>
-          <img src="/asset/turnamen.png" alt="Badminton Tournament Banner" className="tournament-banner" />
+          <img
+            src="/asset/turnamen.png"
+            alt="Badminton Tournament Banner"
+            className="tournament-banner"
+            onClick={() => setArticleModal({ id: 'tournament', title: 'Turnamen Badminton Minton 2026', content: 'Turnamen tahunan Minton akan segera digelar! Berbagai kategori dipertandingkan mulai dari Ganda Dewasa, Tunggal Pemula, hingga Ganda Campuran. Total hadiah mencapai puluhan juta rupiah. Segera daftarkan tim Anda melalui GOR mitra Minton terdekat. Pantau terus informasi jadwal kualifikasi dan pendaftaran di halaman ini.', author_name: 'Minton Tournament', image_url: '/asset/turnamen.png', published_at: new Date().toISOString() })}
+          />
         </section>
       </div>
       <Footer />
+
+      {articleModal && (
+        <div className="modal-overlay-kom" onClick={(e) => { if (e.target === e.currentTarget) closeArticleModal(); }}>
+          <div className="modal-content-kom">
+            <div className="modal-header-kom">
+              <h3>{articleModal.title}</h3>
+              <button className="close-modal-kom" onClick={closeArticleModal}>&times;</button>
+            </div>
+            <div className="modal-body-kom">
+              <img src={articleModal.image_url} alt={articleModal.title} />
+              <p>{articleModal.content}</p>
+              <p style={{ fontSize: '12px', color: '#888' }}><i className="fa-regular fa-user"></i> {articleModal.author_name}</p>
+            </div>
+            <div className="modal-footer-kom">
+              <button className="btn-kom-secondary" onClick={closeArticleModal}>Tutup</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {clubModal && (
+        <div className="modal-overlay-kom" onClick={(e) => { if (e.target === e.currentTarget) setClubModal(null); }}>
+          <div className="modal-content-kom">
+            <div className="modal-header-kom">
+              <h3>{clubModal.action === 'join' ? 'Join ' : 'Mabar Bareng '}{clubModal.club.name}</h3>
+              <button className="close-modal-kom" onClick={() => setClubModal(null)}>&times;</button>
+            </div>
+            <div className="modal-body-kom">
+              <p>{clubModal.action === 'join'
+                ? `Anda akan bergabung sebagai anggota ${clubModal.club.name}. Level: ${clubModal.club.level}, Jadwal: ${clubModal.club.schedule}, Iuran: ${clubModal.club.fee}.`
+                : `Anda akan mengirim permintaan main bareng ke ${clubModal.club.name}. Anggota klub akan melihat permintaan Anda dan menghubungi untuk detail jadwal.`
+              }</p>
+            </div>
+            <div className="modal-footer-kom">
+              <button className="btn-kom-secondary" onClick={() => setClubModal(null)}>Batal</button>
+              <button className="btn-kom-primary" onClick={() => { alert(clubModal.action === 'join' ? 'Permintaan bergabung telah dikirim ke pengurus klub.' : 'Permintaan Mabar Bareng telah dikirim.'); setClubModal(null); }}>
+                {clubModal.action === 'join' ? 'Kirim Permintaan' : 'Kirim'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {myRankModal && (
+        <div className="modal-overlay-kom" onClick={(e) => { if (e.target === e.currentTarget) setMyRankModal(false); }}>
+          <div className="modal-content-kom">
+            <div className="modal-header-kom">
+              <h3>Peringkat Anda</h3>
+              <button className="close-modal-kom" onClick={() => setMyRankModal(false)}>&times;</button>
+            </div>
+            <div className="modal-body-kom">
+              {myRank ? (
+                <p>Saat ini Anda berada di peringkat <strong>{myRank.rank}</strong> dengan <strong>{leaderboard[myRank.rank - 1]?.points?.toLocaleString() || 0}</strong> poin. Pertahankan prestasimu!</p>
+              ) : (
+                <p>Anda belum memiliki peringkat. Mulai bergabung dengan pertandingan Main Bareng untuk mengumpulkan poin!</p>
+              )}
+            </div>
+            <div className="modal-footer-kom">
+              <button className="btn-kom-primary" onClick={() => setMyRankModal(false)}>Tutup</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {loadMoreModal && (
+        <div className="modal-overlay-kom" onClick={(e) => { if (e.target === e.currentTarget) setLoadMoreModal(false); }}>
+          <div className="modal-content-kom">
+            <div className="modal-header-kom">
+              <h3>Memuat Data</h3>
+              <button className="close-modal-kom" onClick={() => setLoadMoreModal(false)}>&times;</button>
+            </div>
+            <div className="modal-body-kom">
+              <p>Menampilkan lebih banyak klub dan komunitas badminton di sekitar Anda...</p>
+            </div>
+            <div className="modal-footer-kom">
+              <button className="btn-kom-primary" onClick={() => setLoadMoreModal(false)}>Tutup</button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -3,6 +3,7 @@ import { useEffect, useState, use } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { supabase } from '@/utils/supabase';
+import { getVenueDetail, getBookedSlots, getVenueReviews } from './actions';
 
 interface Venue {
   id: number;
@@ -22,22 +23,29 @@ interface Court {
   image_url: string;
 }
 
-const BOOKED_SLOTS = ['12:00-13:00', '13:00-14:00', '14:00-15:00', '15:00-16:00', '16:00-17:00', '17:00-18:00', '18:00-19:00', '21:00-22:00'];
+interface Review {
+  id: string; user_name: string; rating: number; comment: string; created_at: string;
+}
 
-const CALENDAR_DAYS = [
-  { day: 'S', classes: 'font-size:12px;color:#666;font-weight:700' },
-  { day: 'S', classes: 'font-size:12px;color:#666;font-weight:700' },
-  { day: 'R', classes: 'font-size:12px;color:#666;font-weight:700' },
-  { day: 'K', classes: 'font-size:12px;color:#666;font-weight:700' },
-  { day: 'J', classes: 'font-size:12px;color:#666;font-weight:700' },
-  { day: 'S', classes: 'font-size:12px;color:#666;font-weight:700' },
-  { day: 'M', classes: 'font-size:12px;color:#666;font-weight:700' },
+interface Recommendation {
+  id: number; name: string; location: string; city: string; price_per_hour: number; rating: number; image_url: string;
+}
+
+const TIME_SLOTS = [
+  '07:00-08:00', '08:00-09:00', '09:00-10:00', '10:00-11:00', '11:00-12:00', '12:00-13:00', 
+  '13:00-14:00', '14:00-15:00', '15:00-16:00', '16:00-17:00', '17:00-18:00', '18:00-19:00', 
+  '19:00-20:00', '20:00-21:00', '21:00-22:00', '22:00-23:00'
 ];
+
+const CALENDAR_DAYS = ['S','S','R','K','J','S','M'];
 
 export default function DetailVenuePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const [venue, setVenue] = useState<Venue | null>(null);
   const [courts, setCourts] = useState<Court[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
+  const [bookedSlots, setBookedSlots] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(true);
   
   const [selectedDate, setSelectedDate] = useState(0);
@@ -50,22 +58,16 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
   const [selectedPayment, setSelectedPayment] = useState('qris');
   const [selectedCalDate, setSelectedCalDate] = useState(6);
 
-  const dates = [
-    { day: 'Jum', date: '6 Mar' },
-    { day: 'Sab', date: '7 Mar' },
-    { day: 'Min', date: '8 Mar' },
-    { day: 'Sen', date: '9 Mar' },
-    { day: 'Sel', date: '10 Mar' },
-    { day: 'Rab', date: '11 Mar' },
-  ];
+  const dates = Array.from({ length: 6 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() + i);
+    const days = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+    const months = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+    return { day: days[d.getDay()], date: `${d.getDate()} ${months[d.getMonth()]}` };
+  });
 
-  const timeSlots = [
-    '07:00-08:00', '08:00-09:00', '09:00-10:00', '10:00-11:00', '11:00-12:00', '12:00-13:00', 
-    '13:00-14:00', '14:00-15:00', '15:00-16:00', '16:00-17:00', '17:00-18:00', '18:00-19:00', 
-    '19:00-20:00', '20:00-21:00', '21:00-22:00', '22:00-23:00'
-  ];
 
-  const availableSlots = timeSlots.filter(s => !BOOKED_SLOTS.includes(s));
+
 
   useEffect(() => { document.title = 'Detail Lapangan - Minton'; }, []);
 
@@ -76,21 +78,20 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
   async function fetchDetail() {
     try {
       setLoading(true);
-      const { data: venueData, error: venueError } = await supabase
-        .from('venues')
-        .select('*')
-        .eq('id', id)
-        .single();
+      const result = await getVenueDetail(id);
+      if (!result) throw new Error('Venue not found');
       
-      if (venueError) throw venueError;
-      setVenue(venueData);
+      setVenue(result.venue);
+      setCourts(result.courts);
+      setRecommendations(result.recommendations);
 
-      const { data: courtData, error: courtError } = await supabase
-        .from('courts')
-        .select('*')
-        .eq('venue_id', id);
-      
-      if (!courtError) setCourts(courtData || []);
+      // Fetch booked slots
+      const booked = await getBookedSlots(result.venue.name, '');
+      setBookedSlots(booked);
+
+      // Fetch reviews
+      const revs = await getVenueReviews(result.venue.name);
+      setReviews(revs);
     } catch (error) {
       console.error('Error fetching detail:', error);
     } finally {
@@ -98,8 +99,10 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
     }
   }
 
-  const toggleSlot = (slot: string) => {
-    if (BOOKED_SLOTS.includes(slot)) return;
+  const getCourtBooked = (courtName: string) => bookedSlots[courtName] || [];
+
+  const toggleSlot = (slot: string, courtName: string) => {
+    if (getCourtBooked(courtName).includes(slot)) return;
     if (selectedSlots.includes(slot)) {
       setSelectedSlots(selectedSlots.filter(s => s !== slot));
     } else {
@@ -153,7 +156,10 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
     document.body.style.overflow = 'auto';
   };
 
-  const isNoSlotCourt = (index: number) => index % 2 === 1;
+  const isNoSlotCourt = (courtName: string) => {
+    const booked = getCourtBooked(courtName);
+    return booked.length >= TIME_SLOTS.length;
+  };
 
   if (loading) return <div style={{ background: '#000', color: '#fff', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Memuat Detail Venue...</div>;
   if (!venue) return <div style={{ background: '#000', color: '#fff', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Venue tidak ditemukan.</div>;
@@ -256,14 +262,16 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
             <span className="close-btn-detail" onClick={closeSlotModal}>&times;</span>
             <h2>Waktu Ketersediaan Lapangan</h2>
             <div className="slot-grid">
-              {timeSlots.map(slot => {
-                const isBooked = BOOKED_SLOTS.includes(slot);
+              {TIME_SLOTS.map(slot => {
+                const courtName = courts.find(c => c.id === activeCourt)?.name || `Lapangan ${activeCourt}`;
+                const courtBooked = getCourtBooked(courtName);
+                const isBooked = courtBooked.includes(slot);
                 const isSelected = selectedSlots.includes(slot);
                 return (
                   <div 
                     key={slot}
                     className={`slot-card ${isBooked ? 'booked' : 'available'} ${isSelected ? 'selected' : ''}`}
-                    onClick={() => !isBooked && toggleSlot(slot)}
+                    onClick={() => !isBooked && toggleSlot(slot, courtName)}
                   >
                     <div className="duration">60 Menit</div>
                     <div className="time">{slot}</div>
@@ -306,7 +314,7 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
             </div>
             <div className="cal-grid">
               {CALENDAR_DAYS.map((d, i) => (
-                <div key={i} style={{ fontSize: '12px', color: '#666', fontWeight: 700 }}>{d.day}</div>
+                <div key={i} style={{ fontSize: '12px', color: '#666', fontWeight: 700 }}>{d}</div>
               ))}
               {Array(6).fill(null).map((_, i) => (
                 <div key={`empty-${i}`} className="cal-day empty">0</div>
@@ -411,9 +419,9 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
           </div>
 
           <div className="court-grid">
-            {courts.length > 0 ? (
-              courts.map((court, index) => {
-                const noSlot = isNoSlotCourt(index);
+              {courts.length > 0 ? (
+              courts.map((court) => {
+                const noSlot = isNoSlotCourt(court.name);
                 return (
                   <div key={court.id} className={`court-card ${noSlot ? 'no-slot' : ''}`}>
                     {noSlot && <div className="no-slot-badge">Penuh</div>}
@@ -472,109 +480,48 @@ export default function DetailVenuePage({ params }: { params: Promise<{ id: stri
 
         <section style={{ marginTop: '100px' }}>
           <h2 style={{ fontSize: '26px', fontWeight: 'bold', marginBottom: '32px' }}>Ulasan</h2>
+          {reviews.length === 0 ? (
+            <p style={{ color: '#aaa' }}>Belum ada ulasan untuk venue ini.</p>
+          ) : (
           <div className="review-wrapper" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
-             <div className="review-card" style={{ background: '#171717', borderRadius: '12px', padding: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#ccc', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'black' }}><i className="fa-solid fa-user"></i></div>
-                  <div>
-                    <h4 style={{ fontSize: '14px', marginBottom: '2px' }}>Rudy Kurniawan</h4>
-                    <p style={{ fontSize: '12px', color: '#aaa' }}>Reviewer</p>
-                  </div>
-                </div>
-                <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Badminton Blue Court 1</h4>
-                <p style={{ fontSize: '13px', color: '#aaa', marginBottom: '20px', lineHeight: '1.5' }}>Lapangan sangat nyaman digunakan dan sangat bersih. Harga sesuai dengan fasilitas yang diberikan.</p>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
-                  <div><span style={{ color: 'var(--primary-lime)' }}>★</span> 5.0</div>
-                  <div style={{ color: '#aaa' }}>2 hari yang lalu</div>
-                </div>
-             </div>
-             <div className="review-card" style={{ background: '#171717', borderRadius: '12px', padding: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#ccc', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'black' }}><i className="fa-solid fa-user"></i></div>
-                  <div>
-                    <h4 style={{ fontSize: '14px', marginBottom: '2px' }}>Ahmad Fauzi</h4>
-                    <p style={{ fontSize: '12px', color: '#aaa' }}>Reviewer</p>
-                  </div>
-                </div>
-                <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Badminton Blue Court 2</h4>
-                <p style={{ fontSize: '13px', color: '#aaa', marginBottom: '20px', lineHeight: '1.5' }}>Pelayanan ramah, lapangan terang, sirkulasi udara baik. Namun parkir agak susah saat weekend.</p>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
-                  <div><span style={{ color: 'var(--primary-lime)' }}>★</span> 4.5</div>
-                  <div style={{ color: '#aaa' }}>4 hari yang lalu</div>
-                </div>
-             </div>
-             <div className="review-card" style={{ background: '#171717', borderRadius: '12px', padding: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#ccc', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'black' }}><i className="fa-solid fa-user"></i></div>
-                  <div>
-                    <h4 style={{ fontSize: '14px', marginBottom: '2px' }}>Clarissa Anwar</h4>
-                    <p style={{ fontSize: '12px', color: '#aaa' }}>Reviewer</p>
-                  </div>
-                </div>
-                <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Badminton Green Court 1</h4>
-                <p style={{ fontSize: '13px', color: '#aaa', marginBottom: '20px', lineHeight: '1.5' }}>Kualitas karpetnya bagus, tidak licin. Sangat recommended buat main bareng teman kantor.</p>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
-                  <div><span style={{ color: 'var(--primary-lime)' }}>★</span> 5.0</div>
-                  <div style={{ color: '#aaa' }}>1 mgg yang lalu</div>
-                </div>
-             </div>
-             <div className="review-card" style={{ background: '#171717', borderRadius: '12px', padding: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#ccc', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'black' }}><i className="fa-solid fa-user"></i></div>
-                  <div>
-                    <h4 style={{ fontSize: '14px', marginBottom: '2px' }}>Bambang Pamungkas</h4>
-                    <p style={{ fontSize: '12px', color: '#aaa' }}>Reviewer</p>
-                  </div>
-                </div>
-                <h4 style={{ fontSize: '14px', marginBottom: '8px' }}>Badminton Green Court 2</h4>
-                <p style={{ fontSize: '13px', color: '#aaa', marginBottom: '20px', lineHeight: '1.5' }}>Overall baik. Harga sewa cukup terjangkau untuk fasilitas yang disediakan oleh GOR ini.</p>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
-                  <div><span style={{ color: 'var(--primary-lime)' }}>★</span> 4.0</div>
-                  <div style={{ color: '#aaa' }}>2 mgg yang lalu</div>
-                </div>
-             </div>
+             {reviews.map((r) => {
+               const initials = r.user_name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+               const daysAgo = Math.floor((Date.now() - new Date(r.created_at).getTime()) / 86400000);
+               const timeAgo = daysAgo === 0 ? 'Hari ini' : daysAgo <= 1 ? 'Kemarin' : `${daysAgo} hari lalu`;
+               return (
+               <div key={r.id} className="review-card" style={{ background: '#171717', borderRadius: '12px', padding: '24px' }}>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                   <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--primary-lime)', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#000', fontWeight: 700, fontSize: '12px' }}>{initials}</div>
+                   <div>
+                     <h4 style={{ fontSize: '14px', marginBottom: '2px' }}>{r.user_name}</h4>
+                     <p style={{ fontSize: '12px', color: '#aaa' }}>Reviewer</p>
+                   </div>
+                 </div>
+                 <p style={{ fontSize: '13px', color: '#aaa', marginBottom: '20px', lineHeight: '1.5' }}>{r.comment}</p>
+                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
+                   <div><span style={{ color: 'var(--primary-lime)' }}>★</span> {r.rating.toFixed(1)}</div>
+                   <div style={{ color: '#aaa' }}>{timeAgo}</div>
+                 </div>
+              </div>
+             )})}
           </div>
+          )}
         </section>
 
         <section style={{ marginTop: '100px', marginBottom: '100px', position: 'relative' }}>
           <h2 style={{ fontSize: '26px', fontWeight: 'bold', marginBottom: '32px' }}>Rekomendasi Lapangan</h2>
           <div className="recommend-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
-             <div className="recommend-card" style={{ background: '#171717', borderRadius: '12px', overflow: 'hidden' }}>
-                <img src="/asset/kalam-kudus.png" style={{ width: '100%', height: '160px', objectFit: 'cover' }} />
+             {recommendations.map((rec) => (
+             <div key={rec.id} className="recommend-card" style={{ background: '#171717', borderRadius: '12px', overflow: 'hidden', cursor: 'pointer' }} onClick={() => window.location.href = `/sewa-lapangan/detail/${rec.id}`}>
+                <img src={rec.image_url} style={{ width: '100%', height: '160px', objectFit: 'cover' }} />
                 <div style={{ padding: '16px' }}>
-                  <h3 style={{ fontSize: '14px', marginBottom: '8px', fontWeight: 600 }}>Kalam Kudus Sport Center</h3>
-                  <p style={{ fontSize: '12px', color: '#aaa', marginBottom: '16px' }}><span style={{ color: 'var(--primary-lime)' }}>★</span> 4.9 • Surakarta, Jawa Tengah</p>
+                  <h3 style={{ fontSize: '14px', marginBottom: '8px', fontWeight: 600 }}>{rec.name}</h3>
+                  <p style={{ fontSize: '12px', color: '#aaa', marginBottom: '16px' }}><span style={{ color: 'var(--primary-lime)' }}>★</span> {rec.rating} • {rec.city}</p>
                   <div style={{ fontSize: '10px', color: '#aaa', marginBottom: '4px' }}>Mulai</div>
-                  <div style={{ fontWeight: 700, fontSize: '16px' }}>Rp250.000<span style={{ fontSize: '12px', fontWeight: 'normal', color: '#aaa' }}>/sesi</span></div>
+                  <div style={{ fontWeight: 700, fontSize: '16px' }}>Rp{rec.price_per_hour.toLocaleString('id-ID')}<span style={{ fontSize: '12px', fontWeight: 'normal', color: '#aaa' }}>/jam</span></div>
                 </div>
              </div>
-             <div className="recommend-card" style={{ background: '#171717', borderRadius: '12px', overflow: 'hidden' }}>
-                <img src="/asset/surabaya-badminton.png" style={{ width: '100%', height: '160px', objectFit: 'cover' }} />
-                <div style={{ padding: '16px' }}>
-                  <h3 style={{ fontSize: '14px', marginBottom: '8px', fontWeight: 600 }}>Surabaya Badminton Hall</h3>
-                  <p style={{ fontSize: '12px', color: '#aaa', marginBottom: '16px' }}><span style={{ color: 'var(--primary-lime)' }}>★</span> 4.8 • Surabaya, Jawa Timur</p>
-                  <div style={{ fontSize: '10px', color: '#aaa', marginBottom: '4px' }}>Mulai</div>
-                  <div style={{ fontWeight: 700, fontSize: '16px' }}>Rp150.000<span style={{ fontSize: '12px', fontWeight: 'normal', color: '#aaa' }}>/sesi</span></div>
-                </div>
-             </div>
-             <div className="recommend-card" style={{ background: '#171717', borderRadius: '12px', overflow: 'hidden' }}>
-                <img src="/asset/gor-arek-surabaya.png" style={{ width: '100%', height: '160px', objectFit: 'cover' }} />
-                <div style={{ padding: '16px' }}>
-                  <h3 style={{ fontSize: '14px', marginBottom: '8px', fontWeight: 600 }}>GOR Arak Surabaya</h3>
-                  <p style={{ fontSize: '12px', color: '#aaa', marginBottom: '16px' }}><span style={{ color: 'var(--primary-lime)' }}>★</span> 4.5 • Surabaya, Jawa Timur</p>
-                  <div style={{ fontSize: '10px', color: '#aaa', marginBottom: '4px' }}>Mulai</div>
-                  <div style={{ fontWeight: 700, fontSize: '16px' }}>Rp80.000<span style={{ fontSize: '12px', fontWeight: 'normal', color: '#aaa' }}>/sesi</span></div>
-                </div>
-             </div>
-             <div className="recommend-card" style={{ background: '#171717', borderRadius: '12px', overflow: 'hidden' }}>
-                <img src="/asset/supersmash-badminton-hall.png" style={{ width: '100%', height: '160px', objectFit: 'cover' }} />
-                <div style={{ padding: '16px' }}>
-                  <h3 style={{ fontSize: '14px', marginBottom: '8px', fontWeight: 600 }}>Supermash Badminton</h3>
-                  <p style={{ fontSize: '12px', color: '#aaa', marginBottom: '16px' }}><span style={{ color: 'var(--primary-lime)' }}>★</span> 4.7 • Surabaya, Jawa Timur</p>
-                  <div style={{ fontSize: '10px', color: '#aaa', marginBottom: '4px' }}>Mulai</div>
-                  <div style={{ fontWeight: 700, fontSize: '16px' }}>Rp120.000<span style={{ fontSize: '12px', fontWeight: 'normal', color: '#aaa' }}>/sesi</span></div>
-                </div>
-             </div>
+             ))}
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '30px' }}>
             <button style={{ background: 'var(--primary-lime)', color: 'black', padding: '12px 24px', borderRadius: '8px', fontWeight: 600, border: 'none', cursor: 'pointer', transition: '0.3s' }} onClick={() => window.location.href = '/sewa-lapangan'}>

@@ -128,7 +128,6 @@ function KeranjangContent() {
       }
 
       setAppliedVoucher({ code: result.code, discountAmount: result.discountAmount });
-      handleCloseVoucherModal();
     } catch {
       setVoucherError('Terjadi kesalahan saat validasi voucher');
     } finally {

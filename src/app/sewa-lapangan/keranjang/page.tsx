@@ -41,26 +41,43 @@ function KeranjangContent() {
     }
 
     if (venueId && courtId) {
-      fetchDetails();
+      loadCartData();
     } else {
       setLoading(false);
     }
   }, [venueId, courtId]);
 
-  async function fetchDetails() {
+  useEffect(() => {
+    if (isVoucherModalOpen) {
+      loadVouchers();
+    } else {
+      setAvailableVouchers([]);
+      setVoucherCode('');
+      setVoucherError('');
+      setVoucherSuccess('');
+    }
+  }, [isVoucherModalOpen]);
+
+  async function loadCartData() {
     try {
       setLoading(true);
       const { data: vData } = await supabase.from('venues').select('*').eq('id', venueId).single();
       const { data: cData } = await supabase.from('courts').select('*').eq('id', courtId).single();
       setVenue(vData);
       setCourt(cData);
-
-      const vouchers = await getAvailableVouchers();
-      setAvailableVouchers(vouchers);
     } catch (error) {
       console.error('Error fetching keranjang details:', error);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function loadVouchers() {
+    try {
+      const vouchers = await getAvailableVouchers();
+      setAvailableVouchers(vouchers);
+    } catch (error) {
+      console.error('Error fetching vouchers:', error);
     }
   }
 

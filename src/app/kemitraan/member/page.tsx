@@ -49,7 +49,7 @@ export default function MemberPage() {
     }
   }
 
-  async   async function handleExport() {
+  async function handleExport() {
     const csv = await exportMembers();
     if (!csv) return;
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -61,7 +61,7 @@ export default function MemberPage() {
     URL.revokeObjectURL(url);
   }
 
-  function handleDetail(m: Member) {
+  async function handleDetail(m: Member) {
     setSelectedMember(m);
     const result = await getMemberDetail(m.email);
     setDetailBookings(result.bookings);

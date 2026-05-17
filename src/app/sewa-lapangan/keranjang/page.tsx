@@ -47,17 +47,6 @@ function KeranjangContent() {
     }
   }, [venueId, courtId]);
 
-  useEffect(() => {
-    if (isVoucherModalOpen) {
-      loadVouchers();
-    } else {
-      setAvailableVouchers([]);
-      setVoucherCode('');
-      setVoucherError('');
-      setVoucherSuccess('');
-    }
-  }, [isVoucherModalOpen]);
-
   async function loadCartData() {
     try {
       setLoading(true);
@@ -72,13 +61,27 @@ function KeranjangContent() {
     }
   }
 
-  async function loadVouchers() {
+  async function handleOpenVoucherModal() {
+    setVoucherCode('');
+    setVoucherError('');
+    setVoucherSuccess('');
+    setVoucherLoading(true);
+    setIsVoucherModalOpen(true);
     try {
       const vouchers = await getAvailableVouchers();
       setAvailableVouchers(vouchers);
     } catch (error) {
       console.error('Error fetching vouchers:', error);
+    } finally {
+      setVoucherLoading(false);
     }
+  }
+
+  function handleCloseVoucherModal() {
+    setIsVoucherModalOpen(false);
+    setVoucherCode('');
+    setVoucherError('');
+    setVoucherSuccess('');
   }
 
   const toggleSlot = (slot: string) => {
@@ -218,7 +221,7 @@ function KeranjangContent() {
         </div>
 
         <div className="right">
-          <div className="small-box" role="button" tabIndex={0} onClick={() => setIsVoucherModalOpen(true)} onKeyDown={(e) => e.key === 'Enter' && setIsVoucherModalOpen(true)} style={appliedVoucher ? { borderColor: 'var(--primary-lime)', cursor: 'pointer' } : { cursor: 'pointer' }}>
+          <div className="small-box" role="button" tabIndex={0} onClick={handleOpenVoucherModal} onKeyDown={(e) => e.key === 'Enter' && handleOpenVoucherModal()} style={appliedVoucher ? { borderColor: 'var(--primary-lime)', cursor: 'pointer' } : { cursor: 'pointer' }}>
             <div className="voucher-line" style={{ pointerEvents: 'none' }}>
               <i className="fa-solid fa-ticket" style={{ color: 'var(--primary-lime)' }}></i>
               <span className="voucher-label">Gunakan Voucher</span>
@@ -292,11 +295,11 @@ function KeranjangContent() {
       )}
 
       {isVoucherModalOpen && (
-        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) { setIsVoucherModalOpen(false); setVoucherError(''); setVoucherSuccess(''); } }}>
+        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) handleCloseVoucherModal(); }}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Gunakan Voucher</h2>
-              <button type="button" className="close-btn" onClick={() => { setIsVoucherModalOpen(false); setVoucherError(''); setVoucherSuccess(''); }}>&times;</button>
+              <button type="button" className="close-btn" onClick={handleCloseVoucherModal}>&times;</button>
             </div>
             <div style={{ marginBottom: '24px' }}>
               <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
@@ -317,7 +320,9 @@ function KeranjangContent() {
               <p style={{ fontSize: '12px', color: '#888' }}>Punya kode promo? Masukkan kodenya di sini.</p>
             </div>
 
-            {availableVouchers.length > 0 && (
+            {voucherLoading ? (
+              <p style={{ fontSize: '13px', color: '#888', textAlign: 'center' }}>Memuat voucher...</p>
+            ) : availableVouchers.length > 0 ? (
               <>
                 <div style={{ marginBottom: '8px', fontWeight: 600, fontSize: '14px' }}>Voucher Tersedia</div>
                 <div className="voucher-list" style={{ maxHeight: '250px', overflowY: 'auto', paddingRight: '5px' }}>
@@ -350,6 +355,8 @@ function KeranjangContent() {
                   })}
                 </div>
               </>
+            ) : (
+              <p style={{ fontSize: '13px', color: '#888', textAlign: 'center' }}>Tidak ada voucher tersedia</p>
             )}
           </div>
         </div>

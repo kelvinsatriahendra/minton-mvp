@@ -55,14 +55,31 @@ export async function loginAction(prevState: any, formData: FormData) {
     const data = users[0];
     console.log('User found:', { email: data.email, id: data.id, verified: data.email_verified });
 
-    if (!data.password || !data.password.startsWith('$2')) {
-      if (data.password === 'oauth-user') {
-        return { message: 'Akun ini terdaftar dengan Google. Silakan masuk menggunakan Google.' };
-      }
+    if (!data.password) {
       return { message: 'Password salah. Periksa kembali kata sandi Anda.' };
     }
 
-    const passwordMatch = await bcrypt.compare(password, data.password);
+    let passwordMatch = false;
+    const storedPassword: string = data.password;
+
+    if (storedPassword === 'oauth-user') {
+      return { message: 'Akun ini terdaftar dengan Google. Silakan masuk menggunakan Google.' };
+    }
+
+    if (storedPassword.startsWith('$2')) {
+      passwordMatch = await bcrypt.compare(password, storedPassword);
+    } else {
+      // Legacy fallback: allow plaintext password once, then migrate to bcrypt hash.
+      passwordMatch = password === storedPassword;
+      if (passwordMatch) {
+        const migratedHash = await bcrypt.hash(password, 10);
+        await supabaseClient
+          .from('users')
+          .update({ password: migratedHash })
+          .eq('id', data.id);
+      }
+    }
+
     if (!passwordMatch) {
       return { message: 'Password salah. Periksa kembali kata sandi Anda.' };
     }

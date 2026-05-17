@@ -119,3 +119,31 @@ export async function getMemberDetail(email: string) {
     ),
   };
 }
+
+export async function exportMembers() {
+  const supabase = createServerSupabaseClient();
+  const cookieStore = await cookies();
+  const partnerId = cookieStore.get('mitraId')?.value;
+
+  if (!partnerId) return null;
+
+  const { data } = await supabase
+    .from('gor_members')
+    .select('*')
+    .eq('partner_id', parseInt(partnerId))
+    .order('created_at', { ascending: false });
+
+  const list = data ?? [];
+
+  const header = 'Nama,Email,Telepon,Status,Total Booking,Bergabung\n';
+  const rows = list
+    .map((m: any) => {
+      const name = `"${(m.name || '').replace(/"/g, '""')}"`;
+      const email = `"${(m.email || '').replace(/"/g, '""')}"`;
+      const phone = `"${(m.phone || '').replace(/"/g, '""')}"`;
+      return `${name},${email},${phone},${m.status || 'Reguler'},${m.total_bookings || 0},${new Date(m.created_at).toLocaleDateString('id-ID')}`;
+    })
+    .join('\n');
+
+  return header + rows;
+}

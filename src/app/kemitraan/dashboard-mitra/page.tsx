@@ -1,5 +1,5 @@
 import MitraSidebar from "@/components/MitraSidebar";
-import { getDashboardStats } from "./actions";
+import { getDashboardStats, getWeeklySchedule } from "./actions";
 
 export const metadata = {
   title: 'Dashboard Mitra - Minton',
@@ -7,6 +7,7 @@ export const metadata = {
 
 export default async function DashboardMitraPage() {
   const stats = await getDashboardStats();
+  const { weekSlots } = await getWeeklySchedule();
 
   const formatRupiah = (angka: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -54,7 +55,7 @@ export default async function DashboardMitraPage() {
               <div className="stat-icon"><i className="fa-solid fa-star"></i></div>
               <div className="stat-info">
                 <h4>Rating GOR</h4>
-                <p>{stats.rating.toFixed(1)} / 5.0</p>
+                <p>{stats.rating > 0 ? `${stats.rating.toFixed(1)} / 5.0` : 'Belum ada rating'}</p>
               </div>
             </div>
           </div>
@@ -70,7 +71,6 @@ export default async function DashboardMitraPage() {
                 </div>
               </div>
               <div style={{ overflowY: "auto", flex: 1 }}>
-                {/* Visualisasi Jadwal Statik untuk MVP (Karena rendering dinamis kalender cukup kompleks) */}
                 <table className="court-table">
                   <thead>
                     <tr>
@@ -79,38 +79,22 @@ export default async function DashboardMitraPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td className="cell-time">08:00</td>
-                      <td className="cell-closed"></td><td className="cell-closed"></td><td className="cell-closed"></td><td className="cell-closed"></td><td className="cell-closed"></td><td className="cell-closed"></td><td className="cell-closed"></td>
-                    </tr>
-                    <tr>
-                      <td className="cell-time">09:00</td>
-                      <td className="cell-empty"></td><td className="cell-empty"></td><td className="cell-empty"></td><td className="cell-empty"></td><td className="cell-empty"></td><td className="cell-empty"></td><td className="cell-empty"></td>
-                    </tr>
-                    <tr>
-                      <td className="cell-time">10:00</td>
-                      <td className="cell-empty"></td><td className="cell-booked">1B</td><td className="cell-booked">1B</td><td className="cell-booked">1B</td><td className="cell-booked">1B</td><td className="cell-booked">1B</td><td className="cell-empty"></td>
-                    </tr>
-                    <tr>
-                      <td className="cell-time">11:00</td>
-                      <td className="cell-empty"></td><td className="cell-booked">1B</td><td className="cell-booked">1B</td><td className="cell-booked">1B</td><td className="cell-booked">1B</td><td className="cell-booked">1B</td><td className="cell-empty"></td>
-                    </tr>
-                    <tr>
-                      <td className="cell-time">12:00</td>
-                      <td className="cell-empty"></td><td className="cell-empty"></td><td className="cell-empty"></td><td className="cell-empty"></td><td className="cell-empty"></td><td className="cell-empty"></td><td className="cell-empty"></td>
-                    </tr>
-                    <tr>
-                      <td className="cell-time">13:00</td>
-                      <td className="cell-empty"></td><td className="cell-empty"></td><td className="cell-empty"></td><td className="cell-empty"></td><td className="cell-booked">2B</td><td className="cell-empty"></td><td className="cell-empty"></td>
-                    </tr>
-                    <tr>
-                      <td className="cell-time">14:00</td>
-                      <td className="cell-empty"></td><td className="cell-booked">2B</td><td className="cell-booked">1B</td><td className="cell-booked">3B</td><td className="cell-booked">2B</td><td className="cell-booked">1B</td><td className="cell-empty"></td>
-                    </tr>
-                    <tr>
-                      <td className="cell-time">15:00</td>
-                      <td className="cell-empty"></td><td className="cell-empty"></td><td className="cell-empty"></td><td className="cell-empty"></td><td className="cell-empty"></td><td className="cell-empty"></td><td className="cell-empty"></td>
-                    </tr>
+                    {weekSlots.length === 0 ? (
+                      <tr>
+                        <td colSpan={8} style={{ textAlign: 'center', padding: '32px', color: '#555', fontSize: '13px' }}>
+                          Belum ada jadwal. Atur jadwal GOR Anda di menu Schedule.
+                        </td>
+                      </tr>
+                    ) : (
+                      weekSlots.map((row) => (
+                        <tr key={row.time}>
+                          <td className="cell-time">{row.time}</td>
+                          {row.days.map((cell, i) => (
+                            <td key={i} className={`cell-${cell.status}`}>{cell.label}</td>
+                          ))}
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>

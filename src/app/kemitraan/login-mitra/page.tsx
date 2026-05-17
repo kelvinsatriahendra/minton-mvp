@@ -8,6 +8,9 @@ export default function LoginMitraPage() {
   const router = useRouter();
   const [state, formAction, isPending] = useActionState(loginMitraAction, null);
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotMsg, setForgotMsg] = useState('');
 
   useEffect(() => { 
     document.title = 'Login Mitra - Minton'; 
@@ -85,7 +88,7 @@ export default function LoginMitraPage() {
               </div>
 
               <div style={{ textAlign: "right", marginBottom: "24px" }}>
-                <a href="#" style={{ color: "#aaaaaa", fontSize: "13px", textDecoration: "none" }}>Lupa kata sandi?</a>
+                <a href="#" onClick={(e) => { e.preventDefault(); setForgotEmail(''); setForgotMsg(''); setShowForgotModal(true); }} style={{ color: "#aaaaaa", fontSize: "13px", textDecoration: "none" }}>Lupa kata sandi?</a>
               </div>
               <button type="submit" className="btn-login" disabled={isPending} style={{ opacity: isPending ? 0.7 : 1 }}>
                 {isPending ? 'Memproses...' : 'Masuk ke Dashboard'}
@@ -100,6 +103,37 @@ export default function LoginMitraPage() {
           </div>
         </div>
       </div>
+      {showForgotModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }} onClick={() => setShowForgotModal(false)}>
+          <div style={{ background: '#1D1D1D', border: '1px solid #333', borderRadius: '16px', padding: '32px', width: '90%', maxWidth: '420px' }} onClick={(e) => e.stopPropagation()}>
+            <h3 style={{ marginBottom: '8px', marginTop: 0 }}>Reset Kata Sandi</h3>
+            <p style={{ color: '#aaa', fontSize: '14px', marginBottom: '24px' }}>
+              Masukkan email bisnis/ID Mitra Anda. Link reset akan dikirim ke email tersebut.
+            </p>
+            <div className="form-group">
+              <label>Email Bisnis / ID Mitra</label>
+              <input
+                type="email"
+                placeholder="contoh: gor_sudirman@email.com"
+                value={forgotEmail}
+                onChange={(e) => setForgotEmail(e.target.value)}
+              />
+            </div>
+            {forgotMsg && (
+              <div style={{ padding: '10px', backgroundColor: 'rgba(189,209,36,0.1)', color: 'var(--primary-lime)', borderRadius: '4px', marginBottom: '16px', fontSize: '13px' }}>
+                {forgotMsg}
+              </div>
+            )}
+            <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+              <button type="button" className="btn-secondary-dash" style={{ flex: 1 }} onClick={() => setShowForgotModal(false)}>Batal</button>
+              <button type="button" className="btn-primary-dash" style={{ flex: 1 }} onClick={() => {
+                if (!forgotEmail) { setForgotMsg('Masukkan email terlebih dahulu.'); return; }
+                setForgotMsg('Fitur reset password sedang dikembangkan. Silakan hubungi admin Minton untuk bantuan reset akun.');
+              }}>Kirim</button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

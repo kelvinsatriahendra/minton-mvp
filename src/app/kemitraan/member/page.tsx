@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import MitraSidebar from "@/components/MitraSidebar";
-import { getMembers, addMember, getMemberDetail } from './actions';
+import { getMembers, addMember, getMemberDetail, exportMembers } from './actions';
 
 interface Member {
   id: string; name: string; email: string; phone: string; status: string;
@@ -49,7 +49,19 @@ export default function MemberPage() {
     }
   }
 
-  async function handleDetail(m: Member) {
+  async   async function handleExport() {
+    const csv = await exportMembers();
+    if (!csv) return;
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `member_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function handleDetail(m: Member) {
     setSelectedMember(m);
     const result = await getMemberDetail(m.email);
     setDetailBookings(result.bookings);
@@ -63,7 +75,7 @@ export default function MemberPage() {
         <header className="mitra-header">
           <h1>Manajemen Member</h1>
           <div className="mitra-header-actions">
-            <button className="btn-secondary-dash"><i className="fa-solid fa-file-export"></i> Ekspor</button>
+            <button className="btn-secondary-dash" onClick={handleExport}><i className="fa-solid fa-file-export"></i> Ekspor</button>
             <button className="btn-primary-dash" onClick={() => { setShowAddModal(true); setMsg(''); }}><i className="fa-solid fa-plus"></i> Tambah Member</button>
           </div>
         </header>

@@ -1,8 +1,9 @@
 
 "use client";
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { submitLead } from './actions';
 
 export default function KemitraanPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -20,14 +21,15 @@ export default function KemitraanPage() {
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
+    const result = await submitLead(new FormData(e.currentTarget as HTMLFormElement));
+    setIsSubmitting(false);
+    if (result.success) {
       setIsSuccess(true);
       setTimeout(() => { setIsSuccess(false); setIsModalOpen(false); }, 3000);
-    }, 1500);
+    }
   };
 
   return (
@@ -96,10 +98,10 @@ export default function KemitraanPage() {
               <form onSubmit={handleSubmit}>
                 <h2 style={{ marginBottom: '10px' }}>Daftar Mitra Minton</h2>
                 <p style={{ color: '#aaa', marginBottom: '30px', fontSize: '14px' }}>Lengkapi data GOR Anda untuk mulai digitalisasi.</p>
-                <div className="form-group"><label>Nama GOR / Venue</label><input type="text" placeholder="GOR Sudirman" required /></div>
-                <div className="form-group"><label>Lokasi (Kota)</label><input type="text" placeholder="Surabaya" required /></div>
-                <div className="form-group"><label>No. WhatsApp Aktif</label><input type="tel" placeholder="0812xxxxxx" required /></div>
-                <button type="submit" className="btn-submit">Kirim Pendaftaran</button>
+                <div className="form-group"><label>Nama GOR / Venue</label><input type="text" name="gor_name" placeholder="GOR Sudirman" required /></div>
+                <div className="form-group"><label>Lokasi (Kota)</label><input type="text" name="city" placeholder="Surabaya" required /></div>
+                <div className="form-group"><label>No. WhatsApp Aktif</label><input type="tel" name="phone" placeholder="0812xxxxxx" required /></div>
+                <button type="submit" className="btn-submit" disabled={isSubmitting}>{isSubmitting ? 'Mengirim...' : 'Kirim Pendaftaran'}</button>
               </form>
             )}
           </div>

@@ -142,9 +142,11 @@ function KeranjangContent() {
         .btn-sewa-primary:hover { background: var(--primary-lime); border-color: var(--primary-lime); color: black; }
         .btn-sewa-primary:disabled { opacity: 0.4; cursor: not-allowed; }
         .btn-sewa-primary:disabled:hover { background: none; border-color: #ffffff; color: #ffffff; }
-        .small-box { background: #1c1c1c; padding: 16px; border-radius: 12px; margin-bottom: 16px; cursor: pointer; font-size: 16px; border: 1px solid #333; transition: 0.3s; min-height: 66px; display: flex; align-items: center; justify-content: center; }
+        .small-box { background: #1c1c1c; padding: 14px 16px; border-radius: 12px; margin-bottom: 16px; cursor: pointer; font-size: 16px; border: 1px solid #333; transition: 0.3s; min-height: 66px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
         .small-box:hover { border-color: var(--primary-lime); }
-        .voucher-line { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .voucher-line { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
+        .voucher-label { font-weight: 500; }
+        .voucher-detail { max-width: 100%; font-size: 13px; color: #c9c9c9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .voucher-tag { color: var(--primary-lime); font-weight: 700; }
         .voucher-remove { font-size: 12px; color: #888; cursor: pointer; text-decoration: underline; }
         .modal-overlay { position: fixed; z-index: 2000; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; animation: fadeIn 0.3s ease; }
@@ -200,17 +202,15 @@ function KeranjangContent() {
 
         <div className="right">
           <div className="small-box" onClick={() => setIsVoucherModalOpen(true)} style={appliedVoucher ? { borderColor: 'var(--primary-lime)' } : {}}>
-            {appliedVoucher ? (
-              <div className="voucher-line">
-                <i className="fa-solid fa-ticket" style={{ color: 'var(--primary-lime)' }}></i>
+            <div className="voucher-line">
+              <i className="fa-solid fa-ticket" style={{ color: 'var(--primary-lime)' }}></i>
+              <span className="voucher-label">Gunakan Voucher</span>
+            </div>
+            {appliedVoucher && (
+              <div className="voucher-line voucher-detail" title={`${appliedVoucher.code} - Diskon Rp ${discountAmount.toLocaleString('id-ID')}`}>
                 <span className="voucher-tag">{appliedVoucher.code}</span>
-                <span>Diskon Rp {discountAmount.toLocaleString('id-ID')}</span>
+                <span>- Diskon Rp {discountAmount.toLocaleString('id-ID')}</span>
                 <span className="voucher-remove" onClick={(e) => { e.stopPropagation(); handleRemoveVoucher(); }}>hapus</span>
-              </div>
-            ) : (
-              <div className="voucher-line">
-                <i className="fa-solid fa-ticket" style={{ color: 'var(--primary-lime)' }}></i>
-                <span>Gunakan Voucher</span>
               </div>
             )}
           </div>

@@ -1,13 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { getLeaderboard, getClubs, getFeedPosts, getMyRank } from './actions';
+import { getLeaderboard, getClubs, getFeedPosts, getMyRank, joinClub, requestMabar, getTournaments } from './actions';
 
-interface LeaderboardUser { email: string; nama_lengkap: string; points: number }
+interface LeaderboardUser { email: string; nama_lengkap: string; gender?: string; points: number }
 interface Club { id: string; name: string; description: string; city: string; level: string; schedule: string; fee: string; member_count: number; image_url: string }
 interface FeedPost { id: string; title: string; content: string; author_name: string; image_url: string; published_at: string }
+interface Tournament { id: string; badge: string; title: string; description: string; image_url: string; date: string; location: string; category: string; price: string; max_participants: number; slots_filled: number; is_open: boolean }
 
 function formatDate(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -24,47 +25,109 @@ function getAvatar(email: string, idx: number) {
   return imgs[idx] ?? undefined;
 }
 
+function matchesSchedule(schedule: string, filter: string) {
+  const lower = schedule.toLowerCase();
+  if (filter === 'weekend') return lower.includes('sabtu') || lower.includes('minggu');
+  if (filter === 'weekday') return !lower.includes('sabtu') && !lower.includes('minggu');
+  return true;
+}
+
 export default function KomunitasPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
   const [clubs, setClubs] = useState<Club[]>([]);
   const [feed, setFeed] = useState<FeedPost[]>([]);
+  const [tournament, setTournament] = useState<Tournament | null>(null);
   const [myRank, setMyRank] = useState<{ rank: number } | null>(null);
   const [userEmail, setUserEmail] = useState('');
+  const [userName, setUserName] = useState('');
   const [search, setSearch] = useState('');
   const [cityFilter, setCityFilter] = useState('');
   const [scheduleFilter, setScheduleFilter] = useState('');
   const [activeTab, setActiveTab] = useState('Pria');
+  const [loading, setLoading] = useState(true);
+  const [clubLoading, setClubLoading] = useState(false);
+  const [hasMoreClubs, setHasMoreClubs] = useState(false);
+  const [clubOffset, setClubOffset] = useState(0);
+  const CLUB_PAGE_SIZE = 4;
 
   const [articleModal, setArticleModal] = useState<FeedPost | null>(null);
   const [clubModal, setClubModal] = useState<{ club: Club; action: string } | null>(null);
   const [myRankModal, setMyRankModal] = useState(false);
-  const [loadMoreModal, setLoadMoreModal] = useState(false);
+  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   useEffect(() => { document.title = 'Komunitas - Minton'; }, []);
 
   useEffect(() => {
+    if (!notification) return;
+    const t = setTimeout(() => setNotification(null), 4000);
+    return () => clearTimeout(t);
+  }, [notification]);
+
+  useEffect(() => {
     (async () => {
-      const [lb, c, f] = await Promise.all([getLeaderboard(), getClubs(), getFeedPosts()]);
+      setLoading(true);
+      const [lb, f, t] = await Promise.all([getLeaderboard(), getFeedPosts(), getTournaments()]);
       setLeaderboard(lb);
-      setClubs(c);
       setFeed(f);
+      setTournament(t);
+
+      const [{ clubs: initialClubs, hasMore }] = await Promise.all([getClubs(CLUB_PAGE_SIZE, 0)]);
+      setClubs(initialClubs);
+      setHasMoreClubs(hasMore);
+
+      const email = document.cookie.replace(/(?:(?:^|.*;\s*)userEmail\s*=\s*([^;]*).*$)|^.*$/, '$1');
+      const name = document.cookie.replace(/(?:(?:^|.*;\s*)userName\s*=\s*([^;]*).*$)|^.*$/, '$1');
+      setUserEmail(email);
+      setUserName(name);
+      if (email) getMyRank(email).then(setMyRank);
+
+      setLoading(false);
     })();
-    const email = document.cookie.replace(/(?:(?:^|.*;\s*)userEmail\s*=\s*([^;]*).*$)|^.*$/, '$1');
-    setUserEmail(email);
-    if (email) getMyRank(email).then(setMyRank);
   }, []);
+
+  const loadMoreClubs = useCallback(async () => {
+    setClubLoading(true);
+    const newOffset = clubOffset + CLUB_PAGE_SIZE;
+    const { clubs: moreClubs, hasMore } = await getClubs(CLUB_PAGE_SIZE, newOffset);
+    setClubs((prev) => [...prev, ...moreClubs]);
+    setClubOffset(newOffset);
+    setHasMoreClubs(hasMore);
+    setClubLoading(false);
+  }, [clubOffset]);
+
+  const handleClubAction = useCallback(async (club: Club, action: string) => {
+    if (!userEmail) {
+      setNotification({ message: 'Silakan login terlebih dahulu.', type: 'error' });
+      setClubModal(null);
+      return;
+    }
+    const fn = action === 'join' ? joinClub : requestMabar;
+    const result = await fn(club.id, userEmail, userName);
+    setNotification({ message: result.message, type: result.success ? 'success' : 'error' });
+    setClubModal(null);
+  }, [userEmail, userName]);
+
+  const tabFilterMap: Record<string, string | undefined> = {
+    Pria: 'Pria',
+    Wanita: 'Wanita',
+    'Klub/Grup': undefined,
+  };
+
+  const filteredLeaderboard = activeTab === 'Klub/Grup'
+    ? leaderboard
+    : leaderboard.filter((u) => u.gender === tabFilterMap[activeTab]);
 
   const filteredClubs = clubs.filter((c) => {
     if (search && !c.name.toLowerCase().includes(search.toLowerCase())) return false;
     if (cityFilter && !c.city.toLowerCase().includes(cityFilter.toLowerCase())) return false;
-    if (scheduleFilter && !c.schedule.toLowerCase().includes(scheduleFilter.toLowerCase())) return false;
+    if (scheduleFilter && !matchesSchedule(c.schedule, scheduleFilter)) return false;
     return true;
   });
 
   const cities = [...new Set(clubs.map((c) => c.city))];
 
-  const top3 = leaderboard.slice(0, 3);
-  const rest = leaderboard.slice(3);
+  const top3 = filteredLeaderboard.slice(0, 3);
+  const rest = filteredLeaderboard.slice(3);
 
   function openArticleModal(post: FeedPost) { setArticleModal(post); document.body.style.overflow = 'hidden'; }
   function closeArticleModal() { setArticleModal(null); document.body.style.overflow = 'auto'; }
@@ -86,6 +149,11 @@ export default function KomunitasPage() {
         .btn-kom-primary { background: var(--primary-lime); color: #000; }
         .btn-kom-primary:hover { background: #d4e92a; }
         .btn-kom-secondary:hover { background: rgba(255,255,255,0.05); }
+        .notification-toast { position: fixed; top: 100px; left: 50%; transform: translateX(-50%); z-index: 2000; padding: 14px 24px; border-radius: 12px; font-size: 14px; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.3); animation: fadeIn 0.3s ease; }
+        .notification-toast.success { background: #16a34a; color: #fff; }
+        .notification-toast.error { background: #dc2626; color: #fff; }
+        .lb-empty { padding: 40px; text-align: center; color: #888; font-size: 14px; grid-column: 1 / -1; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(-10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
       `}} />
 
       <Navbar />
@@ -95,83 +163,89 @@ export default function KomunitasPage() {
             <p>The <span>Hall of Fame</span></p>
             <h2>Jajaran Para <span className="text-highlight">Jagoan.</span></h2>
           </div>
-          <div className="podium-container">
-            {top3.length >= 2 && (
-              <div className="podium-card rank-2">
-                <div className="podium-rank">2</div>
-                <div className="podium-content">
-                  <div className="podium-name">{top3[1]?.nama_lengkap ?? '-'}</div>
-                  <div className="podium-points">{top3[1]?.points.toLocaleString()}</div>
-                  <div className="podium-label">Poin</div>
-                </div>
+          {loading ? (
+            <div className="lb-empty">Memuat data...</div>
+          ) : (
+            <>
+              <div className="podium-container">
+                {top3.length >= 2 && (
+                  <div className="podium-card rank-2">
+                    <div className="podium-rank">2</div>
+                    <div className="podium-content">
+                      <div className="podium-name">{top3[1]?.nama_lengkap ?? '-'}</div>
+                      <div className="podium-points">{top3[1]?.points.toLocaleString()}</div>
+                      <div className="podium-label">Poin</div>
+                    </div>
+                  </div>
+                )}
+                {top3.length >= 1 && (
+                  <div className="podium-card rank-1">
+                    <div className="podium-rank">1</div>
+                    <div className="podium-content">
+                      <div className="podium-name">{top3[0]?.nama_lengkap ?? '-'}</div>
+                      <div className="podium-points">{top3[0]?.points.toLocaleString()}</div>
+                      <div className="podium-label">Poin</div>
+                    </div>
+                  </div>
+                )}
+                {top3.length >= 3 && (
+                  <div className="podium-card rank-3">
+                    <div className="podium-rank">3</div>
+                    <div className="podium-content">
+                      <div className="podium-name">{top3[2]?.nama_lengkap ?? '-'}</div>
+                      <div className="podium-points">{top3[2]?.points.toLocaleString()}</div>
+                      <div className="podium-label">Poin</div>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-            {top3.length >= 1 && (
-              <div className="podium-card rank-1">
-                <div className="podium-rank">1</div>
-                <div className="podium-content">
-                  <div className="podium-name">{top3[0]?.nama_lengkap ?? '-'}</div>
-                  <div className="podium-points">{top3[0]?.points.toLocaleString()}</div>
-                  <div className="podium-label">Poin</div>
-                </div>
-              </div>
-            )}
-            {top3.length >= 3 && (
-              <div className="podium-card rank-3">
-                <div className="podium-rank">3</div>
-                <div className="podium-content">
-                  <div className="podium-name">{top3[2]?.nama_lengkap ?? '-'}</div>
-                  <div className="podium-points">{top3[2]?.points.toLocaleString()}</div>
-                  <div className="podium-label">Poin</div>
-                </div>
-              </div>
-            )}
-          </div>
-        </section>
 
-        <section>
-          <div className="section-title">
-            <h2>Minton <span className="text-highlight">Leaderboard</span></h2>
-          </div>
-          <div className="leaderboard-header">
-            <div className="lb-tabs">
-              {['Pria', 'Wanita', 'Klub/Grup'].map((tab) => (
-                <div key={tab} className={`lb-tab ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>{tab}</div>
-              ))}
-            </div>
-            <button className="btn-standard primary" onClick={() => setMyRankModal(true)}>
-              Lihat Peringkat Saya
-            </button>
-          </div>
-          <div className="leaderboard-grid">
-            {(() => {
-              const cols = 3;
-              const perCol = Math.ceil(rest.length / cols) || 1;
-              return Array.from({ length: cols }, (_, ci) => (
-                <div key={ci} className="lb-list">
-                  {rest.slice(ci * perCol, (ci + 1) * perCol).map((u, i) => {
-                    const globalIdx = ci * perCol + i + 4;
-                    const isMe = u.email === userEmail;
-                    return (
-                      <div
-                        key={u.email}
-                        className="lb-row"
-                        id={isMe ? 'my-rank' : undefined}
-                        style={isMe ? { background: 'var(--primary-lime)', borderRadius: '8px', padding: '4px 8px' } : undefined}
-                      >
-                        <span className="lb-rank" style={globalIdx > 3 ? { color: '#aaaaaa' } : undefined}>{globalIdx}</span>
-                        <div className="lb-user">
-                          <div className="lb-avatar">{getAvatar(u.email, globalIdx - 1) && <img src={getAvatar(u.email, globalIdx - 1)} alt="" />}</div>
-                          {u.nama_lengkap}
-                        </div>
-                        <span className="lb-score">{u.points.toLocaleString()} pts</span>
-                      </div>
-                    );
-                  })}
+              <div className="leaderboard-header">
+                <div className="lb-tabs">
+                  {['Pria', 'Wanita', 'Klub/Grup'].map((tab) => (
+                    <div key={tab} className={`lb-tab ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>{tab}</div>
+                  ))}
                 </div>
-              ));
-            })()}
-          </div>
+                <button className="btn-standard primary" onClick={() => setMyRankModal(true)}>
+                  Lihat Peringkat Saya
+                </button>
+              </div>
+              {rest.length === 0 && activeTab !== 'Klub/Grup' ? (
+                <div className="lb-empty">Belum ada peserta di kategori {activeTab}.</div>
+              ) : (
+                <div className="leaderboard-grid">
+                  {(() => {
+                    if (rest.length === 0) return null;
+                    const cols = 3;
+                    const perCol = Math.ceil(rest.length / cols) || 1;
+                    return Array.from({ length: cols }, (_, ci) => (
+                      <div key={ci} className="lb-list">
+                        {rest.slice(ci * perCol, (ci + 1) * perCol).map((u, i) => {
+                          const globalIdx = ci * perCol + i + 4;
+                          const isMe = u.email === userEmail;
+                          return (
+                            <div
+                              key={u.email}
+                              className="lb-row"
+                              id={isMe ? 'my-rank' : undefined}
+                              style={isMe ? { background: 'var(--primary-lime)', borderRadius: '8px', padding: '4px 8px' } : undefined}
+                            >
+                              <span className="lb-rank" style={globalIdx > 3 ? { color: '#aaaaaa' } : undefined}>{globalIdx}</span>
+                              <div className="lb-user">
+                                <div className="lb-avatar">{getAvatar(u.email, globalIdx - 1) && <img src={getAvatar(u.email, globalIdx - 1)} alt="" />}</div>
+                                {u.nama_lengkap}
+                              </div>
+                              <span className="lb-score">{u.points.toLocaleString()} pts</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ));
+                  })()}
+                </div>
+              )}
+            </>
+          )}
         </section>
 
         <section>
@@ -227,11 +301,18 @@ export default function KomunitasPage() {
               </div>
             ))}
           </div>
-          <div style={{ textAlign: 'right', marginTop: '24px' }}>
-            <button className="btn btn-outline" style={{ borderColor: 'var(--primary-lime)', color: 'var(--primary-lime)' }} onClick={() => setLoadMoreModal(true)}>
-              <i className="fa-solid fa-plus"></i> Muat Lebih Banyak
-            </button>
-          </div>
+          {hasMoreClubs && (
+            <div style={{ textAlign: 'right', marginTop: '24px' }}>
+              <button
+                className="btn btn-outline"
+                style={{ borderColor: 'var(--primary-lime)', color: 'var(--primary-lime)' }}
+                onClick={loadMoreClubs}
+                disabled={clubLoading}
+              >
+                <i className="fa-solid fa-plus"></i> {clubLoading ? 'Memuat...' : 'Muat Lebih Banyak'}
+              </button>
+            </div>
+          )}
         </section>
 
         <section>
@@ -260,14 +341,27 @@ export default function KomunitasPage() {
             <h2>Upcoming <span className="text-highlight">Tournament</span></h2>
           </div>
           <img
-            src="/asset/turnamen.png"
-            alt="Badminton Tournament Banner"
+            src={tournament?.image_url || '/asset/turnamen.png'}
+            alt={tournament?.title || 'Badminton Tournament Banner'}
             className="tournament-banner"
-            onClick={() => setArticleModal({ id: 'tournament', title: 'Turnamen Badminton Minton 2026', content: 'Turnamen tahunan Minton akan segera digelar! Berbagai kategori dipertandingkan mulai dari Ganda Dewasa, Tunggal Pemula, hingga Ganda Campuran. Total hadiah mencapai puluhan juta rupiah. Segera daftarkan tim Anda melalui GOR mitra Minton terdekat. Pantau terus informasi jadwal kualifikasi dan pendaftaran di halaman ini.', author_name: 'Minton Tournament', image_url: '/asset/turnamen.png', published_at: new Date().toISOString() })}
+            onClick={() => setArticleModal({
+              id: tournament?.id || 'tournament',
+              title: tournament?.title || 'Turnamen Badminton Minton 2026',
+              content: tournament?.description || 'Turnamen tahunan Minton akan segera digelar! Berbagai kategori dipertandingkan mulai dari Ganda Dewasa, Tunggal Pemula, hingga Ganda Campuran. Total hadiah mencapai puluhan juta rupiah. Segera daftarkan tim Anda melalui GOR mitra Minton terdekat. Pantau terus informasi jadwal kualifikasi dan pendaftaran di halaman ini.',
+              author_name: tournament?.badge || 'Minton Tournament',
+              image_url: tournament?.image_url || '/asset/turnamen.png',
+              published_at: new Date().toISOString(),
+            })}
           />
         </section>
       </div>
       <Footer />
+
+      {notification && (
+        <div className={`notification-toast ${notification.type}`}>
+          {notification.message}
+        </div>
+      )}
 
       {articleModal && (
         <div className="modal-overlay-kom" onClick={(e) => { if (e.target === e.currentTarget) closeArticleModal(); }}>
@@ -303,7 +397,7 @@ export default function KomunitasPage() {
             </div>
             <div className="modal-footer-kom">
               <button className="btn-kom-secondary" onClick={() => setClubModal(null)}>Batal</button>
-              <button className="btn-kom-primary" onClick={() => { alert(clubModal.action === 'join' ? 'Permintaan bergabung telah dikirim ke pengurus klub.' : 'Permintaan Mabar Bareng telah dikirim.'); setClubModal(null); }}>
+              <button className="btn-kom-primary" onClick={() => handleClubAction(clubModal.club, clubModal.action)}>
                 {clubModal.action === 'join' ? 'Kirim Permintaan' : 'Kirim'}
               </button>
             </div>
@@ -327,23 +421,6 @@ export default function KomunitasPage() {
             </div>
             <div className="modal-footer-kom">
               <button className="btn-kom-primary" onClick={() => setMyRankModal(false)}>Tutup</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {loadMoreModal && (
-        <div className="modal-overlay-kom" onClick={(e) => { if (e.target === e.currentTarget) setLoadMoreModal(false); }}>
-          <div className="modal-content-kom">
-            <div className="modal-header-kom">
-              <h3>Memuat Data</h3>
-              <button className="close-modal-kom" onClick={() => setLoadMoreModal(false)}>&times;</button>
-            </div>
-            <div className="modal-body-kom">
-              <p>Menampilkan lebih banyak klub dan komunitas badminton di sekitar Anda...</p>
-            </div>
-            <div className="modal-footer-kom">
-              <button className="btn-kom-primary" onClick={() => setLoadMoreModal(false)}>Tutup</button>
             </div>
           </div>
         </div>

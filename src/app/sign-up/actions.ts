@@ -9,14 +9,16 @@ const signUpSchema = z.object({
   nama: z.string().min(1, { message: "Nama lengkap wajib diisi" }),
   email: z.string().email({ message: "Format email tidak valid" }),
   password: z.string().min(8, { message: "Kata sandi minimal 8 karakter" }),
+  gender: z.string().optional(),
 });
 
 export async function signUpAction(prevState: any, formData: FormData) {
   const nama = formData.get('nama') as string;
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
+  const gender = formData.get('gender') as string;
 
-  const validatedFields = signUpSchema.safeParse({ nama, email, password });
+  const validatedFields = signUpSchema.safeParse({ nama, email, password, gender });
 
   if (!validatedFields.success) {
     return {
@@ -27,12 +29,13 @@ export async function signUpAction(prevState: any, formData: FormData) {
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const payload = {
+  const payload: Record<string, any> = {
     nama_lengkap: nama,
     email: email,
     password: hashedPassword,
     email_verified: false,
   };
+  if (gender) payload.gender = gender;
 
   try {
     const supabaseClient = createServerSupabaseClient();

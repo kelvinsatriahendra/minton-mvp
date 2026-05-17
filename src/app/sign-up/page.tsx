@@ -75,6 +75,11 @@ export default function SignUpPage() {
         label { display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-white); }
         input[type="text"], input[type="email"], input[type="password"] { width: 100%; padding: 14px; border: 1px solid #333; border-radius: 12px; background-color: var(--input-bg); color: var(--text-white); font-size: 14px; outline: none; transition: 0.3s; }
         input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus { box-shadow: 0 0 0 2px var(--primary-lime); }
+        .gender-radio-group { display: flex; gap: 12px; }
+        .gender-radio { display: flex; align-items: center; gap: 8px; padding: 10px 20px; border: 1px solid #333; border-radius: 12px; cursor: pointer; font-size: 14px; transition: 0.3s; }
+        .gender-radio:hover { border-color: var(--primary-lime); }
+        .gender-radio input[type="radio"] { accent-color: var(--primary-lime); width: 16px; height: 16px; }
+        .gender-radio:has(input:checked) { border-color: var(--primary-lime); background: rgba(189, 209, 36, 0.1); }
         .checkbox-group { display: flex; align-items: center; gap: 10px; margin-top: 20px; margin-bottom: 24px; }
         .checkbox-group input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--primary-lime); cursor: pointer; }
         .checkbox-group label { margin-bottom: 0; color: var(--text-gray); cursor: pointer; font-size: 14px; }
@@ -125,6 +130,19 @@ export default function SignUpPage() {
                 <div className="form-group">
                   <label>E-mail</label>
                   <input type="email" name="email" required />
+                </div>
+              </div>
+              <div className="form-group">
+                <label>Jenis Kelamin</label>
+                <div className="gender-radio-group">
+                  <label className="gender-radio">
+                    <input type="radio" name="gender" value="Pria" defaultChecked />
+                    <span>Pria</span>
+                  </label>
+                  <label className="gender-radio">
+                    <input type="radio" name="gender" value="Wanita" />
+                    <span>Wanita</span>
+                  </label>
                 </div>
               </div>
               <div className="form-group">
